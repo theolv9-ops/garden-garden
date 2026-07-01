@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garden Garden · Restaurant italien à Meyzieu</title>
+
+<!-- ============================================================= -->
+<!--  POLICES (Google Fonts) - ne pas toucher                      -->
+<!-- ============================================================= -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Icônes Tabler -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --cream:#f7f1e3;
+  --cream2:#efe6d0;
+  --ink:#1c1a12;
+  --green:#1f4d2e;
+  --green-d:#143620;
+  --tomato:#d1401f;
+  --gold:#e0a92e;
+  --rose:#e8b7a0;
+}
+body { font-family:'Inter',sans-serif; color:var(--ink); background:var(--cream); overflow-x:hidden; line-height:1.6; }
+::selection { background:var(--tomato); color:var(--cream); }
+
+/* ---------- NAVIGATION ---------- */
+.nav { position:sticky; top:0; z-index:200; display:flex; align-items:center; justify-content:space-between; padding:14px 28px; background:var(--green-d); border-bottom:2px solid var(--gold); }
+.brand { font-family:'Playfair Display',serif; font-weight:900; font-style:italic; font-size:24px; color:var(--cream); cursor:pointer; }
+.brand b { color:var(--gold); }
+.nav-links { display:flex; gap:22px; align-items:center; }
+.nav-links a { color:var(--cream); text-decoration:none; font-size:13px; font-weight:500; letter-spacing:.5px; cursor:pointer; opacity:.85; transition:.2s; text-transform:uppercase; }
+.nav-links a:hover { opacity:1; color:var(--gold); }
+.nav-cta { background:var(--tomato); color:var(--cream)!important; padding:9px 18px; border-radius:30px; opacity:1!important; font-weight:600; }
+.nav-cta:hover { background:var(--gold); color:var(--ink)!important; }
+
+/* ---------- HERO ---------- */
+.hero { position:relative; min-height:620px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:70px 24px 90px; overflow:hidden; }
+/* image de fond du hero */
+.hero-bg { position:absolute; inset:0; z-index:0; }
+.hero-bg img { width:100%; height:100%; object-fit:cover; }
+/* voile sombre par-dessus la photo pour lire le texte */
+.hero-bg::after { content:''; position:absolute; inset:0; background:linear-gradient(160deg,rgba(20,54,32,.82),rgba(13,39,22,.7),rgba(165,47,19,.5)); }
+/* dégradé de secours si aucune photo n'est mise */
+.hero-fallback { position:absolute; inset:0; z-index:-1; background:linear-gradient(160deg,#1f4d2e,#143620 60%,#0d2716); }
+.hero > * { position:relative; z-index:2; }
+.hero-kicker { display:inline-flex; align-items:center; gap:8px; color:var(--gold); font-size:12px; letter-spacing:3px; text-transform:uppercase; border:1px solid rgba(224,169,46,.5); padding:7px 16px; border-radius:30px; margin-bottom:26px; }
+.hero h1 { font-family:'Playfair Display',serif; font-weight:900; font-size:clamp(46px,9vw,92px); line-height:.92; color:var(--cream); letter-spacing:-1px; }
+.hero h1 em { color:var(--gold); font-style:italic; }
+.hero .sub { font-family:'Playfair Display',serif; font-style:italic; font-size:clamp(17px,2.6vw,24px); color:var(--rose); margin:14px 0 34px; }
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+.btn { font-family:'Inter',sans-serif; font-weight:600; font-size:14px; letter-spacing:.5px; padding:15px 30px; border-radius:34px; cursor:pointer; border:none; transition:transform .18s, background .2s, color .2s; text-transform:uppercase; }
+.btn:hover { transform:translateY(-2px); }
+.btn-primary { background:var(--tomato); color:var(--cream); }
+.btn-primary:hover { background:var(--gold); color:var(--ink); }
+.btn-ghost { background:transparent; color:var(--cream); border:1.5px solid var(--cream); }
+.btn-ghost:hover { background:var(--cream); color:var(--green-d); }
+.hero-strip { position:absolute; bottom:0; left:0; right:0; z-index:2; background:var(--gold); color:var(--green-d); font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:13px; letter-spacing:2px; text-transform:uppercase; padding:9px 0; white-space:nowrap; overflow:hidden; }
+.hero-strip span { display:inline-block; padding:0 24px; }
+
+/* ---------- ANIMATION AU SCROLL ---------- */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity:1; transform:none; }
+
+/* ---------- SECTIONS ---------- */
+section { padding:76px 28px; }
+.eyebrow { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; color:var(--tomato); font-size:13px; letter-spacing:3px; text-transform:uppercase; margin-bottom:14px; }
+.stitle { font-family:'Playfair Display',serif; font-weight:700; font-size:clamp(30px,5vw,50px); line-height:1.05; letter-spacing:-.5px; }
+.stitle em { font-style:italic; color:var(--green); }
+
+/* Bloc photo réutilisable */
+.photo { position:relative; border-radius:18px; overflow:hidden; min-height:340px; display:flex; align-items:flex-end; padding:20px; border:1px solid rgba(28,26,18,.08); background:linear-gradient(135deg,#1f4d2e,#a52f13); }
+.photo img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; }
+.photo-tag { position:relative; z-index:2; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--cream); background:rgba(20,54,32,.55); padding:6px 12px; border-radius:20px; font-weight:600; }
+
+/* ---------- À PROPOS ---------- */
+.about-wrap { max-width:1000px; margin:0 auto; display:grid; grid-template-columns:1.05fr .95fr; gap:52px; align-items:center; }
+.about-text p { font-size:16px; color:#4a4736; margin-top:18px; }
+.about-text p b { color:var(--green); }
+.stats { display:flex; gap:26px; margin-top:30px; flex-wrap:wrap; }
+.stat b { font-family:'Playfair Display',serif; font-size:34px; color:var(--tomato); display:block; line-height:1; }
+.stat span { font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#6b6752; }
+
+/* ---------- MENU ---------- */
+.menu { background:var(--green-d); color:var(--cream); }
+.menu .eyebrow { color:var(--gold); }
+.menu .stitle { color:var(--cream); }
+.menu-head { text-align:center; max-width:640px; margin:0 auto 40px; }
+.menu-head p { color:var(--rose); margin-top:14px; font-family:'Playfair Display',serif; font-style:italic; font-size:18px; }
+.tabs { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:40px; }
+.tab { font-family:'Bricolage Grotesque',sans-serif; font-weight:600; background:transparent; color:var(--cream); border:1.5px solid rgba(247,241,227,.3); padding:9px 20px; border-radius:30px; cursor:pointer; font-size:13px; letter-spacing:1px; text-transform:uppercase; transition:.2s; }
+.tab.active { background:var(--gold); color:var(--green-d); border-color:var(--gold); }
+.tab:hover:not(.active) { border-color:var(--gold); color:var(--gold); }
+.dishes { max-width:1000px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+.pane { display:none; }
+.pane.active { display:contents; }
+.dish { background:rgba(247,241,227,.05); border:1px solid rgba(247,241,227,.12); border-radius:16px; overflow:hidden; transition:transform .2s, border-color .2s; }
+.dish:hover { transform:translateY(-4px); border-color:var(--gold); }
+.dish-img { height:170px; position:relative; display:flex; align-items:flex-start; justify-content:flex-end; padding:12px; background:linear-gradient(135deg,#2e6b40,#0d2716); overflow:hidden; }
+.dish-img img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; transition:transform .4s ease; }
+.dish:hover .dish-img img { transform:scale(1.07); }
+.dish-price { position:relative; z-index:2; font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:15px; background:var(--tomato); color:var(--cream); padding:5px 12px; border-radius:20px; }
+.dish-body { padding:16px 18px 20px; }
+.dish h4 { font-family:'Playfair Display',serif; font-weight:700; font-size:19px; color:var(--cream); margin-bottom:6px; }
+.dish p { font-size:13px; color:var(--rose); line-height:1.5; }
+.menu-foot { text-align:center; margin-top:40px; }
+
+/* ---------- BANDEAU ANIMÉ ---------- */
+.marquee { background:var(--tomato); color:var(--cream); overflow:hidden; white-space:nowrap; padding:14px 0; border-top:2px solid var(--gold); border-bottom:2px solid var(--gold); }
+.marquee .track { display:inline-block; animation:scroll 22s linear infinite; }
+.marquee span { font-family:'Playfair Display',serif; font-style:italic; font-weight:700; font-size:22px; padding:0 26px; }
+.marquee b { color:var(--gold); }
+@keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ---------- GALERIE ---------- */
+.gallery { background:var(--cream); }
+.gallery-head { text-align:center; margin-bottom:40px; }
+.grid-gal { max-width:1000px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+.gal-item { position:relative; border-radius:14px; overflow:hidden; aspect-ratio:1; background:linear-gradient(135deg,#1f4d2e,#d1401f); }
+.gal-item img { width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
+.gal-item:hover img { transform:scale(1.08); }
+
+/* ---------- TERRASSE ---------- */
+.terr { background:var(--cream2); }
+.terr-wrap { max-width:1000px; margin:0 auto; }
+.terr-top { display:grid; grid-template-columns:1fr 1fr; gap:46px; align-items:center; margin-bottom:44px; }
+.terr-feats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; }
+.feat { background:var(--cream); border-radius:14px; padding:24px 20px; border:1px solid rgba(28,26,18,.07); }
+.feat i { font-size:26px; color:var(--tomato); }
+.feat h4 { font-family:'Playfair Display',serif; font-weight:700; font-size:18px; margin:10px 0 6px; color:var(--green); }
+.feat p { font-size:13px; color:#6b6752; }
+
+/* ---------- RÉSERVATION ---------- */
+.resa { background:var(--green); color:var(--cream); }
+.resa-wrap { max-width:620px; margin:0 auto; text-align:center; }
+.resa .eyebrow { color:var(--gold); }
+.resa .stitle { color:var(--cream); margin-bottom:10px; }
+.resa .lead { color:var(--rose); font-family:'Playfair Display',serif; font-style:italic; font-size:18px; margin-bottom:34px; }
+.form-card { background:var(--cream); border-radius:20px; padding:30px; text-align:left; }
+.fg { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+.field.full { grid-column:1/-1; }
+.field label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); font-weight:600; }
+.field input, .field select, .field textarea { border:1.5px solid rgba(28,26,18,.15); background:#fff; color:var(--ink); padding:12px 14px; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; outline:none; transition:border-color .2s; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color:var(--tomato); }
+.submit { width:100%; margin-top:6px; }
+.ok { display:none; margin-top:16px; background:#eaf3de; border:1.5px solid var(--green); color:var(--green); padding:16px; border-radius:12px; font-size:14px; text-align:center; font-weight:500; }
+
+/* ---------- INFOS ---------- */
+.infos { background:var(--ink); color:var(--cream); }
+.infos-wrap { max-width:1000px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:40px; }
+.info h4 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; color:var(--gold); font-size:13px; letter-spacing:2px; text-transform:uppercase; margin-bottom:16px; }
+.info p { font-size:14px; color:#c9c3b0; line-height:1.9; }
+.info a { color:var(--gold); text-decoration:none; }
+.hr-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(224,169,46,.15); }
+.hr-row:last-child { border:none; }
+.hr-day { color:#c9c3b0; font-size:13px; }
+.hr-time { color:var(--gold); font-size:13px; font-weight:500; }
+.hr-time.closed { color:var(--tomato); }
+
+/* ---------- PIED DE PAGE ---------- */
+.foot { background:var(--green-d); color:var(--cream); text-align:center; padding:44px 24px; border-top:2px solid var(--gold); }
+.foot .brand { font-size:30px; display:inline-block; margin-bottom:14px; }
+.foot .socials { display:flex; gap:16px; justify-content:center; margin:18px 0; }
+.foot .socials i { font-size:20px; color:var(--gold); cursor:pointer; transition:.2s; }
+.foot .socials i:hover { color:var(--tomato); }
+.foot small { color:#8fa896; font-size:12px; }
+
+html { scroll-behavior:smooth; }
+@media(max-width:760px){
+  .nav-links a:not(.nav-cta){ display:none; }
+  .about-wrap, .terr-top { grid-template-columns:1fr; }
+  .fg { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================= -->
+<!--  NAVIGATION                                                   -->
+<!-- ============================================================= -->
+<div class="nav">
+  <div class="brand" onclick="gscroll('top')">Garden<b>Garden</b></div>
+  <div class="nav-links">
+    <a onclick="gscroll('about')">Histoire</a>
+    <a onclick="gscroll('menu')">Menu</a>
+    <a onclick="gscroll('terr')">Terrasse</a>
+    <a onclick="gscroll('infos')">Infos</a>
+    <a class="nav-cta" onclick="gscroll('resa')">Réserver</a>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!--  HERO (grande image d'accueil)                               -->
+<!-- ============================================================= -->
+<div class="hero" id="top">
+  <div class="hero-fallback"></div>
+  <div class="hero-bg">
+    <!-- ▼▼▼ PHOTO HERO : mets une belle photo de la salle ou d'un plat. Nomme-la hero.jpg dans le dossier images ▼▼▼ -->
+    <img src="images/hero.jpg" alt="Restaurant Garden Garden" onerror="this.style.display='none'">
+    <!-- ▲▲▲ (si l'image n'existe pas encore, le dégradé vert s'affiche automatiquement) ▲▲▲ -->
+  </div>
+  <div class="hero-kicker"><i class="ti ti-leaf"></i> Trattoria &amp; Pizzeria · Meyzieu</div>
+  <h1>Garden <em>Garden</em></h1>
+  <div class="sub">La dolce vita, servie au cœur d'un jardin.</div>
+  <div class="hero-btns">
+    <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une table</button>
+    <button class="btn btn-ghost" onclick="gscroll('menu')">Voir le menu</button>
+  </div>
+  <div class="hero-strip">
+    <span>★ Pâtes fraîches maison ★ Pizza au feu de bois ★ Produits d'Italie ★ Terrasse jardin ★ Vins naturels ★ Pâtes fraîches maison ★ Pizza au feu de bois ★ Produits d'Italie ★ Terrasse jardin ★ Vins naturels ★</span>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!--  À PROPOS                                                     -->
+<!-- ============================================================= -->
+<section class="about" id="about">
+  <div class="about-wrap">
+    <div class="about-text reveal">
+      <div class="eyebrow">Nostra storia</div>
+      <h2 class="stitle">Un morceau d'Italie, <em>sous les feuilles</em></h2>
+      <p>Chez Garden Garden, on cuisine comme la <b>nonna</b> : avec des produits vrais, des mains qui travaillent la pâte chaque matin, et beaucoup, beaucoup d'amore.</p>
+      <p>Niché à Meyzieu, notre restaurant vous accueille dans une <b>véranda-jardin</b> baignée de lumière, où les plantes grimpent et où le temps ralentit.</p>
+      <div class="stats">
+        <div class="stat"><b>100%</b><span>Fait maison</span></div>
+        <div class="stat"><b>40</b><span>Couverts en terrasse</span></div>
+        <div class="stat"><b>60+</b><span>Vins italiens</span></div>
+      </div>
+    </div>
+    <div class="photo reveal">
+      <!-- ▼▼▼ PHOTO SALLE : nomme-la salle.jpg dans le dossier images ▼▼▼ -->
+      <img src="images/salle.jpg" alt="Salle et jardin" onerror="this.style.display='none'">
+      <span class="photo-tag">Notre salle &amp; jardin</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!--  MENU                                                         -->
+<!-- ============================================================= -->
+<section class="menu" id="menu">
+  <div class="menu-head reveal">
+    <div class="eyebrow">La carta</div>
+    <h2 class="stitle">Ce qu'on mijote</h2>
+    <p>Une carte qui change au fil des saisons, toujours pleine de caractère.</p>
+  </div>
+  <div class="tabs reveal">
+    <button class="tab active" onclick="gtab('t-pizza',this)">Pizzas</button>
+    <button class="tab" onclick="gtab('t-pasta',this)">Pâtes</button>
+    <button class="tab" onclick="gtab('t-salad',this)">Salades</button>
+    <button class="tab" onclick="gtab('t-meat',this)">Viandes</button>
+    <button class="tab" onclick="gtab('t-dolci',this)">Dolci</button>
+  </div>
+  <div class="dishes">
+
+    <!-- === PIZZAS === -->
+    <div class="pane active" id="t-pizza">
+      <div class="dish">
+        <div class="dish-img">
+          <!-- ▼ PHOTO PLAT : nomme l'image margherita.jpg dans images ▼ -->
+          <img src="images/margherita.jpg" alt="Margherita" onerror="this.style.display='none'">
+          <span class="dish-price">12€</span>
+        </div>
+        <div class="dish-body"><h4>Margherita</h4><p>Tomate San Marzano, fior di latte, basilic frais du jardin.</p></div>
+      </div>
+      <div class="dish">
+        <div class="dish-img">
+          <img src="images/prosciutto.jpg" alt="Prosciutto e Rucola" onerror="this.style.display='none'">
+          <span class="dish-price">16€</span>
+        </div>
+        <div class="dish-body"><h4>Prosciutto e Rucola</h4><p>Jambon de Parme 18 mois, roquette, copeaux de parmesan.</p></div>
+      </div>
+      <div class="dish">
+        <div class="dish-img">
+          <img src="images/garden-pizza.jpg" alt="Pizza Garden Garden" onerror="this.style.display='none'">
+          <span class="dish-price">17€</span>
+        </div>
+        <div class="dish-body"><h4>Garden Garden</h4><p>Notre signature : légumes grillés, burrata crémeuse, pesto maison.</p></div>
+      </div>
+      <div class="dish">
+        <div class="dish-img">
+          <img src="images/quattro.jpg" alt="Quattro Formaggi" onerror="this.style.display='none'">
+          <span class="dish-price">15€</span>
+        </div>
+        <div class="dish-body"><h4>Quattro Formaggi</h4><p>Gorgonzola, mozzarella, parmesan, chèvre. Pour les affamés.</p></div>
+      </div>
+    </div>
+
+    <!-- === PÂTES === -->
+    <div class="pane" id="t-pasta">
+      <div class="dish"><div class="dish-img"><img src="images/tartufo.jpg" alt="Tagliatelle Tartufo" onerror="this.style.display='none'"><span class="dish-price">22€</span></div><div class="dish-body"><h4>Tagliatelle Tartufo</h4><p>Pâtes fraîches, crème de truffe noire, copeaux frais.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/carbonara.jpg" alt="Carbonara" onerror="this.style.display='none'"><span class="dish-price">15€</span></div><div class="dish-body"><h4>Carbonara</h4><p>La vraie : pancetta, pecorino, œuf, poivre. Zéro crème.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/bolognaise.jpg" alt="Bolognaise" onerror="this.style.display='none'"><span class="dish-price">16€</span></div><div class="dish-body"><h4>Tagliatelle Bolognaise</h4><p>Ragù mijoté 4 heures, comme à Bologne.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/gnocchi.jpg" alt="Gnocchi" onerror="this.style.display='none'"><span class="dish-price">14€</span></div><div class="dish-body"><h4>Gnocchi al Pesto</h4><p>Gnocchi maison, pesto de basilic, pignons torréfiés.</p></div></div>
+    </div>
+
+    <!-- === SALADES === -->
+    <div class="pane" id="t-salad">
+      <div class="dish"><div class="dish-img"><img src="images/caprese.jpg" alt="Caprese" onerror="this.style.display='none'"><span class="dish-price">12€</span></div><div class="dish-body"><h4>Caprese</h4><p>Burrata des Pouilles, tomates anciennes, basilic, huile d'olive.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/insalata.jpg" alt="Insalata Garden" onerror="this.style.display='none'"><span class="dish-price">14€</span></div><div class="dish-body"><h4>Insalata Garden</h4><p>Roquette, figues, gorgonzola, noix, miel de Sicile.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/caesar.jpg" alt="Caesar" onerror="this.style.display='none'"><span class="dish-price">13€</span></div><div class="dish-body"><h4>Caesar Italiana</h4><p>Romaine, poulet grillé, parmesan, croûtons maison.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/orto.jpg" alt="Del Orto" onerror="this.style.display='none'"><span class="dish-price">11€</span></div><div class="dish-body"><h4>Del Orto</h4><p>Légumes de saison du maraîcher, vinaigrette balsamique.</p></div></div>
+    </div>
+
+    <!-- === VIANDES === -->
+    <div class="pane" id="t-meat">
+      <div class="dish"><div class="dish-img"><img src="images/tagliata.jpg" alt="Tagliata" onerror="this.style.display='none'"><span class="dish-price">26€</span></div><div class="dish-body"><h4>Tagliata di Manzo</h4><p>Entrecôte grillée tranchée, roquette, parmesan, salsa verde.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/ossobuco.jpg" alt="Osso Buco" onerror="this.style.display='none'"><span class="dish-price">24€</span></div><div class="dish-body"><h4>Osso Buco</h4><p>Jarret de veau braisé, gremolata, risotto au safran.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/saltimbocca.jpg" alt="Saltimbocca" onerror="this.style.display='none'"><span class="dish-price">22€</span></div><div class="dish-body"><h4>Saltimbocca</h4><p>Veau, prosciutto, sauge, jus au marsala.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/milanese.jpg" alt="Milanese" onerror="this.style.display='none'"><span class="dish-price">18€</span></div><div class="dish-body"><h4>Pollo Milanese</h4><p>Escalope panée dorée, citron, câpres, roquette.</p></div></div>
+    </div>
+
+    <!-- === DOLCI === -->
+    <div class="pane" id="t-dolci">
+      <div class="dish"><div class="dish-img"><img src="images/tiramisu.jpg" alt="Tiramisù" onerror="this.style.display='none'"><span class="dish-price">8€</span></div><div class="dish-body"><h4>Tiramisù</h4><p>Le classique, mascarpone onctueux, café, cacao amer.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/gelato.jpg" alt="Gelato" onerror="this.style.display='none'"><span class="dish-price">6€</span></div><div class="dish-body"><h4>Gelato Pistacchio</h4><p>Glace pistache maison, coulis intense. Elle ne se cache pas.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/pannacotta.jpg" alt="Panna Cotta" onerror="this.style.display='none'"><span class="dish-price">7€</span></div><div class="dish-body"><h4>Panna Cotta</h4><p>Vanille de Madagascar, coulis de fruits rouges.</p></div></div>
+      <div class="dish"><div class="dish-img"><img src="images/cannoli.jpg" alt="Cannoli" onerror="this.style.display='none'"><span class="dish-price">7€</span></div><div class="dish-body"><h4>Cannoli Siciliani</h4><p>Ricotta sucrée, zeste d'orange, éclats de pistache.</p></div></div>
+    </div>
+
+  </div>
+  <div class="menu-foot reveal">
+    <button class="btn btn-primary" onclick="gscroll('resa')">Réserver pour goûter</button>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!--  BANDEAU ANIMÉ                                                -->
+<!-- ============================================================= -->
+<div class="marquee">
+  <div class="track">
+    <span>Buon appetito <b>·</b> Fatto in casa <b>·</b> Con molto amore <b>·</b> Buon appetito <b>·</b> Fatto in casa <b>·</b> Con molto amore <b>·</b> </span>
+    <span>Buon appetito <b>·</b> Fatto in casa <b>·</b> Con molto amore <b>·</b> Buon appetito <b>·</b> Fatto in casa <b>·</b> Con molto amore <b>·</b> </span>
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!--  GALERIE PHOTOS (façon Instagram)                            -->
+<!-- ============================================================= -->
+<section class="gallery">
+  <div class="gallery-head reveal">
+    <div class="eyebrow" style="color:var(--tomato)">Il nostro mondo</div>
+    <h2 class="stitle">Un aperçu de la maison</h2>
+  </div>
+  <div class="grid-gal">
+    <!-- ▼▼▼ 6 PHOTOS D'AMBIANCE : nomme-les gal1.jpg à gal6.jpg dans images ▼▼▼ -->
+    <div class="gal-item reveal"><img src="images/gal1.jpg" alt="" onerror="this.style.display='none'"></div>
+    <div class="gal-item reveal"><img src="images/gal2.jpg" alt="" onerror="this.style.display='none'"></div>
+    <div class="gal-item reveal"><img src="images/gal3.jpg" alt="" onerror="this.style.display='none'"></div>
+    <div class="gal-item reveal"><img src="images/gal4.jpg" alt="" onerror="this.style.display='none'"></div>
+    <div class="gal-item reveal"><img src="images/gal5.jpg" alt="" onerror="this.style.display='none'"></div>
+    <div class="gal-item reveal"><img src="images/gal6.jpg" alt="" onerror="this.style.display='none'"></div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!--  TERRASSE                                                     -->
+<!-- ============================================================= -->
+<section class="terr" id="terr">
+  <div class="terr-wrap">
+    <div class="terr-top">
+      <div class="photo reveal">
+        <!-- ▼ PHOTO TERRASSE : nomme-la terrasse.jpg dans images ▼ -->
+        <img src="images/terrasse.jpg" alt="Terrasse" onerror="this.style.display='none'">
+        <span class="photo-tag">Notre terrasse jardin</span>
+      </div>
+      <div class="reveal">
+        <div class="eyebrow">All'aperto</div>
+        <h2 class="stitle">Une terrasse <em>comme un jardin secret</em></h2>
+        <p class="about-text" style="font-size:16px;color:#4a4736;margin-top:18px;">Sous la pergola fleurie, entre les oliviers en pot et les guirlandes, notre terrasse est le meilleur spot de Meyzieu pour un déjeuner au soleil ou un dîner aux chandelles.</p>
+      </div>
+    </div>
+    <div class="terr-feats">
+      <div class="feat reveal"><i class="ti ti-plant-2"></i><h4>Jardin luxuriant</h4><p>Plantes méditerranéennes et pergola végétale.</p></div>
+      <div class="feat reveal"><i class="ti ti-sun"></i><h4>Ombragée</h4><p>Parasols et fraîcheur même en plein été.</p></div>
+      <div class="feat reveal"><i class="ti ti-flame"></i><h4>Soirées chandelles</h4><p>Ambiance tamisée pour vos dîners romantiques.</p></div>
+      <div class="feat reveal"><i class="ti ti-users-group"></i><h4>Groupes &amp; privé</h4><p>Espace privatisable jusqu'à 40 personnes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!--  RÉSERVATION                                                  -->
+<!-- ============================================================= -->
+<section class="resa" id="resa">
+  <div class="resa-wrap">
+    <div class="reveal">
+      <div class="eyebrow">Prenota</div>
+      <h2 class="stitle">Réservez votre table</h2>
+      <p class="lead">On vous garde la plus belle place au jardin.</p>
+    </div>
+    <div class="form-card reveal">
+      <div class="fg">
+        <div class="field"><label>Prénom</label><input id="g-prenom" type="text" placeholder="Marco"></div>
+        <div class="field"><label>Nom</label><input id="g-nom" type="text" placeholder="Rossi"></div>
+        <div class="field"><label>Date</label><input id="g-date" type="date"></div>
+        <div class="field"><label>Heure</label>
+          <select id="g-heure"><option value="">Choisir</option><option>12h00</option><option>12h30</option><option>13h00</option><option>19h00</option><option>19h30</option><option>20h00</option><option>20h30</option><option>21h00</option></select>
+        </div>
+        <div class="field"><label>Personnes</label>
+          <select id="g-pers"><option>1 personne</option><option>2 personnes</option><option>3 personnes</option><option>4 personnes</option><option>5 personnes</option><option>6+ personnes</option></select>
+        </div>
+        <div class="field"><label>Téléphone</label><input id="g-tel" type="tel" placeholder="06 00 00 00 00"></div>
+        <div class="field full"><label>Une envie, une allergie ?</label><textarea id="g-msg" rows="2" placeholder="Terrasse souhaitée, anniversaire, sans gluten..."></textarea></div>
+      </div>
+      <button class="btn btn-primary submit" onclick="gsubmit()">Confirmer la réservation</button>
+      <div class="ok" id="g-ok">✓ Grazie ! Votre demande est enregistrée. On vous rappelle très vite pour confirmer.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!--  INFOS PRATIQUES                                              -->
+<!-- ============================================================= -->
+<section class="infos" id="infos">
+  <div class="infos-wrap">
+    <div class="info reveal">
+      <h4>Où nous trouver</h4>
+      <p>12 rue des Oliviers<br>69330 Meyzieu<br><a href="#">→ Ouvrir dans Google Maps</a></p>
+    </div>
+    <div class="info reveal">
+      <h4>Horaires</h4>
+      <div class="hr-row"><span class="hr-day">Lundi</span><span class="hr-time closed">Fermé</span></div>
+      <div class="hr-row"><span class="hr-day">Mar — Ven</span><span class="hr-time">12h–14h · 19h–22h</span></div>
+      <div class="hr-row"><span class="hr-day">Samedi</span><span class="hr-time">12h–15h · 19h–23h</span></div>
+      <div class="hr-row"><span class="hr-day">Dimanche</span><span class="hr-time">12h–15h</span></div>
+    </div>
+    <div class="info reveal">
+      <h4>Contact</h4>
+      <p>Tél · <a href="#">04 78 00 00 00</a><br>Email · <a href="#">ciao@gardengarden.fr</a><br>Insta · <a href="#">@gardengarden_meyzieu</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= -->
+<!--  PIED DE PAGE                                                 -->
+<!-- ============================================================= -->
+<div class="foot">
+  <div class="brand">Garden<b>Garden</b></div>
+  <div class="socials">
+    <i class="ti ti-brand-instagram"></i>
+    <i class="ti ti-brand-facebook"></i>
+    <i class="ti ti-brand-tiktok"></i>
+  </div>
+  <small>12 rue des Oliviers, 69330 Meyzieu · 04 78 00 00 00<br>© 2026 Garden Garden — Fatto con amore</small>
+</div>
+
+<script>
+function gscroll(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+function gtab(id,btn){
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function gsubmit(){
+  var req=['g-prenom','g-nom','g-date','g-heure','g-tel'];
+  var ok=req.every(function(f){return document.getElementById(f).value.trim()!==''});
+  if(!ok){ alert('Merci de remplir prénom, nom, date, heure et téléphone.'); return; }
+  var el=document.getElementById('g-ok'); el.style.display='block';
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+(function(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target);} });
+  },{threshold:0.14});
+  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
+})();
+</script>
+
+</body>
+</html>
