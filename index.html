@@ -756,6 +756,7 @@ html { scroll-behavior:smooth; }
           <select id="g-pers" name="convives"><option>2 personnes</option><option>3 personnes</option><option>4 personnes</option><option>5 personnes</option><option>6 personnes</option><option>Grande tablée (7+)</option></select>
         </div>
         <div class="field"><label>Téléphone</label><input id="g-tel" name="telephone" type="tel" placeholder="06 00 00 00 00"></div>
+        <div class="field"><label>Email</label><input id="g-email" name="email" type="email" placeholder="camille@email.com"></div>
         <div class="field full"><label>Une occasion particulière ?</label><textarea id="g-msg" name="message" rows="2" placeholder="Anniversaire, demande spéciale, allergies…"></textarea></div>
       </div>
       <button class="btn btn-primary submit-full" type="submit">Confirmer la réservation</button>
@@ -806,9 +807,9 @@ html { scroll-behavior:smooth; }
 function gscroll(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
 function gsubmit(e){
   e.preventDefault();
-  var req=['g-prenom','g-nom','g-date','g-heure','g-tel'];
+  var req=['g-prenom','g-nom','g-date','g-heure','g-tel','g-email'];
   var ok=req.every(function(f){return document.getElementById(f).value.trim()!==''});
-  if(!ok){ alert('Merci de remplir prénom, nom, date, heure et téléphone.'); return false; }
+  if(!ok){ alert('Merci de remplir prénom, nom, date, heure, téléphone et email.'); return false; }
   var form = document.getElementById('reservationForm');
   var data = new FormData(form);
   fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams(data).toString() })
