@@ -721,23 +721,26 @@ html { scroll-behavior:smooth; }
       <h2 class="stitle">Votre table <em>vous attend</em></h2>
       <p class="lead">Réponse rapide, confirmation par téléphone.</p>
     </div>
-    <div class="form-card reveal">
+    <form class="form-card reveal" id="reservationForm" name="reservation" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return gsubmit(event)">
+      <input type="hidden" name="form-name" value="reservation">
+      <p style="display:none"><label>Ne pas remplir : <input name="bot-field"></label></p>
       <div class="fg">
-        <div class="field"><label>Prénom</label><input id="g-prenom" type="text" placeholder="Camille"></div>
-        <div class="field"><label>Nom</label><input id="g-nom" type="text" placeholder="Laurent"></div>
-        <div class="field"><label>Date</label><input id="g-date" type="date"></div>
+        <div class="field"><label>Prénom</label><input id="g-prenom" name="prenom" type="text" placeholder="Camille"></div>
+        <div class="field"><label>Nom</label><input id="g-nom" name="nom" type="text" placeholder="Laurent"></div>
+        <div class="field"><label>Date</label><input id="g-date" name="date" type="date"></div>
         <div class="field"><label>Heure</label>
-          <select id="g-heure"><option value="">Choisir</option><option>12h00</option><option>12h30</option><option>13h00</option><option>19h00</option><option>19h30</option><option>20h00</option><option>20h30</option><option>21h00</option></select>
+          <select id="g-heure" name="heure"><option value="">Choisir</option><option>12h00</option><option>12h30</option><option>13h00</option><option>19h00</option><option>19h30</option><option>20h00</option><option>20h30</option><option>21h00</option></select>
         </div>
         <div class="field"><label>Convives</label>
-          <select id="g-pers"><option>2 personnes</option><option>3 personnes</option><option>4 personnes</option><option>5 personnes</option><option>6 personnes</option><option>Grande tablée (7+)</option></select>
+          <select id="g-pers" name="convives"><option>2 personnes</option><option>3 personnes</option><option>4 personnes</option><option>5 personnes</option><option>6 personnes</option><option>Grande tablée (7+)</option></select>
         </div>
-        <div class="field"><label>Téléphone</label><input id="g-tel" type="tel" placeholder="06 00 00 00 00"></div>
-        <div class="field full"><label>Une occasion particulière ?</label><textarea id="g-msg" rows="2" placeholder="Anniversaire, demande spéciale, allergies…"></textarea></div>
+        <div class="field"><label>Téléphone</label><input id="g-tel" name="telephone" type="tel" placeholder="06 00 00 00 00"></div>
+        <div class="field full"><label>Une occasion particulière ?</label><textarea id="g-msg" name="message" rows="2" placeholder="Anniversaire, demande spéciale, allergies…"></textarea></div>
       </div>
-      <button class="btn btn-primary submit-full" onclick="gsubmit()">Confirmer la réservation</button>
+      <button class="btn btn-primary submit-full" type="submit">Confirmer la réservation</button>
+      <div class="err" id="g-err" style="display:none; color:#b95f3a; margin-top:10px; font-size:14px;">Le formulaire n'a pas pu être envoyé — merci d'appeler directement le <a href="tel:0486802750">04 86 80 27 50</a>.</div>
       <div class="ok" id="g-ok">✓ Merci ! Votre demande est enregistrée. Nous vous rappelons très vite pour confirmer.</div>
-    </div>
+    </form>
     <p class="resa-note">Pour les chambres ou la privatisation : <a href="tel:0486802750">04 86 80 27 50</a> · <a href="tel:0661024431">06 61 02 44 31</a></p>
   </div>
 </section>
@@ -780,12 +783,24 @@ html { scroll-behavior:smooth; }
 
 <script>
 function gscroll(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
-function gsubmit(){
+function gsubmit(e){
+  e.preventDefault();
   var req=['g-prenom','g-nom','g-date','g-heure','g-tel'];
   var ok=req.every(function(f){return document.getElementById(f).value.trim()!==''});
-  if(!ok){ alert('Merci de remplir prénom, nom, date, heure et téléphone.'); return; }
-  var el=document.getElementById('g-ok'); el.style.display='block';
-  el.scrollIntoView({behavior:'smooth',block:'center'});
+  if(!ok){ alert('Merci de remplir prénom, nom, date, heure et téléphone.'); return false; }
+  var form = document.getElementById('reservationForm');
+  var data = new FormData(form);
+  fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams(data).toString() })
+    .then(function(){
+      document.getElementById('g-err').style.display='none';
+      var el=document.getElementById('g-ok'); el.style.display='block';
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      form.reset();
+    })
+    .catch(function(){
+      document.getElementById('g-err').style.display='block';
+    });
+  return false;
 }
 function chooseTable(label){
   var msg = document.getElementById('g-msg');
