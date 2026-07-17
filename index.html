@@ -135,7 +135,7 @@ section { padding:110px 20px; }
 
 /* STATS */
 .statsband { background:var(--olive-d); border-top:1px solid rgba(200,162,102,.3); padding:64px 28px; }
-.statsgrid { max-width:1020px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:22px; text-align:center; }
+.statsgrid { max-width:1020px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; text-align:center; }
 .statsgrid .n { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(32px,4.8vw,52px); letter-spacing:-1px; color:var(--gold); }
 .statsgrid .l { color:rgba(246,241,229,.55); font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-top:8px; }
 
@@ -176,9 +176,9 @@ section { padding:110px 20px; }
 .hotel-photo { border-radius:18px; overflow:hidden; aspect-ratio:4/3; background:linear-gradient(150deg,#3a4028,#23271a); position:relative; }
 .hotel-photo img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease, opacity .35s ease; }
 .hotel-photo:hover img { transform:scale(1.04); }
-.hotel-photo.switching img { opacity:0; }
+.hotel-photo.switching img, .jardin-photo.switching img { opacity:0; }
 .hphoto-caption { position:absolute; top:16px; left:16px; background:rgba(21,23,15,.75); color:var(--cream); font-size:11.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:6px 14px; border-radius:20px; z-index:3; transition:opacity .35s ease; }
-.hotel-photo.switching .hphoto-caption { opacity:0; }
+.hotel-photo.switching .hphoto-caption, .jardin-photo.switching .hphoto-caption { opacity:0; }
 .hphoto-nav { position:absolute; left:0; right:0; bottom:16px; display:flex; align-items:center; justify-content:center; gap:14px; z-index:3; }
 .hphoto-arrow { width:36px; height:36px; border-radius:50%; border:none; background:rgba(246,241,229,.92); color:var(--ink); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .2s, background .2s; flex-shrink:0; }
 .hphoto-arrow:hover { background:var(--gold); transform:scale(1.08); }
@@ -186,6 +186,9 @@ section { padding:110px 20px; }
 .hdot { width:8px; height:8px; border-radius:50%; background:rgba(246,241,229,.6); border:none; padding:0; cursor:pointer; transition:.25s; }
 .hdot.active { background:var(--gold); width:22px; border-radius:5px; }
 .hotel-stars { color:var(--gold); letter-spacing:3px; font-size:15px; margin-bottom:10px; }
+.hotel-price { display:flex; align-items:baseline; gap:8px; margin-top:14px; }
+.hotel-price .amount { font-family:'Fraunces',serif; font-size:32px; color:var(--cream); }
+.hotel-price .per { font-size:13.5px; color:var(--muted); }
 .hotel-feats { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:26px 0; }
 .hfeat { display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--muted); }
 .hfeat i { color:var(--terra); font-size:19px; }
@@ -193,7 +196,7 @@ section { padding:110px 20px; }
 /* JARDIN / EVENEMENTS */
 .jardin-wrap { max-width:1120px; margin:0 auto; }
 .jardin-photo { border-radius:18px; overflow:hidden; aspect-ratio:21/9; background:linear-gradient(150deg,#3a4028,#23271a); margin-bottom:36px; position:relative; }
-.jardin-photo img { width:100%; height:100%; object-fit:cover; }
+.jardin-photo img { width:100%; height:100%; object-fit:cover; transition:opacity .35s ease; }
 .jardin-feats { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:36px; }
 .jfeat { background:#fff; border:1px solid var(--line); border-radius:16px; padding:26px 24px; transition:transform .3s; }
 .jfeat:hover { transform:translateY(-5px); }
@@ -261,6 +264,11 @@ section { padding:110px 20px; }
 
 /* TESTIMONIALS */
 .testi-head { text-align:center; max-width:620px; margin:0 auto 46px; }
+.opening-banner { max-width:720px; margin:0 auto; text-align:center; background:#fff; border:1px solid var(--line); border-radius:22px; padding:48px 40px; }
+.opening-icon { width:56px; height:56px; border-radius:50%; background:var(--ink); color:var(--gold); font-size:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 22px; }
+.opening-banner p { font-size:16px; line-height:1.7; color:var(--muted); margin-bottom:28px; }
+.opening-banner strong { color:var(--ink); }
+.opening-actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
 .testi-grid { max-width:1120px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:20px; }
 .tcard { background:#fff; border:1px solid var(--line); border-radius:18px; padding:30px; transition:transform .3s ease, box-shadow .3s ease; }
 .tcard:hover { transform:translateY(-6px); box-shadow:0 24px 44px -22px rgba(21,23,15,.28); }
@@ -316,7 +324,7 @@ html { scroll-behavior:smooth; }
   .fg { grid-template-columns:1fr; }
   .hero { margin-top:-60px; }
   .hero-content { padding-top:120px; }
-  .statsgrid { grid-template-columns:repeat(2,1fr); }
+  .statsgrid { grid-template-columns:repeat(3,1fr); }
   .signature { flex-direction:column; align-items:flex-start; }
   .jardin-photo { aspect-ratio:16/10; }
   .visite-stage { aspect-ratio:4/5; }
@@ -382,6 +390,7 @@ html { scroll-behavior:smooth; }
       <a onclick="gscroll('carte')">La carte</a>
       <a onclick="gscroll('tables')">Les tables</a>
       <a onclick="gscroll('hotel')">Les chambres</a>
+      <a onclick="gscroll('terrasse')">Jardin &amp; Terrasse</a>
       <a onclick="gscroll('infos')">Contact</a>
     </div>
     <a class="nav-cta" onclick="gscroll('resa')">Réserver</a>
@@ -394,17 +403,17 @@ html { scroll-behavior:smooth; }
     <img src="images/hero.jpg" alt="Garden Garden — Bar, Restaurant &amp; Chambres" onerror="this.style.display='none'">
   </div>
   <canvas id="fireflies"></canvas>
-  <div class="status-float"><span class="status-dot"></span> Service du soir · dernières tables</div>
+  <div class="status-float"><span class="status-dot"></span> Ouverture Septembre 2026 · réservations bientôt ouvertes</div>
   <div class="hero-content" id="heroContent">
     <div class="tagline"><i class="ti ti-trees"></i> Bar · Restaurant · Chambres</div>
-    <h1><span class="w" style="--d:.6s">L'art</span> <span class="w" style="--d:.72s">de</span> <span class="w" style="--d:.84s">recevoir,</span> <em><span class="w" style="--d:1s">côté</span> <span class="w" style="--d:1.12s">jardin.</span></em></h1>
+    <h1><span class="w" style="--d:.6s">L'art</span> <span class="w" style="--d:.72s">de</span> <span class="w" style="--d:.84s">recevoir,</span> <em><span class="w" style="--d:1s">le</span> <span class="w" style="--d:1.12s">goût</span> <span class="w" style="--d:1.24s">du</span> <span class="w" style="--d:1.36s">plaisir.</span></em></h1>
     <p class="sub">Cuisine française traditionnelle, viandes d'exception sélectionnées et maturées avec soin, chambres au calme d'un parc arboré — à quelques minutes de Lyon.</p>
     <div class="hero-row">
       <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une table</button>
       <div class="rating-badge">
-        <span class="stars">★★★★★</span>
-        <b>4.9/5</b>
-        <span>sur 260 avis Google</span>
+        <span class="stars"><i class="ti ti-calendar-event"></i></span>
+        <b>Ouverture</b>
+        <span>en septembre 2026</span>
       </div>
     </div>
   </div>
@@ -440,7 +449,6 @@ html { scroll-behavior:smooth; }
 
 <div class="statsband">
   <div class="statsgrid">
-    <div class="reveal"><div class="n" data-count="4.9">0</div><div class="l">Note Google</div></div>
     <div class="reveal"><div class="n" data-count="7">0</div><div class="l">Chambres</div></div>
     <div class="reveal"><div class="n" data-count="120">0</div><div class="l">Couverts</div></div>
     <div class="reveal"><div class="n" data-count="3">0</div><div class="l">Pistes de pétanque</div></div>
@@ -599,11 +607,13 @@ html { scroll-behavior:smooth; }
       <div class="eyebrow">Les chambres</div>
       <div class="hotel-stars">★★★</div>
       <h2 class="stitle">Prolongez la soirée <em>à l'étage</em></h2>
-      <p style="color:var(--muted); font-size:15px; margin-top:16px;">Sept chambres trois étoiles aux matériaux naturels — lin, chêne, terracotta — ouvertes sur le jardin. Le petit-déjeuner se prend côté jardin, au calme.</p>
+      <p style="color:var(--muted); font-size:15px; margin-top:16px;">Sept chambres classiques trois étoiles aux matériaux naturels — lin, chêne, terracotta — ouvertes sur le jardin, climatisées pour un confort en toute saison.</p>
+      <div class="hotel-price"><span class="amount">110€</span><span class="per">/ nuit — chambre classique, 2 personnes</span></div>
       <div class="hotel-feats">
         <div class="hfeat"><i class="ti ti-bed"></i> 7 chambres</div>
+        <div class="hfeat"><i class="ti ti-snowflake"></i> Climatisation</div>
         <div class="hfeat"><i class="ti ti-trees"></i> Vue sur le parc arboré</div>
-        <div class="hfeat"><i class="ti ti-coffee"></i> Petit-déjeuner maison</div>
+        <div class="hfeat"><i class="ti ti-coffee"></i> Petit-déjeuner continental — 15€</div>
         <div class="hfeat"><i class="ti ti-car"></i> Parking privé gratuit</div>
       </div>
       <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une chambre</button>
@@ -638,8 +648,18 @@ html { scroll-behavior:smooth; }
       <div class="eyebrow">Le jardin &amp; les événements</div>
       <h2 class="stitle">Un parc entier <em>pour vos plus belles occasions</em></h2>
     </div>
-    <div class="jardin-photo tilt img-shine reveal">
-      <img src="images/jardin.jpg" alt="Le parc, les pistes de pétanque et l'aire de jeux" onerror="this.style.display='none'">
+    <div class="jardin-photo tilt img-shine reveal" id="jardinPhoto">
+      <img id="jardinImg" src="images/jardin-petanque.jpg" alt="Le parc — les pistes de pétanque" onerror="this.style.display='none'">
+      <div class="hphoto-caption" id="jardinCaption">Les pistes de pétanque</div>
+      <div class="hphoto-nav">
+        <button class="hphoto-arrow" id="jphotoPrev" aria-label="Photo précédente" onclick="event.stopPropagation()"><i class="ti ti-chevron-left"></i></button>
+        <div class="hphoto-dots" id="jardinDots">
+          <button class="hdot active" data-i="0" aria-label="Photo 1" onclick="event.stopPropagation()"></button>
+          <button class="hdot" data-i="1" aria-label="Photo 2" onclick="event.stopPropagation()"></button>
+          <button class="hdot" data-i="2" aria-label="Photo 3" onclick="event.stopPropagation()"></button>
+        </div>
+        <button class="hphoto-arrow" id="jphotoNext" aria-label="Photo suivante" onclick="event.stopPropagation()"><i class="ti ti-chevron-right"></i></button>
+      </div>
     </div>
     <div class="jardin-feats">
       <div class="jfeat reveal"><i class="ti ti-target"></i><h4>Pétanque au crépuscule</h4><p>Trois pistes éclairées au cœur du jardin, pour prolonger l'apéritif à la fraîche.</p></div>
@@ -664,27 +684,15 @@ html { scroll-behavior:smooth; }
 
 <section class="testi">
   <div class="testi-head reveal">
-    <div class="eyebrow">Avis clients</div>
-    <h2 class="stitle">Ils en <em>parlent</em></h2>
+    <div class="eyebrow">Bientôt</div>
+    <h2 class="stitle">L'ouverture approche <em>— septembre 2026</em></h2>
   </div>
-  <div class="testi-grid">
-    <div class="tcard reveal">
-      <div class="gbadge"><i class="ti ti-brand-google"></i> Google</div>
-      <div class="tstars">★★★★★</div>
-      <p>"La côte de bœuf maturée est exceptionnelle, et le cadre… on se croirait loin de tout. On a fini la soirée à la pétanque sous les guirlandes."</p>
-      <div class="name">Hélène M.</div>
-    </div>
-    <div class="tcard reveal">
-      <div class="gbadge"><i class="ti ti-brand-google"></i> Google</div>
-      <div class="tstars">★★★★★</div>
-      <p>"Dîner puis nuit sur place : la chambre était superbe, petit-déjeuner face au parc. Le combo parfait pour un week-end sans voiture."</p>
-      <div class="name">Julien &amp; Chloé</div>
-    </div>
-    <div class="tcard reveal">
-      <div class="gbadge"><i class="ti ti-brand-google"></i> Google</div>
-      <div class="tstars">★★★★★</div>
-      <p>"Nous avons privatisé la grande salle pour nos 60 invités. Organisation impeccable, cuisine remarquable, tout le monde en parle encore."</p>
-      <div class="name">Nadia R.</div>
+  <div class="opening-banner reveal">
+    <div class="opening-icon"><i class="ti ti-calendar-event"></i></div>
+    <p>Garden Garden ouvre ses portes en <strong>septembre 2026</strong> à Chavanoz : bar, restaurant et chambres au cœur d'un parc arboré. Suivez l'avancement et soyez parmi les premiers informés de la date d'ouverture et des réservations.</p>
+    <div class="opening-actions">
+      <a class="btn btn-primary" href="https://www.instagram.com/gardengardenchavanoz" target="_blank" rel="noopener"><i class="ti ti-brand-instagram"></i> Suivre l'ouverture</a>
+      <button class="btn-outline" onclick="gscroll('resa')">Être prévenu</button>
     </div>
   </div>
 </section>
@@ -1008,6 +1016,36 @@ function chooseTable(label){
     document.getElementById('hphotoNext').addEventListener('click', function(){ hotelShow(hotelIdx + 1); });
     hotelDots.forEach(function(d){
       d.addEventListener('click', function(){ hotelShow(parseInt(d.getAttribute('data-i'), 10)); });
+    });
+  }
+
+  // Galerie photo jardin & terrasse : plusieurs vues du parc et des espaces extérieurs
+  var jardinPhoto = document.getElementById('jardinPhoto');
+  if(jardinPhoto){
+    var jardinImg = document.getElementById('jardinImg');
+    var jardinCaption = document.getElementById('jardinCaption');
+    var jardinDots = Array.from(document.querySelectorAll('#jardinDots .hdot'));
+    var jardinSlides = [
+      { src:'images/jardin-petanque.jpg', alt:'Le parc — les pistes de pétanque', label:'Les pistes de pétanque' },
+      { src:'images/terrasse.jpg', alt:'La terrasse sous la charpente', label:'La terrasse' },
+      { src:'images/bar.jpg', alt:'Le bar extérieur', label:'Le bar extérieur' }
+    ];
+    var jardinIdx = 0;
+    var jardinShow = function(i){
+      jardinIdx = (i + jardinSlides.length) % jardinSlides.length;
+      jardinPhoto.classList.add('switching');
+      setTimeout(function(){
+        jardinImg.src = jardinSlides[jardinIdx].src;
+        jardinImg.alt = jardinSlides[jardinIdx].alt;
+        jardinCaption.textContent = jardinSlides[jardinIdx].label;
+        jardinDots.forEach(function(d, di){ d.classList.toggle('active', di === jardinIdx); });
+        jardinPhoto.classList.remove('switching');
+      }, reduceMotion ? 0 : 220);
+    };
+    document.getElementById('jphotoPrev').addEventListener('click', function(){ jardinShow(jardinIdx - 1); });
+    document.getElementById('jphotoNext').addEventListener('click', function(){ jardinShow(jardinIdx + 1); });
+    jardinDots.forEach(function(d){
+      d.addEventListener('click', function(){ jardinShow(parseInt(d.getAttribute('data-i'), 10)); });
     });
   }
 })();
