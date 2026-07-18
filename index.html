@@ -62,7 +62,10 @@ body.loaded #preloader { opacity:0; visibility:hidden; }
 #progress { position:fixed; top:0; left:0; height:2px; width:0; background:linear-gradient(90deg,var(--gold),var(--terra)); z-index:400; }
 
 /* NAV */
-.nav-wrap { position:sticky; top:16px; z-index:200; display:flex; justify-content:center; padding:0 16px; }
+.opening-ribbon { position:sticky; top:0; z-index:250; display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(90deg,var(--terra),#c8863f); color:#fff; text-align:center; font-size:13px; font-weight:600; letter-spacing:.3px; padding:10px 16px; }
+.opening-ribbon i { font-size:15px; }
+.opening-ribbon b { font-weight:800; }
+.nav-wrap { position:sticky; top:52px; z-index:200; display:flex; justify-content:center; padding:0 16px; }
 .nav { display:flex; align-items:center; gap:26px; background:rgba(21,23,15,.92); backdrop-filter:blur(10px); border:1px solid rgba(200,162,102,.35); border-radius:60px; padding:10px 12px 10px 24px; box-shadow:0 8px 30px -12px rgba(0,0,0,.45); transition:box-shadow .3s; }
 .nav.scrolled { box-shadow:0 14px 40px -10px rgba(0,0,0,.6); }
 .brand { display:inline-flex; align-items:center; gap:9px; font-family:'Fraunces',serif; font-weight:500; font-size:20px; letter-spacing:.3px; color:var(--cream); cursor:pointer; white-space:nowrap; }
@@ -379,6 +382,8 @@ html { scroll-behavior:smooth; }
 
 <div id="progress"></div>
 
+<div class="opening-ribbon"><i class="ti ti-confetti"></i> <b>Ouverture en septembre 2026</b> — Bar · Restaurant · Chambres à Chavanoz</div>
+
 <div class="nav-wrap">
   <div class="nav" id="mainNav">
     <div class="brand" onclick="gscroll('top')">
@@ -432,18 +437,18 @@ html { scroll-behavior:smooth; }
 
 <div class="marquee">
   <div class="track">
+    <span><i class="ti ti-confetti"></i>Ouverture Septembre 2026</span>
     <span><i class="ti ti-tag"></i>Grenouilles à volonté · Ven, Sam, Dim</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
     <span><i class="ti ti-bed"></i>Chambres ★★★</span>
     <span><i class="ti ti-trees"></i>Terrasse au jardin</span>
-    <span><i class="ti ti-confetti"></i>Événements privés</span>
+    <span><i class="ti ti-confetti"></i>Ouverture Septembre 2026</span>
     <span><i class="ti ti-tag"></i>Grenouilles à volonté · Ven, Sam, Dim</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
     <span><i class="ti ti-bed"></i>Chambres ★★★</span>
     <span><i class="ti ti-trees"></i>Terrasse au jardin</span>
-    <span><i class="ti ti-confetti"></i>Événements privés</span>
   </div>
 </div>
 
