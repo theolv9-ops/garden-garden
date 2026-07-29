@@ -165,7 +165,8 @@ section { padding:110px 20px; }
 .signature h3 { font-family:'Fraunces',serif; font-weight:500; font-size:26px; color:var(--cream); }
 .signature p { color:rgba(246,241,229,.65); font-size:14px; margin-top:6px; max-width:520px; }
 .signature .sig-price { font-family:'Fraunces',serif; font-size:34px; color:var(--gold); white-space:nowrap; }
-.carte-cat { max-width:1020px; margin:0 auto 42px; }
+.carte-grid { max-width:1020px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:0 60px; }
+.carte-cat { margin:0 0 42px; }
 .carte-cat h4 { font-family:'Fraunces',serif; font-weight:500; font-style:italic; font-size:22px; color:var(--gold); margin-bottom:20px; }
 .plat { display:flex; justify-content:space-between; align-items:baseline; gap:18px; padding:17px 4px; border-bottom:1px solid rgba(246,241,229,.12); }
 .plat:last-child { border-bottom:none; }
@@ -329,6 +330,7 @@ html { scroll-behavior:smooth; }
   .hero-content { padding-top:120px; }
   .statsgrid { grid-template-columns:repeat(3,1fr); }
   .signature { flex-direction:column; align-items:flex-start; }
+  .carte-grid { grid-template-columns:1fr; }
   .jardin-photo { aspect-ratio:16/10; }
   .visite-stage { aspect-ratio:4/5; }
 }
@@ -510,33 +512,64 @@ html { scroll-behavior:smooth; }
   <div class="carte-head reveal">
     <div class="eyebrow">La carte</div>
     <h2 class="stitle">La viande comme <em>nulle part ailleurs</em></h2>
-    <p>Des pièces sélectionnées chez des éleveurs français, maturées sur place et cuites au plus juste. La carte change au fil des saisons.</p>
+    <p>Cuisson au brasero, produits sélectionnés, recettes maison. La carte officielle du Garden Garden.</p>
   </div>
   <div class="signature img-shine reveal">
     <div>
-      <div class="sig-label">La pièce signature</div>
-      <h3>Côte de bœuf maturée 45 jours</h3>
-      <p>Race Aubrac, environ 950 g pour deux — os à moelle rôti, pommes grenaille au thym, jus corsé.</p>
+      <div class="sig-label">Nos signatures</div>
+      <h3>La côte de bœuf flambée</h3>
+      <p>Spectacle & gourmandise — pour deux : grillée, présentée puis flambée, pommes grenailles et sauce au poivre.</p>
     </div>
     <div class="sig-price">89€</div>
   </div>
-  <div class="carte-cat reveal">
-    <h4>Viandes d'exception</h4>
-    <div class="plat"><div><div class="plat-name">Filet de bœuf charolais</div><div class="plat-desc">Sauce périgueux, pommes fondantes</div></div><div class="plat-price">42€</div></div>
-    <div class="plat"><div><div class="plat-name">Carré d'agneau en croûte d'herbes</div><div class="plat-desc">Jus au thym, légumes de saison rôtis</div></div><div class="plat-price">38€</div></div>
-    <div class="plat"><div><div class="plat-name">Volaille de Bresse rôtie</div><div class="plat-desc">Suprême fermier, morilles à la crème</div></div><div class="plat-price">34€</div></div>
-  </div>
-  <div class="carte-cat reveal">
-    <h4>Pour commencer</h4>
-    <div class="plat"><div><div class="plat-name">Foie gras mi-cuit maison</div><div class="plat-desc">Chutney de figues, brioche toastée</div></div><div class="plat-price">24€</div></div>
-    <div class="plat"><div><div class="plat-name">Œuf parfait forestier</div><div class="plat-desc">Crème de cèpes, noisettes torréfiées</div></div><div class="plat-price">18€</div></div>
-    <div class="plat"><div><div class="plat-name">Velouté du potager</div><div class="plat-desc">Légumes de saison, huile d'olive fruitée</div></div><div class="plat-price">15€</div></div>
-  </div>
-  <div class="carte-cat reveal">
-    <h4>Douceurs</h4>
-    <div class="plat"><div><div class="plat-name">Paris-Brest de la maison</div><div class="plat-desc">Praliné noisette, éclats caramélisés</div></div><div class="plat-price">15€</div></div>
-    <div class="plat"><div><div class="plat-name">Soufflé au Grand Marnier</div><div class="plat-desc">Préparé minute, glace vanille de Madagascar</div></div><div class="plat-price">16€</div></div>
-    <div class="plat"><div><div class="plat-name">Chariot de fromages affinés</div><div class="plat-desc">Sélection de nos fermes partenaires</div></div><div class="plat-price">14€</div></div>
+  <div class="carte-grid">
+    <div class="carte-cat reveal">
+      <h4>Entrées</h4>
+      <div class="plat"><div><div class="plat-name">Tartare de saumon frais</div><div class="plat-desc">À l'aneth & agrumes, crème citronnée, mesclun croquant</div></div><div class="plat-price">12€</div></div>
+      <div class="plat"><div><div class="plat-name">Carpaccio de bœuf façon Garden Garden</div><div class="plat-desc">Roquette, copeaux de parmesan, pignons de pin, réduction balsamique</div></div><div class="plat-price">12€</div></div>
+      <div class="plat"><div><div class="plat-name">Burrata crémeuse</div><div class="plat-desc">Tomates anciennes & pesto maison</div></div><div class="plat-price">12€</div></div>
+      <div class="plat"><div><div class="plat-name">Tataki de thon rouge</div><div class="plat-desc">Sésame & sauce soja, gingembre, citron vert, wakamé</div></div><div class="plat-price">16€</div></div>
+      <div class="plat"><div><div class="plat-name">Velouté de légumes du moment</div><div class="plat-desc">Mousse de chèvre frais & éclats de noisettes</div></div><div class="plat-price">12€</div></div>
+    </div>
+    <div class="carte-cat reveal">
+      <h4>Les formules</h4>
+      <div class="plat"><div><div class="plat-name">Menu Brasero du Midi</div><div class="plat-desc">Entrée + plat + dessert — bavette, picanha ou brochette de poulet</div></div><div class="plat-price">24,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Menu Petit Garden</div><div class="plat-desc">Plat + dessert + boisson — steak haché ou brochette de poulet</div></div><div class="plat-price">13,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Œuf à cheval</div><div class="plat-desc">La touche gourmande pour accompagner votre pièce de viande</div></div><div class="plat-price">2€</div></div>
+      <div class="plat"><div><div class="plat-name">Gambas grillées</div><div class="plat-desc">Deux pièces au brasero, servies avec citron</div></div><div class="plat-price">7€</div></div>
+      <div class="plat"><div><div class="plat-name">Foie gras poêlé</div><div class="plat-desc">Selon disponibilité</div></div><div class="plat-price">9€</div></div>
+    </div>
+    <div class="carte-cat reveal">
+      <h4>Les belles pièces</h4>
+      <div class="plat"><div><div class="plat-name">Bavette d'aloyau · 250g</div><div class="plat-desc">Persillée & goûteuse, saisie vivement au brasero</div></div><div class="plat-price">26,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Entrecôte de bœuf · 300g</div><div class="plat-desc">Tendre & persillée, grillée selon votre cuisson</div></div><div class="plat-price">32,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Faux-filet de bœuf · 300g</div><div class="plat-desc">Le goût franc du bœuf, tendre et savoureuse</div></div><div class="plat-price">31,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Filet de bœuf · 220g</div><div class="plat-desc">La tendreté absolue, délicatement grillé</div></div><div class="plat-price">36,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Côte de bœuf à partager</div><div class="plat-desc">Environ 1kg pour deux, présentée entière puis découpée</div></div><div class="plat-price">76€</div></div>
+    </div>
+    <div class="carte-cat reveal">
+      <h4>Autres signatures</h4>
+      <div class="plat"><div><div class="plat-name">La Picanha Garden</div><div class="plat-desc">Beurre persillé maison, pommes grenailles, salade croquante</div></div><div class="plat-price">31,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Le Brasero Terre & Mer</div><div class="plat-desc">Filet 180g, gambas grillées, chimichurri, écrasé de pommes de terre</div></div><div class="plat-price">38,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Le Burger du Brasero</div><div class="plat-desc">Steak frais, poitrine fumée, cheddar, oignons confits, sauce Garden</div></div><div class="plat-price">22,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Le Tartare Garden</div><div class="plat-desc">Coupé au couteau, assaisonnement maison, frites et salade</div></div><div class="plat-price">24,90€</div></div>
+    </div>
+    <div class="carte-cat reveal">
+      <h4>Viandes au brasero</h4>
+      <div class="plat"><div><div class="plat-name">Demi-poulet fermier mariné</div><div class="plat-desc">Aux herbes fraîches, cuisson lente puis finition au brasero</div></div><div class="plat-price">24,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Travers de porc confits</div><div class="plat-desc">Laqués au feu, caramélisés au brasero</div></div><div class="plat-price">26,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Picanha de bœuf</div><div class="plat-desc">Beurre persillé maison, tranchée après cuisson</div></div><div class="plat-price">29,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Onglet de bœuf</div><div class="plat-desc">Grillé à la demande, saisi au feu</div></div><div class="plat-price">27,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Magret de canard</div><div class="plat-desc">Peau croustillante, cœur rosé, jus corsé</div></div><div class="plat-price">31,90€</div></div>
+    </div>
+    <div class="carte-cat reveal">
+      <h4>Nos desserts</h4>
+      <div class="plat"><div><div class="plat-name">Moelleux au chocolat</div><div class="plat-desc">Cœur coulant & glace vanille, éclats de noisettes</div></div><div class="plat-price">9,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Pavlova aux fruits rouges</div><div class="plat-desc">Croquante & légère, coulis maison</div></div><div class="plat-price">10,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Brioche perdue</div><div class="plat-desc">Caramel au beurre salé, glace vanille, noisettes torréfiées</div></div><div class="plat-price">9,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Tiramisu Garden</div><div class="plat-desc">La recette maison, crème mascarpone légère</div></div><div class="plat-price">8,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Café gourmand</div><div class="plat-desc">Trois douceurs du moment sélectionnées par le chef</div></div><div class="plat-price">11,90€</div></div>
+    </div>
   </div>
 </section>
 
@@ -552,11 +585,11 @@ html { scroll-behavior:smooth; }
         <div class="flip-front">
           <img src="images/gal1.jpg" alt="" onerror="this.style.display='none'">
           <span class="flip-tag">Signature</span>
-          <h4>Côte de bœuf maturée</h4>
+          <h4>La côte de bœuf flambée</h4>
         </div>
         <div class="flip-back">
-          <h4>Côte de bœuf maturée 45 jours</h4>
-          <p>Race Aubrac, environ 950 g pour deux, os à moelle rôti, pommes grenaille au thym, jus corsé.</p>
+          <h4>La côte de bœuf flambée</h4>
+          <p>Spectacle & gourmandise — pour deux : grillée, présentée puis flambée, pommes grenailles et sauce au poivre.</p>
           <div class="flip-price">89€</div>
         </div>
       </div>
@@ -565,13 +598,13 @@ html { scroll-behavior:smooth; }
       <div class="flip-inner">
         <div class="flip-front">
           <img src="images/gal2.jpg" alt="" onerror="this.style.display='none'">
-          <span class="flip-tag">Best-seller</span>
-          <h4>Filet de bœuf charolais</h4>
+          <span class="flip-tag">Fait maison</span>
+          <h4>Le Burger du Brasero</h4>
         </div>
         <div class="flip-back">
-          <h4>Filet de bœuf charolais</h4>
-          <p>Sauce périgueux, pommes fondantes, jeunes pousses assaisonnées à l'huile d'olive fruitée.</p>
-          <div class="flip-price">42€</div>
+          <h4>Le Burger du Brasero</h4>
+          <p>Steak frais, poitrine fumée, cheddar, oignons confits, sauce Garden et frites.</p>
+          <div class="flip-price">22,90€</div>
         </div>
       </div>
     </div>
@@ -580,12 +613,12 @@ html { scroll-behavior:smooth; }
         <div class="flip-front">
           <img src="images/gal4.jpg" alt="" onerror="this.style.display='none'">
           <span class="flip-tag">Douceur</span>
-          <h4>Paris-Brest de la maison</h4>
+          <h4>Moelleux au chocolat</h4>
         </div>
         <div class="flip-back">
-          <h4>Paris-Brest de la maison</h4>
-          <p>Praliné noisette, éclats caramélisés, pâte à choux dorée minute.</p>
-          <div class="flip-price">15€</div>
+          <h4>Moelleux au chocolat</h4>
+          <p>Cœur coulant & glace vanille, chocolat fondant, éclats de noisettes.</p>
+          <div class="flip-price">9,90€</div>
         </div>
       </div>
     </div>
