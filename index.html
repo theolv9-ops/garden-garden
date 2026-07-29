@@ -382,7 +382,7 @@ html { scroll-behavior:smooth; }
 
 <div id="progress"></div>
 
-<div class="opening-ribbon"><i class="ti ti-confetti"></i> <b>Ouverture en septembre 2026</b> — Bar · Restaurant · Chambres à Chavanoz</div>
+<div class="opening-ribbon" onclick="gscroll('ouverture')" style="cursor:pointer;"><i class="ti ti-confetti"></i> <b>Ouverture en septembre 2026</b> — Bar · Restaurant · Chambres à Chavanoz</div>
 
 <div class="nav-wrap">
   <div class="nav" id="mainNav">
@@ -408,14 +408,14 @@ html { scroll-behavior:smooth; }
     <img src="images/hero.jpg" alt="Garden Garden — Bar, Restaurant &amp; Chambres" onerror="this.style.display='none'">
   </div>
   <canvas id="fireflies"></canvas>
-  <div class="status-float"><span class="status-dot"></span> Ouverture Septembre 2026 · réservations bientôt ouvertes</div>
+  <div class="status-float" onclick="gscroll('ouverture')" style="cursor:pointer;"><span class="status-dot"></span> Ouverture Septembre 2026 · réservations bientôt ouvertes</div>
   <div class="hero-content" id="heroContent">
     <div class="tagline"><i class="ti ti-trees"></i> Bar · Restaurant · Chambres</div>
     <h1><span class="w" style="--d:.6s">L'art</span> <span class="w" style="--d:.72s">de</span> <span class="w" style="--d:.84s">recevoir,</span> <em><span class="w" style="--d:1s">le</span> <span class="w" style="--d:1.12s">goût</span> <span class="w" style="--d:1.24s">du</span> <span class="w" style="--d:1.36s">plaisir.</span></em></h1>
     <p class="sub">Cuisine française traditionnelle, viandes d'exception sélectionnées et maturées avec soin, chambres au calme d'un parc arboré — à quelques minutes de Lyon.</p>
     <div class="hero-row">
       <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une table</button>
-      <div class="rating-badge">
+      <div class="rating-badge" onclick="gscroll('ouverture')" style="cursor:pointer;">
         <span class="stars"><i class="ti ti-calendar-event"></i></span>
         <b>Ouverture</b>
         <span>en septembre 2026</span>
@@ -437,13 +437,13 @@ html { scroll-behavior:smooth; }
 
 <div class="marquee">
   <div class="track">
-    <span><i class="ti ti-confetti"></i>Ouverture Septembre 2026</span>
+    <span onclick="gscroll('ouverture')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture Septembre 2026</span>
     <span><i class="ti ti-tag"></i>Grenouilles à volonté · Ven, Sam, Dim</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
     <span><i class="ti ti-bed"></i>Chambres ★★★</span>
     <span><i class="ti ti-trees"></i>Terrasse au jardin</span>
-    <span><i class="ti ti-confetti"></i>Ouverture Septembre 2026</span>
+    <span onclick="gscroll('ouverture')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture Septembre 2026</span>
     <span><i class="ti ti-tag"></i>Grenouilles à volonté · Ven, Sam, Dim</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
@@ -686,7 +686,7 @@ html { scroll-behavior:smooth; }
   </div>
 </section>
 
-<section class="testi">
+<section class="testi" id="ouverture">
   <div class="testi-head reveal">
     <div class="eyebrow">Bientôt</div>
     <h2 class="stitle">L'ouverture approche <em>— septembre 2026</em></h2>
