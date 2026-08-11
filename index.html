@@ -203,6 +203,13 @@ section { padding:110px 20px; }
 .plat-name { font-weight:600; font-size:15.5px; color:var(--cream); }
 .plat-desc { color:rgba(246,241,229,.55); font-size:13px; margin-top:3px; }
 .plat-price { font-family:'Fraunces',serif; font-size:19px; color:var(--gold); white-space:nowrap; }
+.carte-legal { max-width:1020px; margin:8px auto 0; color:rgba(246,241,229,.42); font-size:12px; line-height:1.7; text-align:center; }
+.carte-legal strong { color:rgba(246,241,229,.62); font-weight:600; }
+.carte-photo { max-width:1020px; margin:44px auto 0; border-radius:18px; overflow:hidden; position:relative; }
+.carte-photo img { width:100%; display:block; aspect-ratio:16/7; object-fit:cover; transition:transform .5s ease; }
+.carte-photo:hover img { transform:scale(1.04); }
+.carte-photo figcaption { position:absolute; left:0; right:0; bottom:0; padding:34px 28px 20px; background:linear-gradient(transparent,rgba(12,14,9,.85)); color:var(--cream); font-family:'Fraunces',serif; font-style:italic; font-size:20px; }
+@media(max-width:640px){ .carte-photo img { aspect-ratio:4/3; } .carte-photo figcaption { font-size:16px; } }
 
 /* HOTEL */
 .hotel { background:var(--cream2); }
@@ -600,7 +607,34 @@ html { scroll-behavior:smooth; }
       <div class="plat"><div><div class="plat-name">Tiramisu Garden</div><div class="plat-desc">La recette maison, crème mascarpone légère</div></div><div class="plat-price">8,90€</div></div>
       <div class="plat"><div><div class="plat-name">Café gourmand</div><div class="plat-desc">Trois douceurs du moment sélectionnées par le chef</div></div><div class="plat-price">11,90€</div></div>
     </div>
+    <div class="carte-cat reveal">
+      <h4>Cocktails avec alcool</h4>
+      <div class="plat"><div><div class="plat-name">Pina Colada</div><div class="plat-desc">Rhum de Guadeloupe, alcool, jus d'ananas, crème, parfum coco — allergène : protéines de lait</div></div><div class="plat-price">8,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Sex on the Beach</div><div class="plat-desc">Vodka française, alcool, jus d'orange, jus d'ananas, parfums fruit de la passion, papaye, pêche, pêche blanche et melon</div></div><div class="plat-price">8,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Swimming Pool</div><div class="plat-desc">Rhum de Guadeloupe, alcool, jus d'ananas, parfums curaçao, Pina Colada — allergène : protéines de lait</div></div><div class="plat-price">8,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Moscow Mule</div><div class="plat-desc">Vodka française, parfums citron, gingembre et concombre</div></div><div class="plat-price">8,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Perlina</div><div class="plat-desc">Vodka française, alcool, saveurs framboise, pitaya, pêche, goyave, baies roses et eau gazeuse</div></div><div class="plat-price">8,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Melly Berry</div><div class="plat-desc">Liqueur de framboise, vodka, jus d'ananas et arômes naturels de fraise, pêche, orange et framboise</div></div><div class="plat-price">8,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Bikini</div><div class="plat-desc">Rhum de Guadeloupe, alcool, jus d'ananas, parfums pastèque, banane, framboise, tequila, gin et citron</div></div><div class="plat-price">8,50€</div></div>
+      <div class="plat"><div><div class="plat-name">69</div><div class="plat-desc">Rhum de Guadeloupe, alcool, jus d'ananas, parfums goyave, pitaya et gingembre</div></div><div class="plat-price">8,50€</div></div>
+    </div>
+    <div class="carte-cat reveal">
+      <h4>Cocktails sans alcool</h4>
+      <div class="plat"><div><div class="plat-name">Caribbean Sun</div><div class="plat-desc">Tourbillon exotique au jus d'orange, parfums mangue, ananas, kiwi et orange</div></div><div class="plat-price">6,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Paradise Dream</div><div class="plat-desc">Jus d'ananas, cascade de saveurs fraise, framboise et pêche blanche</div></div><div class="plat-price">6,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Jungle Green</div><div class="plat-desc">Expédition sauvage au jus d'orange, goûts kiwi, banane, pomme verte et orange</div></div><div class="plat-price">6,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Coconut King</div><div class="plat-desc">Délice des îles au jus d'ananas et à la crème, saveur coco — allergène : protéines de lait</div></div><div class="plat-price">6,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Purple</div><div class="plat-desc">Fusion pétillante à base de framboise, fraise, citron, violette, myrtille, mûre et eau gazeuse</div></div><div class="plat-price">6,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Peace &amp; Love</div><div class="plat-desc">Évasion intense au jus d'orange, parfums tequila, jasmin, violette et hibiscus</div></div><div class="plat-price">6,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Koyo</div><div class="plat-desc">Cocktail rigolo à base de jus de pomme ou jus d'ananas, saveurs fraise, melon, banane, citron et vanille</div></div><div class="plat-price">6,50€</div></div>
+      <div class="plat"><div><div class="plat-name">Virgin Spritz</div><div class="plat-desc">Un spritz pétillant aux saveurs d'oranges et d'épices</div></div><div class="plat-price">6,50€</div></div>
+    </div>
   </div>
+  <figure class="carte-photo img-shine reveal">
+    <img src="images/bar-exterieur.jpg" alt="Le bar extérieur du Garden Garden à Chavanoz, avec sa carte de cocktails, apéritifs et bières">
+    <figcaption>Le bar extérieur — cocktails, apéritifs & planches au coucher du soleil</figcaption>
+  </figure>
+  <p class="carte-legal reveal">Cocktails d'environ 20 à 25 cl. Cocktails alcoolisés : de 6 à 9 % de contenance en alcool. Prix nets, service compris. Photos non contractuelles.<br><strong>L'abus d'alcool est dangereux pour la santé, à consommer avec modération.</strong></p>
 </section>
 
 <section class="assiettes" id="assiettes">
