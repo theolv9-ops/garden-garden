@@ -32,6 +32,7 @@
   "email": "contact.gardengarden38@gmail.com",
   "priceRange": "€€€",
   "servesCuisine": "Française",
+  "hasMenu": "https://gardengarden-chavanoz.com/#carte",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "14 hameau de Grange Rouge, 2 route de Loyettes",
@@ -444,7 +445,7 @@ html { scroll-behavior:smooth; }
 <div class="hero" id="top">
   <div class="hero-fallback"></div>
   <div class="hero-bg" id="heroBg">
-    <img src="images/hero.jpg" alt="Garden Garden — Bar, Restaurant &amp; Chambres" onerror="this.style.display='none'">
+    <img src="images/hero.jpg" alt="Garden Garden — Bar, Restaurant &amp; Chambres" onerror="this.style.display='none'" fetchpriority="high" decoding="async">
   </div>
   <canvas id="fireflies"></canvas>
   <div class="status-float" onclick="gscroll('ouverture')" style="cursor:pointer;"><span class="status-dot"></span> Ouverture Septembre 2026 · réservations bientôt ouvertes</div>
@@ -501,8 +502,8 @@ html { scroll-behavior:smooth; }
 
 <section class="lieu" id="lieu">
   <div class="duo">
-    <div class="duo-item tilt img-shine reveal"><img src="images/lounge.jpg" alt="Le lounge Garden Garden" onerror="this.style.display='none'"></div>
-    <div class="duo-item tilt img-shine reveal"><img src="images/salle.jpg" alt="La grande salle" onerror="this.style.display='none'"></div>
+    <div class="duo-item tilt img-shine reveal"><img src="images/lounge.jpg" alt="Le lounge Garden Garden" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
+    <div class="duo-item tilt img-shine reveal"><img src="images/salle.jpg" alt="La grande salle" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
   </div>
   <div class="duo-caption">
     <div class="duo-cap reveal">
@@ -528,7 +529,7 @@ html { scroll-behavior:smooth; }
   </div>
   <div class="visite-wrap reveal">
     <div class="visite-stage tilt" id="visiteStage">
-      <img id="visiteImg" src="images/lounge.jpg" alt="Visite virtuelle — Le lounge" onerror="this.style.display='none'">
+      <img id="visiteImg" src="images/lounge.jpg" alt="Visite virtuelle — Le lounge" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="visite-caption">
         <h3 id="visiteTitle">Le lounge</h3>
         <p id="visiteDesc">Velours kaki, bois blond et verdure suspendue pour l'apéritif comme le digestif.</p>
@@ -631,7 +632,7 @@ html { scroll-behavior:smooth; }
     </div>
   </div>
   <figure class="carte-photo img-shine reveal">
-    <img src="images/bar-exterieur.jpg" alt="Le bar extérieur du Garden Garden à Chavanoz, avec sa carte de cocktails, apéritifs et bières">
+    <img src="images/bar-exterieur.jpg" alt="Le bar extérieur du Garden Garden à Chavanoz, avec sa carte de cocktails, apéritifs et bières" loading="lazy" decoding="async">
     <figcaption>Le bar extérieur — cocktails, apéritifs & planches au coucher du soleil</figcaption>
   </figure>
   <p class="carte-legal reveal">Cocktails d'environ 20 à 25 cl. Cocktails alcoolisés : de 6 à 9 % de contenance en alcool. Prix nets, service compris. Photos non contractuelles.<br><strong>L'abus d'alcool est dangereux pour la santé, à consommer avec modération.</strong></p>
@@ -647,7 +648,7 @@ html { scroll-behavior:smooth; }
     <div class="flip reveal" tabindex="0">
       <div class="flip-inner">
         <div class="flip-front">
-          <img src="images/gal1.jpg" alt="Côte de bœuf flambée, spécialité signature du restaurant Garden Garden à Chavanoz" onerror="this.style.display='none'">
+          <img src="images/gal1.jpg" alt="Côte de bœuf flambée, spécialité signature du restaurant Garden Garden à Chavanoz" onerror="this.style.display='none'" loading="lazy" decoding="async">
           <span class="flip-tag">Signature</span>
           <h4>La côte de bœuf flambée</h4>
         </div>
@@ -661,7 +662,7 @@ html { scroll-behavior:smooth; }
     <div class="flip reveal" tabindex="0">
       <div class="flip-inner">
         <div class="flip-front">
-          <img src="images/gal2.jpg" alt="Burger du Brasero maison avec frites, restaurant Garden Garden" onerror="this.style.display='none'">
+          <img src="images/gal2.jpg" alt="Burger du Brasero maison avec frites, restaurant Garden Garden" onerror="this.style.display='none'" loading="lazy" decoding="async">
           <span class="flip-tag">Fait maison</span>
           <h4>Le Burger du Brasero</h4>
         </div>
@@ -675,7 +676,7 @@ html { scroll-behavior:smooth; }
     <div class="flip reveal" tabindex="0">
       <div class="flip-inner">
         <div class="flip-front">
-          <img src="images/gal4.jpg" alt="Moelleux au chocolat cœur coulant, dessert du restaurant Garden Garden" onerror="this.style.display='none'">
+          <img src="images/gal4.jpg" alt="Moelleux au chocolat cœur coulant, dessert du restaurant Garden Garden" onerror="this.style.display='none'" loading="lazy" decoding="async">
           <span class="flip-tag">Douceur</span>
           <h4>Moelleux au chocolat</h4>
         </div>
@@ -693,7 +694,7 @@ html { scroll-behavior:smooth; }
 <section class="hotel" id="hotel">
   <div class="hotel-wrap">
     <div class="hotel-photo tilt img-shine reveal" id="hotelPhoto">
-      <img id="hotelImg" src="images/chambre1.jpg" alt="Chambre Garden Garden — Chambre" onerror="this.style.display='none'">
+      <img id="hotelImg" src="images/chambre1.jpg" alt="Chambre Garden Garden — Chambre" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="hphoto-caption" id="hotelCaption">Chambre</div>
       <div class="hphoto-nav">
         <button class="hphoto-arrow" id="hphotoPrev" aria-label="Photo précédente" onclick="event.stopPropagation()"><i class="ti ti-chevron-left"></i></button>
@@ -725,8 +726,8 @@ html { scroll-behavior:smooth; }
 
 <section class="terrasse" id="terrasse">
   <div class="duo">
-    <div class="duo-item wide tilt img-shine reveal"><img src="images/terrasse.jpg" alt="La terrasse sous la charpente" onerror="this.style.display='none'"></div>
-    <div class="duo-item wide tilt img-shine reveal"><img src="images/bar.jpg" alt="Le bar extérieur" onerror="this.style.display='none'"></div>
+    <div class="duo-item wide tilt img-shine reveal"><img src="images/terrasse.jpg" alt="La terrasse sous la charpente" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
+    <div class="duo-item wide tilt img-shine reveal"><img src="images/bar.jpg" alt="Le bar extérieur" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
   </div>
   <div class="duo-caption">
     <div class="duo-cap reveal">
@@ -751,7 +752,7 @@ html { scroll-behavior:smooth; }
       <h2 class="stitle">Un parc entier <em>pour vos plus belles occasions</em></h2>
     </div>
     <div class="jardin-photo tilt img-shine reveal" id="jardinPhoto">
-      <img id="jardinImg" src="images/jardin-petanque.jpg" alt="Le parc — les pistes de pétanque" onerror="this.style.display='none'">
+      <img id="jardinImg" src="images/jardin-petanque.jpg" alt="Le parc — les pistes de pétanque" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="hphoto-caption" id="jardinCaption">Les pistes de pétanque</div>
       <div class="hphoto-nav">
         <button class="hphoto-arrow" id="jphotoPrev" aria-label="Photo précédente" onclick="event.stopPropagation()"><i class="ti ti-chevron-left"></i></button>
@@ -777,10 +778,10 @@ html { scroll-behavior:smooth; }
     <h2 class="stitle">Le goût du <em>détail</em></h2>
   </div>
   <div class="grid-gal">
-    <div class="gal-item tilt img-shine reveal"><img src="images/gal1.jpg" alt="Côte de bœuf flambée, restaurant Garden Garden à Chavanoz" onerror="this.style.display='none'"></div>
-    <div class="gal-item tilt img-shine reveal"><img src="images/gal2.jpg" alt="Burger du Brasero avec frites maison" onerror="this.style.display='none'"></div>
-    <div class="gal-item tilt img-shine reveal"><img src="images/gal3.jpg" alt="Entrée fraîcheur tomates et mozzarella" onerror="this.style.display='none'"></div>
-    <div class="gal-item tilt img-shine reveal"><img src="images/gal4.jpg" alt="Moelleux au chocolat, dessert maison Garden Garden" onerror="this.style.display='none'"></div>
+    <div class="gal-item tilt img-shine reveal"><img src="images/gal1.jpg" alt="Côte de bœuf flambée, restaurant Garden Garden à Chavanoz" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
+    <div class="gal-item tilt img-shine reveal"><img src="images/gal2.jpg" alt="Burger du Brasero avec frites maison" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
+    <div class="gal-item tilt img-shine reveal"><img src="images/gal3.jpg" alt="Entrée fraîcheur tomates et mozzarella" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
+    <div class="gal-item tilt img-shine reveal"><img src="images/gal4.jpg" alt="Moelleux au chocolat, dessert maison Garden Garden" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
   </div>
 </section>
 
@@ -808,7 +809,7 @@ html { scroll-behavior:smooth; }
   <div class="tables-grid">
     <div class="table-card tilt img-shine reveal">
       <span class="tc-tag">Vue sur le passe</span>
-      <img src="images/salle.jpg" alt="Table du Chef" onerror="this.style.display='none'">
+      <img src="images/salle.jpg" alt="Table du Chef" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="tc-overlay">
         <h4>Table du Chef</h4>
         <p>Au cœur de la grande salle, face au foyer, pour suivre chaque dressage.</p>
@@ -817,7 +818,7 @@ html { scroll-behavior:smooth; }
     </div>
     <div class="table-card tilt img-shine reveal">
       <span class="tc-tag">Vue sur le jardin</span>
-      <img src="images/terrasse.jpg" alt="Table Jardin" onerror="this.style.display='none'">
+      <img src="images/terrasse.jpg" alt="Table Jardin" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="tc-overlay">
         <h4>Table Jardin</h4>
         <p>Sous la charpente de la terrasse, entre bougies et frondaisons.</p>
@@ -826,7 +827,7 @@ html { scroll-behavior:smooth; }
     </div>
     <div class="table-card tilt img-shine reveal">
       <span class="tc-tag">Intime</span>
-      <img src="images/lounge.jpg" alt="Salon privé" onerror="this.style.display='none'">
+      <img src="images/lounge.jpg" alt="Salon privé" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="tc-overlay">
         <h4>Le Salon Privé</h4>
         <p>Un renfoncement du lounge, velours kaki et lumière tamisée.</p>
@@ -835,7 +836,7 @@ html { scroll-behavior:smooth; }
     </div>
     <div class="table-card tilt img-shine reveal">
       <span class="tc-tag">Grand air</span>
-      <img src="images/jardin.jpg" alt="Table au jardin" onerror="this.style.display='none'">
+      <img src="images/jardin.jpg" alt="Table au jardin" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="tc-overlay">
         <h4>Table au Feu de Bois</h4>
         <p>Près du brasero du jardin, pour prolonger le dîner à la fraîche.</p>
