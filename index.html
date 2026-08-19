@@ -795,7 +795,7 @@ html { scroll-behavior:smooth; }
     <p>Garden Garden ouvre ses portes en <strong>septembre 2026</strong> à Chavanoz : bar, restaurant et chambres au cœur d'un parc arboré. Suivez l'avancement et soyez parmi les premiers informés de la date d'ouverture et des réservations.</p>
     <div class="opening-actions">
       <a class="btn btn-primary" href="https://www.instagram.com/gardengardenchavanoz" target="_blank" rel="noopener"><i class="ti ti-brand-instagram"></i> Suivre l'ouverture</a>
-      <button class="btn-outline" onclick="gscroll('resa')">Être prévenu</button>
+      <a class="btn-outline" href="mailto:contact.gardengarden38@gmail.com?subject=Tenez-moi%20inform%C3%A9%20de%20l%27ouverture&body=Bonjour%2C%0A%0AJe%20souhaite%20%C3%AAtre%20inform%C3%A9%28e%29%20de%20la%20date%20d%27ouverture%20de%20Garden%20Garden.%0A%0AMon%20pr%C3%A9nom%20%3A%20%0AMon%20t%C3%A9l%C3%A9phone%20ou%20email%20%3A%20">Être prévenu</a>
     </div>
   </div>
 </section>
@@ -853,9 +853,7 @@ html { scroll-behavior:smooth; }
       <h2 class="stitle">Votre table <em>vous attend</em></h2>
       <p class="lead">Réponse rapide, confirmation par téléphone.</p>
     </div>
-    <form class="form-card reveal" id="reservationForm" name="reservation" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return gsubmit(event)">
-      <input type="hidden" name="form-name" value="reservation">
-      <p style="display:none"><label>Ne pas remplir : <input name="bot-field"></label></p>
+    <form class="form-card reveal" id="reservationForm" name="reservation" onsubmit="return gsubmit(event)">
       <div class="fg">
         <div class="field"><label>Prénom</label><input id="g-prenom" name="prenom" type="text" placeholder="Camille"></div>
         <div class="field"><label>Nom</label><input id="g-nom" name="nom" type="text" placeholder="Laurent"></div>
@@ -921,18 +919,25 @@ function gsubmit(e){
   var req=['g-prenom','g-nom','g-date','g-heure','g-tel','g-email'];
   var ok=req.every(function(f){return document.getElementById(f).value.trim()!==''});
   if(!ok){ alert('Merci de remplir prénom, nom, date, heure, téléphone et email.'); return false; }
-  var form = document.getElementById('reservationForm');
-  var data = new FormData(form);
-  fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams(data).toString() })
-    .then(function(){
-      document.getElementById('g-err').style.display='none';
-      var el=document.getElementById('g-ok'); el.style.display='block';
-      el.scrollIntoView({behavior:'smooth',block:'center'});
-      form.reset();
-    })
-    .catch(function(){
-      document.getElementById('g-err').style.display='block';
-    });
+  var v=function(id){ return document.getElementById(id).value.trim(); };
+  var subject = 'Réservation — ' + v('g-prenom') + ' ' + v('g-nom') + ' — ' + v('g-date') + ' ' + v('g-heure');
+  var body = [
+    'Prénom : ' + v('g-prenom'),
+    'Nom : ' + v('g-nom'),
+    'Date : ' + v('g-date'),
+    'Heure : ' + v('g-heure'),
+    'Convives : ' + v('g-pers'),
+    'Téléphone : ' + v('g-tel'),
+    'Email : ' + v('g-email'),
+    'Occasion particulière : ' + (v('g-msg') || '—')
+  ].join('\n');
+  var mailto = 'mailto:contact.gardengarden38@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  window.location.href = mailto;
+  document.getElementById('g-err').style.display='none';
+  var el=document.getElementById('g-ok');
+  el.textContent = '✓ Votre messagerie va s\'ouvrir avec la demande pré-remplie — il ne reste qu\'à cliquer sur « Envoyer ». Vous pouvez aussi appeler directement le 04 86 80 27 50.';
+  el.style.display='block';
+  el.scrollIntoView({behavior:'smooth',block:'center'});
   return false;
 }
 function chooseTable(label){
