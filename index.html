@@ -940,13 +940,46 @@ function gsubmit(e){
     'Occasion particulière : ' + (v('g-msg') || '—')
   ].join('\n');
   var mailto = 'mailto:contact.gardengarden38@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation'}); }
-  window.location.href = mailto;
-  document.getElementById('g-err').style.display='none';
-  var el=document.getElementById('g-ok');
-  el.textContent = '✓ Votre messagerie va s\'ouvrir avec la demande pré-remplie — il ne reste qu\'à cliquer sur « Envoyer ». Vous pouvez aussi appeler directement le 04 86 80 27 50.';
-  el.style.display='block';
-  el.scrollIntoView({behavior:'smooth',block:'center'});
+  var btn = e.target.querySelector('button[type="submit"]');
+  var errEl = document.getElementById('g-err');
+  var okEl = document.getElementById('g-ok');
+  errEl.style.display='none';
+  okEl.style.display='none';
+  if(btn){ btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
+  var fd = new FormData();
+  fd.append('Prénom', v('g-prenom'));
+  fd.append('Nom', v('g-nom'));
+  fd.append('Date', v('g-date'));
+  fd.append('Heure', v('g-heure'));
+  fd.append('Convives', v('g-pers'));
+  fd.append('Téléphone', v('g-tel'));
+  fd.append('Email', v('g-email'));
+  fd.append('Occasion particulière', v('g-msg') || '—');
+  fd.append('_subject', subject);
+  fd.append('_template', 'table');
+  fd.append('_captcha', 'false');
+  fetch('https://formsubmit.co/ajax/contact.gardengarden38@gmail.com', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json' },
+    body: fd
+  }).then(function(res){
+    if(!res.ok) throw new Error('bad status');
+    return res.json();
+  }).then(function(){
+    if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation_auto'}); }
+    okEl.textContent = '✓ Merci ! Votre demande a été envoyée. Nous vous rappelons très vite pour confirmer.';
+    okEl.style.display='block';
+    okEl.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById('reservationForm').reset();
+  }).catch(function(){
+    if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation_fallback_mailto'}); }
+    window.location.href = mailto;
+    okEl.textContent = '✓ Votre messagerie va s\'ouvrir avec la demande pré-remplie — il ne reste qu\'à cliquer sur « Envoyer ». Vous pouvez aussi appeler directement le 04 86 80 27 50.';
+    okEl.style.display='block';
+    okEl.scrollIntoView({behavior:'smooth',block:'center'});
+  }).finally(function(){
+    if(btn){ btn.disabled = false; btn.textContent = 'Confirmer la réservation'; }
+  });
   return false;
 }
 function chooseTable(label){
