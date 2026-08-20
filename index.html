@@ -803,7 +803,7 @@ html { scroll-behavior:smooth; }
     <p>Garden Garden ouvre ses portes en <strong>septembre 2026</strong> à Chavanoz : bar, restaurant et chambres au cœur d'un parc arboré. Suivez l'avancement et soyez parmi les premiers informés de la date d'ouverture et des réservations.</p>
     <div class="opening-actions">
       <a class="btn btn-primary" href="https://www.instagram.com/gardengardenchavanoz" target="_blank" rel="noopener"><i class="ti ti-brand-instagram"></i> Suivre l'ouverture</a>
-      <a class="btn-outline" href="mailto:contact.gardengarden38@gmail.com?subject=Tenez-moi%20inform%C3%A9%20de%20l%27ouverture&body=Bonjour%2C%0A%0AJe%20souhaite%20%C3%AAtre%20inform%C3%A9%28e%29%20de%20la%20date%20d%27ouverture%20de%20Garden%20Garden.%0A%0AMon%20pr%C3%A9nom%20%3A%20%0AMon%20t%C3%A9l%C3%A9phone%20ou%20email%20%3A%20">Être prévenu</a>
+      <a class="btn-outline" href="mailto:contact.gardengarden38@gmail.com?subject=Tenez-moi%20inform%C3%A9%20de%20l%27ouverture&body=Bonjour%2C%0A%0AJe%20souhaite%20%C3%AAtre%20inform%C3%A9%28e%29%20de%20la%20date%20d%27ouverture%20de%20Garden%20Garden.%0A%0AMon%20pr%C3%A9nom%20%3A%20%0AMon%20t%C3%A9l%C3%A9phone%20ou%20email%20%3A%20" onclick="if(typeof gtag==='function'){gtag('event','notify_me_click',{event_category:'engagement',event_label:'etre_prevenu'});}">Être prévenu</a>
     </div>
   </div>
 </section>
@@ -940,6 +940,7 @@ function gsubmit(e){
     'Occasion particulière : ' + (v('g-msg') || '—')
   ].join('\n');
   var mailto = 'mailto:contact.gardengarden38@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation'}); }
   window.location.href = mailto;
   document.getElementById('g-err').style.display='none';
   var el=document.getElementById('g-ok');
