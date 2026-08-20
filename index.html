@@ -965,7 +965,8 @@ function gsubmit(e){
   }).then(function(res){
     if(!res.ok) throw new Error('bad status');
     return res.json();
-  }).then(function(){
+  }).then(function(data){
+    if(!data || data.success === false || data.success === 'false'){ throw new Error('formsubmit not active'); }
     if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation_auto'}); }
     okEl.textContent = '✓ Merci ! Votre demande a été envoyée. Nous vous rappelons très vite pour confirmer.';
     okEl.style.display='block';
