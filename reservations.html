@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Réservations · Garden Garden</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#2c5f2d;
+    --green-dark:#1f4520;
+    --green-light:#eaf3ea;
+    --cream:#faf8f3;
+    --ink:#1f2a1f;
+    --muted:#6b7568;
+    --line:#e2e6df;
+    --red:#b3261e;
+    --red-light:#fbeceb;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);}
+  h1,h2{font-family:'Playfair Display',serif;margin:0;}
+  header.top{background:var(--green);color:#fff;padding:28px 20px;text-align:center;}
+  header.top h1{font-size:26px;}
+  header.top p{margin:6px 0 0;opacity:.9;font-size:14px;}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px;}
+
+  .stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
+  .stat-card{flex:1;min-width:160px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .stat-card .num{font-size:32px;font-weight:700;color:var(--green);font-family:'Playfair Display',serif;}
+  .stat-card .label{font-size:13px;color:var(--muted);margin-top:2px;}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;margin-bottom:28px;}
+  .card h2{font-size:20px;margin-bottom:18px;color:var(--green-dark);}
+
+  form{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1/-1;}
+  label{font-size:13px;font-weight:600;color:var(--ink);}
+  input,select,textarea{font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;background:var(--cream);color:var(--ink);}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--green);outline-offset:1px;background:#fff;}
+  textarea{resize:vertical;min-height:70px;}
+
+  .btn{grid-column:1/-1;background:var(--green);color:#fff;border:none;border-radius:40px;padding:15px 30px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s,transform .15s;}
+  .btn:hover{background:var(--green-dark);}
+  .btn:disabled{opacity:.6;cursor:not-allowed;}
+
+  .msg{grid-column:1/-1;padding:12px 16px;border-radius:8px;font-size:14px;display:none;}
+  .msg.show{display:block;}
+  .msg.ok{background:var(--green-light);color:var(--green-dark);border:1px solid var(--green);}
+  .msg.err{background:var(--red-light);color:var(--red);border:1px solid var(--red);}
+
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{width:100%;border-collapse:collapse;min-width:860px;font-size:13px;}
+  thead th{background:var(--green);color:#fff;text-align:left;padding:12px 10px;white-space:nowrap;position:sticky;top:0;}
+  tbody td{padding:11px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  tbody tr:nth-child(even){background:#fbfbf8;}
+  tbody tr.example td{color:var(--muted);font-style:italic;}
+
+  .badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;}
+  .badge.nouvelle{background:#fdf2d0;color:#8a6d00;}
+  .badge.confirmee{background:var(--green-light);color:var(--green-dark);}
+  .badge.annulee{background:var(--red-light);color:var(--red);}
+  .badge.autre{background:var(--line);color:var(--muted);}
+
+  .table-note{font-size:13px;color:var(--muted);margin-top:10px;}
+  .loading-row td{text-align:center;color:var(--muted);padding:24px;}
+
+  @media (max-width:640px){
+    form{grid-template-columns:1fr;}
+    header.top h1{font-size:22px;}
+    .stats{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Garden Garden</h1>
+  <p>Gestion des réservations</p>
+</header>
+
+<div class="wrap">
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num" id="statCount">–</div>
+      <div class="label">Réservations</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="statGuests">–</div>
+      <div class="label">Convives attendus</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Nouvelle réservation</h2>
+    <form id="reservationForm">
+      <div class="field">
+        <label for="prenom">Prénom *</label>
+        <input type="text" id="prenom" required>
+      </div>
+      <div class="field">
+        <label for="nom">Nom *</label>
+        <input type="text" id="nom" required>
+      </div>
+      <div class="field">
+        <label for="email">Email *</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="field">
+        <label for="telephone">Téléphone *</label>
+        <input type="tel" id="telephone" required>
+      </div>
+      <div class="field">
+        <label for="date">Date *</label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="field">
+        <label for="heure">Heure *</label>
+        <input type="time" id="heure" required>
+      </div>
+      <div class="field">
+        <label for="convives">Convives *</label>
+        <input type="number" id="convives" min="1" max="50" required>
+      </div>
+      <div class="field">
+        <label for="occasion">Occasion</label>
+        <input type="text" id="occasion" placeholder="Anniversaire, repas d'affaires...">
+      </div>
+      <div class="field full">
+        <label for="commentaires">Commentaires</label>
+        <textarea id="commentaires" placeholder="Allergies, préférence de table..."></textarea>
+      </div>
+
+      <div class="msg" id="formMsg"></div>
+
+      <button type="submit" class="btn" id="submitBtn">Confirmer la réservation</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Toutes les réservations</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Reçu le</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Convives</th>
+            <th>Téléphone</th>
+            <th>Email</th>
+            <th>Occasion</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="loading-row"><td colspan="10">Chargement des réservations…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note" id="tableNote"></p>
+  </div>
+
+</div>
+
+<script>
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNJ-ZJkZebg-IJ-vKzTs966eLpEIyXPZTYWio1gYjCiguMARc7VrlTfMpxHcsT-KCGGA/exec';
+
+  var form = document.getElementById('reservationForm');
+  var submitBtn = document.getElementById('submitBtn');
+  var formMsg = document.getElementById('formMsg');
+  var tableBody = document.getElementById('tableBody');
+  var tableNote = document.getElementById('tableNote');
+  var statCount = document.getElementById('statCount');
+  var statGuests = document.getElementById('statGuests');
+
+  // empêche de choisir une date déjà passée
+  document.getElementById('date').min = new Date().toISOString().slice(0, 10);
+
+  function badgeClass(statut) {
+    var s = (statut || '').toLowerCase();
+    if (s.indexOf('confirm') !== -1) return 'confirmee';
+    if (s.indexOf('annul') !== -1) return 'annulee';
+    if (s.indexOf('nouvel') !== -1) return 'nouvelle';
+    return 'autre';
+  }
+
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderExample() {
+    tableBody.innerHTML =
+      '<tr class="example">' +
+        '<td>—</td><td>Sophie</td><td>Dubois</td><td>2026-09-12</td><td>20:00</td>' +
+        '<td>4</td><td>—</td><td>—</td><td>Anniversaire</td>' +
+        '<td><span class="badge autre">Exemple</span></td>' +
+      '</tr>';
+    tableNote.textContent = 'Aucune réservation pour l\'instant — ligne d\'exemple affichée ci-dessus.';
+    statCount.textContent = '0';
+    statGuests.textContent = '0';
+  }
+
+  function renderTable(reservations) {
+    if (!reservations || reservations.length === 0) {
+      renderExample();
+      return;
+    }
+
+    var totalGuests = 0;
+    var rows = reservations.map(function (r) {
+      var convives = parseInt(r['Convives'], 10) || 0;
+      totalGuests += convives;
+      var statut = r['Statut'] || 'Nouvelle';
+      return '<tr>' +
+        '<td>' + escapeHtml(r['Reçu le']) + '</td>' +
+        '<td>' + escapeHtml(r['Prénom']) + '</td>' +
+        '<td>' + escapeHtml(r['Nom']) + '</td>' +
+        '<td>' + escapeHtml(r['Date']) + '</td>' +
+        '<td>' + escapeHtml(r['Heure']) + '</td>' +
+        '<td>' + escapeHtml(r['Convives']) + '</td>' +
+        '<td>' + escapeHtml(r['Téléphone']) + '</td>' +
+        '<td>' + escapeHtml(r['Email']) + '</td>' +
+        '<td>' + escapeHtml(r['Occasion']) + '</td>' +
+        '<td><span class="badge ' + badgeClass(statut) + '">' + escapeHtml(statut) + '</span></td>' +
+      '</tr>';
+    }).join('');
+
+    tableBody.innerHTML = rows;
+    tableNote.textContent = '';
+    statCount.textContent = reservations.length;
+    statGuests.textContent = totalGuests;
+  }
+
+  function loadReservations() {
+    fetch(SCRIPT_URL + '?action=getReservations')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.success) {
+          renderTable(data.reservations);
+        } else {
+          throw new Error(data.error || 'Erreur inconnue');
+        }
+      })
+      .catch(function (err) {
+        tableBody.innerHTML = '<tr class="loading-row"><td colspan="10">Impossible de charger les réservations (' + escapeHtml(err.message) + ')</td></tr>';
+      });
+  }
+
+  function showMsg(type, text) {
+    formMsg.className = 'msg show ' + type;
+    formMsg.textContent = text;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    formMsg.className = 'msg';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Envoi en cours…';
+
+    var payload = {
+      prenom: document.getElementById('prenom').value.trim(),
+      nom: document.getElementById('nom').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      telephone: document.getElementById('telephone').value.trim(),
+      date: document.getElementById('date').value,
+      heure: document.getElementById('heure').value,
+      convives: document.getElementById('convives').value,
+      occasion: document.getElementById('occasion').value.trim(),
+      commentaires: document.getElementById('commentaires').value.trim()
+    };
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.success) {
+          showMsg('ok', 'Réservation envoyée ! Nous vous confirmons rapidement.');
+          form.reset();
+          document.getElementById('date').min = new Date().toISOString().slice(0, 10);
+          loadReservations();
+        } else {
+          throw new Error(data.error || 'Erreur lors de l\'envoi.');
+        }
+      })
+      .catch(function (err) {
+        showMsg('err', 'Erreur lors de l\'envoi : ' + err.message);
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Confirmer la réservation';
+      });
+  });
+
+  loadReservations();
+</script>
+
+</body>
+</html>

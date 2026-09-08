@@ -727,7 +727,11 @@ html { scroll-behavior:smooth; }
         <div class="hfeat"><i class="ti ti-coffee"></i> Petit-déjeuner continental — 15€</div>
         <div class="hfeat"><i class="ti ti-car"></i> Parking privé gratuit</div>
       </div>
-      <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une chambre</button>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:4px;">
+        <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une chambre</button>
+        <!-- Lien de paiement Stripe : à remplacer par le vrai lien une fois le compte Stripe créé (voir instructions) -->
+        <a class="btn-outline" href="https://buy.stripe.com/REMPLACE_PAR_TON_LIEN" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; text-decoration:none;">Payer ma chambre en ligne</a>
+      </div>
     </div>
   </div>
 </section>
@@ -922,12 +926,29 @@ html { scroll-behavior:smooth; }
 
 <script>
 function gscroll(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+function gsendToSheet(payload){
+  fetch('https://script.google.com/macros/s/AKfycbwNJ-ZJkZebg-IJ-vKzTs966eLpEIyXPZTYWio1gYjCiguMARc7VrlTfMpxHcsT-KCGGA/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).catch(function(){});
+}
 function gsubmit(e){
   e.preventDefault();
   var req=['g-prenom','g-nom','g-date','g-heure','g-tel','g-email'];
   var ok=req.every(function(f){return document.getElementById(f).value.trim()!==''});
   if(!ok){ alert('Merci de remplir prénom, nom, date, heure, téléphone et email.'); return false; }
   var v=function(id){ return document.getElementById(id).value.trim(); };
+  gsendToSheet({
+    prenom: v('g-prenom'),
+    nom: v('g-nom'),
+    email: v('g-email'),
+    telephone: v('g-tel'),
+    date: v('g-date'),
+    heure: v('g-heure').replace('h', ':'),
+    convives: v('g-pers'),
+    occasion: v('g-msg') || ''
+  });
   var subject = 'Réservation — ' + v('g-prenom') + ' ' + v('g-nom') + ' — ' + v('g-date') + ' ' + v('g-heure');
   var body = [
     'Prénom : ' + v('g-prenom'),
