@@ -182,8 +182,14 @@
   var statCount = document.getElementById('statCount');
   var statGuests = document.getElementById('statGuests');
 
-  // empêche de choisir une date déjà passée
-  document.getElementById('date').min = new Date().toISOString().slice(0, 10);
+  var OPENING_DATE = '2026-10-02';
+  function minDate() {
+    var todayStr = new Date().toISOString().slice(0, 10);
+    return todayStr > OPENING_DATE ? todayStr : OPENING_DATE;
+  }
+
+  // empêche de choisir une date avant l'ouverture (2 octobre 2026) ou déjà passée
+  document.getElementById('date').min = minDate();
 
   function badgeClass(statut) {
     var s = (statut || '').toLowerCase();
@@ -264,6 +270,12 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     formMsg.className = 'msg';
+
+    if (document.getElementById('date').value < OPENING_DATE) {
+      showMsg('err', 'Garden Garden ouvre ses portes le 2 octobre 2026 — merci de choisir une date à partir de cette date.');
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Envoi en cours…';
 
@@ -289,7 +301,7 @@
         if (data.success) {
           showMsg('ok', 'Réservation envoyée ! Nous vous confirmons rapidement.');
           form.reset();
-          document.getElementById('date').min = new Date().toISOString().slice(0, 10);
+          document.getElementById('date').min = minDate();
           loadReservations();
         } else {
           throw new Error(data.error || 'Erreur lors de l\'envoi.');
