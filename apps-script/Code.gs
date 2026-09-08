@@ -63,10 +63,36 @@ function doPost(e) {
   }
 }
 
+// Supprime les lignes de test (Prénom commençant par "TEST", Nom contenant
+// "A-SUPPRIMER", ou l'ancienne ligne "Pierre Martin"). Ne touche à rien d'autre.
+function cleanupTestData_() {
+  var sheet = getSheet_();
+  var values = sheet.getDataRange().getValues();
+  var deleted = [];
+
+  for (var i = values.length - 1; i >= 1; i--) {
+    var prenom = String(values[i][1] || '');
+    var nom = String(values[i][2] || '');
+    var isTest = /^test/i.test(prenom) || /a-supprimer/i.test(nom) || (prenom === 'Pierre' && nom === 'Martin');
+    if (isTest) {
+      deleted.push(prenom + ' ' + nom);
+      sheet.deleteRow(i + 1); // +1 car deleteRow est 1-indexé
+    }
+  }
+
+  return { success: true, deleted: deleted };
+}
+
 // Retourne les réservations en JSON : ?action=getReservations
+// Nettoie les lignes de test : ?action=cleanupTestData
 function doGet(e) {
   try {
     var action = e && e.parameter ? e.parameter.action : null;
+
+    if (action === 'cleanupTestData') {
+      return jsonResponse_(cleanupTestData_());
+    }
+
     if (action !== 'getReservations') {
       return jsonResponse_({ success: false, error: 'Action inconnue' });
     }
