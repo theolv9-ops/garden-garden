@@ -73,7 +73,7 @@ function cleanupTestData_() {
   for (var i = values.length - 1; i >= 1; i--) {
     var prenom = String(values[i][1] || '');
     var nom = String(values[i][2] || '');
-    var isTest = /^test/i.test(prenom) || /a-supprimer/i.test(nom) || (prenom === 'Pierre' && nom === 'Martin');
+    var isTest = /test/i.test(prenom) || /test/i.test(nom) || /a-supprimer/i.test(nom) || (prenom === 'Pierre' && nom === 'Martin');
     if (isTest) {
       deleted.push(prenom + ' ' + nom);
       sheet.deleteRow(i + 1); // +1 car deleteRow est 1-indexé
