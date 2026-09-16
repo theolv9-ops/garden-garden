@@ -729,8 +729,8 @@ html { scroll-behavior:smooth; }
       </div>
       <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:4px;">
         <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une chambre</button>
-        <!-- Lien de paiement Stripe : à remplacer par le vrai lien une fois le compte Stripe créé (voir instructions) -->
-        <a class="btn-outline" href="https://buy.stripe.com/REMPLACE_PAR_TON_LIEN" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; text-decoration:none;">Payer ma chambre en ligne</a>
+        <!-- Paiement en ligne : ce bouton reste masqué tant que STRIPE_PAYMENT_LINK (bloc <script> en bas de page) est vide. -->
+        <a class="btn-outline" id="pay-room" href="#resa" target="_blank" rel="noopener" hidden style="align-items:center; text-decoration:none;">Payer ma chambre en ligne</a>
       </div>
     </div>
   </div>
@@ -926,6 +926,26 @@ html { scroll-behavior:smooth; }
 
 <script>
 var OPENING_DATE = '2026-10-02';
+
+// ---------------------------------------------------------------------------
+// Paiement en ligne des chambres (Stripe Payment Link)
+// Laisser vide tant que le lien n'existe pas : le bouton « Payer ma chambre en
+// ligne » reste alors masqué, plutôt que d'envoyer le client sur une page
+// d'erreur. Pour l'activer : Stripe → Paiements → Liens de paiement → créer le
+// lien, puis coller l'URL complète ci-dessous.
+// Exemple : var STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/4gw8wR0aB1cD2ef3gh';
+// ---------------------------------------------------------------------------
+var STRIPE_PAYMENT_LINK = '';
+(function(){
+  var btn = document.getElementById('pay-room');
+  if(!btn){ return; }
+  var link = (STRIPE_PAYMENT_LINK || '').trim();
+  // Lien absent ou encore à l'état de gabarit : on laisse le bouton masqué.
+  if(!/^https:\/\/\S+$/.test(link) || /REMPLACE/i.test(link)){ return; }
+  btn.href = link;
+  btn.hidden = false;
+  btn.style.display = 'inline-flex';
+})();
 (function(){
   var todayStr = new Date().toISOString().slice(0,10);
   var dateInput = document.getElementById('g-date');
