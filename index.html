@@ -332,6 +332,12 @@ section { padding:110px 20px; }
 .field label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--olive); font-weight:600; }
 .field input, .field select, .field textarea { border:1.5px solid var(--line); background:#fff; color:var(--ink); padding:12px 14px; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; outline:none; transition:border-color .2s, box-shadow .2s; resize:vertical; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--terra); box-shadow:0 0 0 3px rgba(185,95,58,.14); }
+/* Choix de la table : cases à cocher (le client peut en cocher plusieurs) */
+.table-choice { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
+.table-choice .opt { display:flex; align-items:center; gap:10px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:12px 14px; cursor:pointer; transition:border-color .2s, box-shadow .2s, background .2s; font-size:14px; font-weight:500; letter-spacing:normal; text-transform:none; color:var(--ink); }
+.table-choice .opt:hover { border-color:var(--terra); }
+.table-choice .opt input { width:18px; height:18px; flex:none; padding:0; margin:0; accent-color:var(--terra); cursor:pointer; }
+.table-choice .opt:has(input:checked) { border-color:var(--terra); background:rgba(185,95,58,.07); box-shadow:0 0 0 3px rgba(185,95,58,.12); }
 .submit-full { width:100%; margin-top:6px; }
 .resa-note { margin-top:18px; font-size:13px; color:rgba(246,241,229,.55); }
 .resa-note a { color:var(--gold); text-decoration:none; }
@@ -746,7 +752,7 @@ html { scroll-behavior:smooth; }
       <div class="eyebrow">+ La terrasse</div>
       <h3>Dîner dehors, jusqu'à la nuit tombée</h3>
       <p>Sous la grande charpente de bois, face aux arbres : bougies sur chaque table, braseros à la fraîche, et le service qui continue sous les étoiles.</p>
-      <button class="btn-outline" onclick="gscroll('resa')">Réserver en terrasse</button>
+      <button class="btn-outline" onclick="chooseTable('Table en terrasse')">Réserver en terrasse</button>
     </div>
     <div class="duo-cap reveal">
       <div class="eyebrow">+ Le bar extérieur</div>
@@ -816,43 +822,34 @@ html { scroll-behavior:smooth; }
   <div class="tables-head reveal">
     <div class="eyebrow">Plan de salle</div>
     <h2 class="stitle">Choisissez <em>votre table</em></h2>
-    <p style="color:var(--muted); margin-top:14px; font-size:15px;">Quatre ambiances, une même exigence. Cliquez pour préremplir votre demande.</p>
+    <p style="color:var(--muted); margin-top:14px; font-size:15px;">Trois ambiances, une même exigence. Cliquez pour cocher la table souhaitée dans votre demande.</p>
   </div>
   <div class="tables-grid">
     <div class="table-card tilt img-shine reveal">
-      <span class="tc-tag">Vue sur le passe</span>
-      <img src="images/salle.jpg" alt="Table du Chef" onerror="this.style.display='none'" loading="lazy" decoding="async">
+      <span class="tc-tag">Intime</span>
+      <img src="images/lounge.jpg" alt="Table lounge" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="tc-overlay">
-        <h4>Table du Chef</h4>
-        <p>Au cœur de la grande salle, face au foyer, pour suivre chaque dressage.</p>
-        <button class="btn-outline" onclick="chooseTable('Table du Chef, près du foyer')">Réserver cette table</button>
+        <h4>Table lounge</h4>
+        <p>Velours kaki et lumière tamisée, pour un verre qui s'éternise.</p>
+        <button class="btn-outline" onclick="chooseTable('Table lounge')">Choisir cette table</button>
       </div>
     </div>
     <div class="table-card tilt img-shine reveal">
       <span class="tc-tag">Vue sur le jardin</span>
-      <img src="images/terrasse.jpg" alt="Table Jardin" onerror="this.style.display='none'" loading="lazy" decoding="async">
+      <img src="images/terrasse.jpg" alt="Table en terrasse" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="tc-overlay">
-        <h4>Table Jardin</h4>
-        <p>Sous la charpente de la terrasse, entre bougies et frondaisons.</p>
-        <button class="btn-outline" onclick="chooseTable('Table Jardin, en terrasse')">Réserver cette table</button>
+        <h4>Table en terrasse</h4>
+        <p>Sous la charpente, entre bougies et frondaisons.</p>
+        <button class="btn-outline" onclick="chooseTable('Table en terrasse')">Choisir cette table</button>
       </div>
     </div>
     <div class="table-card tilt img-shine reveal">
-      <span class="tc-tag">Intime</span>
-      <img src="images/lounge.jpg" alt="Salon privé" onerror="this.style.display='none'" loading="lazy" decoding="async">
+      <span class="tc-tag">Vue sur le passe</span>
+      <img src="images/salle.jpg" alt="Table en salle principale" onerror="this.style.display='none'" loading="lazy" decoding="async">
       <div class="tc-overlay">
-        <h4>Le Salon Privé</h4>
-        <p>Un renfoncement du lounge, velours kaki et lumière tamisée.</p>
-        <button class="btn-outline" onclick="chooseTable('Le Salon Privé, côté lounge')">Réserver cette table</button>
-      </div>
-    </div>
-    <div class="table-card tilt img-shine reveal">
-      <span class="tc-tag">Grand air</span>
-      <img src="images/jardin.jpg" alt="Table au jardin" onerror="this.style.display='none'" loading="lazy" decoding="async">
-      <div class="tc-overlay">
-        <h4>Table au Feu de Bois</h4>
-        <p>Près du brasero du jardin, pour prolonger le dîner à la fraîche.</p>
-        <button class="btn-outline" onclick="chooseTable('Table au Feu de Bois, au jardin')">Réserver cette table</button>
+        <h4>Table salle principale</h4>
+        <p>Au cœur de la grande salle, face au foyer, pour suivre chaque dressage.</p>
+        <button class="btn-outline" onclick="chooseTable('Table salle principale')">Choisir cette table</button>
       </div>
     </div>
   </div>
@@ -878,6 +875,14 @@ html { scroll-behavior:smooth; }
         </div>
         <div class="field"><label>Téléphone</label><input id="g-tel" name="telephone" type="tel" placeholder="06 00 00 00 00"></div>
         <div class="field"><label>Email</label><input id="g-email" name="email" type="email" placeholder="camille@email.com"></div>
+        <div class="field full" id="g-table-field">
+          <label>Quelle table souhaitez-vous ?</label>
+          <div class="table-choice">
+            <label class="opt"><input type="checkbox" name="table" value="Table lounge"> Table lounge</label>
+            <label class="opt"><input type="checkbox" name="table" value="Table en terrasse"> Table en terrasse</label>
+            <label class="opt"><input type="checkbox" name="table" value="Table salle principale"> Table salle principale</label>
+          </div>
+        </div>
         <div class="field full"><label>Une occasion particulière ?</label><textarea id="g-msg" name="message" rows="2" placeholder="Anniversaire, demande spéciale, allergies…"></textarea></div>
       </div>
       <button class="btn btn-primary submit-full" type="submit">Confirmer la réservation</button>
@@ -946,6 +951,11 @@ function gsubmit(e){
   if(!ok){ alert('Merci de remplir prénom, nom, date, heure, téléphone et email.'); return false; }
   var v=function(id){ return document.getElementById(id).value.trim(); };
   if(v('g-date') < OPENING_DATE){ alert('Garden Garden ouvre ses portes le 2 octobre 2026 — merci de choisir une date à partir de cette date.'); return false; }
+  var tables = gCheckedTables();
+  if(tables.length === 0){ alert('Merci de cocher la table que vous souhaitez (lounge, terrasse ou salle principale).'); gscroll('resa'); return false; }
+  var tableLabel = tables.join(' ou ');
+  // La feuille Google n'a pas de colonne dédiée : on place la table en tête de l'occasion.
+  var occasionSheet = 'Table : ' + tableLabel + (v('g-msg') ? ' — ' + v('g-msg') : '');
   gsendToSheet({
     prenom: v('g-prenom'),
     nom: v('g-nom'),
@@ -954,7 +964,7 @@ function gsubmit(e){
     date: v('g-date'),
     heure: v('g-heure').replace('h', ':'),
     convives: v('g-pers'),
-    occasion: v('g-msg') || ''
+    occasion: occasionSheet
   });
   var subject = 'Réservation — ' + v('g-prenom') + ' ' + v('g-nom') + ' — ' + v('g-date') + ' ' + v('g-heure');
   var body = [
@@ -963,6 +973,7 @@ function gsubmit(e){
     'Date : ' + v('g-date'),
     'Heure : ' + v('g-heure'),
     'Convives : ' + v('g-pers'),
+    'Table souhaitée : ' + tableLabel,
     'Téléphone : ' + v('g-tel'),
     'Email : ' + v('g-email'),
     'Occasion particulière : ' + (v('g-msg') || '—')
@@ -980,6 +991,7 @@ function gsubmit(e){
   fd.append('Date', v('g-date'));
   fd.append('Heure', v('g-heure'));
   fd.append('Convives', v('g-pers'));
+  fd.append('Table souhaitée', tableLabel);
   fd.append('Téléphone', v('g-tel'));
   fd.append('Email', v('g-email'));
   fd.append('Occasion particulière', v('g-msg') || '—');
@@ -1011,16 +1023,23 @@ function gsubmit(e){
   });
   return false;
 }
+function gCheckedTables(){
+  var boxes = document.querySelectorAll('#reservationForm input[name="table"]:checked');
+  return Array.prototype.map.call(boxes, function(b){ return b.value; });
+}
+// Clic sur une carte du plan de salle : coche la case correspondante dans le formulaire
 function chooseTable(label){
-  var msg = document.getElementById('g-msg');
-  if(msg && msg.value.indexOf(label) === -1){
-    msg.value = 'Table souhaitée : ' + label + (msg.value ? ' — ' + msg.value : '');
-  }
+  var boxes = document.querySelectorAll('#reservationForm input[name="table"]');
+  Array.prototype.forEach.call(boxes, function(b){
+    if(b.value === label){ b.checked = true; }
+  });
   gscroll('resa');
-  if(msg){
-    msg.style.transition = 'box-shadow .3s ease';
-    msg.style.boxShadow = '0 0 0 3px rgba(185,95,58,.35)';
-    setTimeout(function(){ msg.style.boxShadow = ''; }, 1200);
+  var field = document.getElementById('g-table-field');
+  if(field){
+    field.style.transition = 'box-shadow .3s ease';
+    field.style.borderRadius = '12px';
+    field.style.boxShadow = '0 0 0 3px rgba(185,95,58,.35)';
+    setTimeout(function(){ field.style.boxShadow = ''; }, 1200);
   }
 }
 

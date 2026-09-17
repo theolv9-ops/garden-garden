@@ -45,6 +45,13 @@
   input:focus,select:focus,textarea:focus{outline:2px solid var(--green);outline-offset:1px;background:#fff;}
   textarea{resize:vertical;min-height:70px;}
 
+  /* Choix de la table : cases à cocher (plusieurs choix possibles) */
+  .table-choice{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+  .table-choice .opt{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--cream);border-radius:8px;padding:11px 13px;font-size:14px;font-weight:400;cursor:pointer;transition:border-color .2s,background .2s;}
+  .table-choice .opt:hover{border-color:var(--green);}
+  .table-choice .opt input{width:17px;height:17px;flex:none;padding:0;margin:0;accent-color:var(--green);cursor:pointer;}
+  .table-choice .opt:has(input:checked){border-color:var(--green);background:var(--green-light);}
+
   .btn{grid-column:1/-1;background:var(--green);color:#fff;border:none;border-radius:40px;padding:15px 30px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s,transform .15s;}
   .btn:hover{background:var(--green-dark);}
   .btn:disabled{opacity:.6;cursor:not-allowed;}
@@ -133,6 +140,14 @@
         <input type="text" id="occasion" placeholder="Anniversaire, repas d'affaires...">
       </div>
       <div class="field full">
+        <label>Table souhaitée *</label>
+        <div class="table-choice">
+          <label class="opt"><input type="checkbox" name="table" value="Table lounge"> Table lounge</label>
+          <label class="opt"><input type="checkbox" name="table" value="Table en terrasse"> Table en terrasse</label>
+          <label class="opt"><input type="checkbox" name="table" value="Table salle principale"> Table salle principale</label>
+        </div>
+      </div>
+      <div class="field full">
         <label for="commentaires">Commentaires</label>
         <textarea id="commentaires" placeholder="Allergies, préférence de table..."></textarea>
       </div>
@@ -155,6 +170,7 @@
             <th>Date</th>
             <th>Heure</th>
             <th>Convives</th>
+            <th>Table</th>
             <th>Téléphone</th>
             <th>Email</th>
             <th>Occasion</th>
@@ -162,7 +178,7 @@
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr class="loading-row"><td colspan="10">Chargement des réservations…</td></tr>
+          <tr class="loading-row"><td colspan="11">Chargement des réservations…</td></tr>
         </tbody>
       </table>
     </div>
@@ -204,11 +220,25 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  function checkedTables() {
+    var boxes = document.querySelectorAll('#reservationForm input[name="table"]:checked');
+    return Array.prototype.map.call(boxes, function (b) { return b.value; });
+  }
+
+  // L'occasion stockée dans la feuille ressemble à "Table : X — Anniversaire" :
+  // on en ressort la table d'un côté et le reste de l'occasion de l'autre.
+  function splitOccasion(occasion) {
+    var txt = String(occasion == null ? '' : occasion);
+    var m = txt.match(/^Table\s*:\s*([^—]+?)(?:\s*—\s*([\s\S]*))?$/);
+    if (!m) return { table: '—', reste: txt || '—' };
+    return { table: m[1].trim(), reste: (m[2] || '').trim() || '—' };
+  }
+
   function renderExample() {
     tableBody.innerHTML =
       '<tr class="example">' +
-        '<td>—</td><td>Sophie</td><td>Dubois</td><td>2026-09-12</td><td>20:00</td>' +
-        '<td>4</td><td>—</td><td>—</td><td>Anniversaire</td>' +
+        '<td>—</td><td>Sophie</td><td>Dubois</td><td>2026-10-02</td><td>20:00</td>' +
+        '<td>4</td><td>Table en terrasse</td><td>—</td><td>—</td><td>Anniversaire</td>' +
         '<td><span class="badge autre">Exemple</span></td>' +
       '</tr>';
     tableNote.textContent = 'Aucune réservation pour l\'instant — ligne d\'exemple affichée ci-dessus.';
@@ -227,6 +257,7 @@
       var convives = parseInt(r['Convives'], 10) || 0;
       totalGuests += convives;
       var statut = r['Statut'] || 'Nouvelle';
+      var occ = splitOccasion(r['Occasion']);
       return '<tr>' +
         '<td>' + escapeHtml(r['Reçu le']) + '</td>' +
         '<td>' + escapeHtml(r['Prénom']) + '</td>' +
@@ -234,9 +265,10 @@
         '<td>' + escapeHtml(r['Date']) + '</td>' +
         '<td>' + escapeHtml(r['Heure']) + '</td>' +
         '<td>' + escapeHtml(r['Convives']) + '</td>' +
+        '<td>' + escapeHtml(occ.table) + '</td>' +
         '<td>' + escapeHtml(r['Téléphone']) + '</td>' +
         '<td>' + escapeHtml(r['Email']) + '</td>' +
-        '<td>' + escapeHtml(r['Occasion']) + '</td>' +
+        '<td>' + escapeHtml(occ.reste) + '</td>' +
         '<td><span class="badge ' + badgeClass(statut) + '">' + escapeHtml(statut) + '</span></td>' +
       '</tr>';
     }).join('');
@@ -258,7 +290,7 @@
         }
       })
       .catch(function (err) {
-        tableBody.innerHTML = '<tr class="loading-row"><td colspan="10">Impossible de charger les réservations (' + escapeHtml(err.message) + ')</td></tr>';
+        tableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Impossible de charger les réservations (' + escapeHtml(err.message) + ')</td></tr>';
       });
   }
 
@@ -276,8 +308,19 @@
       return;
     }
 
+    var tables = checkedTables();
+    if (tables.length === 0) {
+      showMsg('err', 'Merci de cocher au moins une table (lounge, terrasse ou salle principale).');
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Envoi en cours…';
+
+    // La feuille Google n'a pas de colonne dédiée : la table est placée en tête de l'occasion.
+    var occasionValue = 'Table : ' + tables.join(' ou ');
+    var occasionSaisie = document.getElementById('occasion').value.trim();
+    if (occasionSaisie) { occasionValue += ' — ' + occasionSaisie; }
 
     var payload = {
       prenom: document.getElementById('prenom').value.trim(),
@@ -287,7 +330,7 @@
       date: document.getElementById('date').value,
       heure: document.getElementById('heure').value,
       convives: document.getElementById('convives').value,
-      occasion: document.getElementById('occasion').value.trim(),
+      occasion: occasionValue,
       commentaires: document.getElementById('commentaires').value.trim()
     };
 
