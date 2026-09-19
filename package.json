@@ -1,9 +1,0 @@
-{
-  "name": "garden-garden-site",
-  "private": true,
-  "version": "1.0.0",
-  "description": "Site vitrine Garden Garden + fonctions Netlify pour le paiement en ligne des chambres (Stripe).",
-  "dependencies": {
-    "stripe": "^17.4.0"
-  }
-}

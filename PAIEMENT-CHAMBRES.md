@@ -1,9 +1,10 @@
 # Paiement en ligne des chambres — mise en service
 
 Le code est prêt. Il reste des étapes que seul Théo peut faire (créer le compte Stripe,
-choisir l'hébergement, entrer les clés secrètes). Une fois ces étapes faites, le parcours
-est 100 % automatique : le client choisit ses dates, paie, reçoit sa confirmation par email,
-et une ligne apparaît dans l'onglet "Chambres" du Google Sheet — sans aucune action de Théo.
+créer le projet Cloudflare Pages, entrer les clés secrètes). Une fois ces étapes faites, le
+parcours est 100 % automatique : le client choisit ses dates, paie, reçoit sa confirmation
+par email, et une ligne apparaît dans l'onglet "Chambres" du Google Sheet — sans aucune
+action de Théo.
 
 ## 1. Créer le compte Stripe (~15 min)
 
@@ -12,33 +13,43 @@ et une ligne apparaît dans l'onglet "Chambres" du Google Sheet — sans aucune 
    qui doit recevoir les paiements.
 3. Une fois le compte activé, récupérer la **clé secrète** : Développeurs > Clés API >
    "Clé secrète" (commence par `sk_live_...`). Ne jamais la partager ni la mettre dans le
-   code — elle va uniquement dans Netlify (étape 3).
+   code — elle va uniquement dans Cloudflare Pages (étape 3).
 
-## 2. Héberger le site sur Netlify
+## 2. Héberger le site sur Cloudflare Pages
 
-Le site est aujourd'hui hébergé en pages statiques (probablement GitHub Pages), qui ne
-peut pas exécuter de code côté serveur. Or il faut un endroit qui garde la clé secrète
-Stripe cachée et qui parle à Stripe : c'est le rôle des "fonctions Netlify" déjà ajoutées
-dans `netlify/functions/`.
+Le site est aujourd'hui hébergé en pages statiques (probablement GitHub Pages, qui ne
+peut pas exécuter de code côté serveur). Or il faut un endroit qui garde la clé secrète
+Stripe cachée et qui parle à Stripe : c'est le rôle des fonctions déjà ajoutées dans
+`functions/api/`. Cloudflare Pages est gratuit sans carte bancaire, avec une limite large
+(100 000 appels de fonction par jour) largement suffisante pour un site de réservation.
 
-1. Créer un compte sur https://netlify.com (gratuit) et connecter le dépôt GitHub
+1. Créer un compte sur https://dash.cloudflare.com/sign-up (gratuit) et, dans la section
+   **Workers & Pages**, créer un nouveau projet Pages connecté au dépôt GitHub
    `garden-garden`.
-2. Netlify détecte automatiquement `netlify.toml` : rien à configurer côté build.
-3. Une fois le site déployé sur Netlify, refaire pointer le nom de domaine
-   `gardengarden-chavanoz.com` vers Netlify (Netlify explique la marche à suivre avec le
-   registrar du domaine). Le fichier `CNAME` du dépôt sert aujourd'hui à GitHub Pages ;
-   avec Netlify, le domaine personnalisé se configure depuis l'interface Netlify.
+2. Paramètres de build : aucun (site statique) — laisser la commande de build vide et le
+   répertoire de sortie sur `/` (racine du dépôt). Cloudflare détecte automatiquement le
+   dossier `functions/`.
+3. Une fois le site déployé (tu obtiens une adresse `<nom-du-projet>.pages.dev`), rattacher
+   le nom de domaine `gardengarden-chavanoz.com` : dans le projet Pages, Custom domains >
+   Add a domain. Cloudflare explique la marche à suivre selon que le domaine est déjà chez
+   Cloudflare ou chez un autre registrar (dans ce dernier cas, il faudra modifier un
+   enregistrement CNAME chez ton registrar actuel). Le fichier `CNAME` du dépôt servait à
+   GitHub Pages ; avec Cloudflare Pages, le domaine personnalisé se configure depuis
+   l'interface Cloudflare, ce fichier peut rester tel quel sans effet.
 
-## 3. Renseigner les clés secrètes dans Netlify
+## 3. Renseigner les clés secrètes dans Cloudflare Pages
 
-Dans Netlify : Site settings > Environment variables, ajouter les 4 valeurs décrites dans
-`.env.example` :
+Dans le projet Cloudflare Pages : Settings > Environment variables, ajouter les 4 valeurs
+décrites dans `.env.example` :
 
 - `STRIPE_SECRET_KEY` — la clé secrète récupérée à l'étape 1
 - `GAS_WEBHOOK_URL` — déjà indiquée dans `.env.example` (c'est l'URL Google Sheet existante)
 - `GAS_SHARED_SECRET` — à inventer (une longue chaîne aléatoire au hasard) — noter cette
   valeur, elle sert aussi à l'étape 5
 - `STRIPE_WEBHOOK_SECRET` — récupérée à l'étape 4 ci-dessous
+
+Après un premier ajout de variables, il faut redéclencher un déploiement (bouton "Retry
+deployment") pour qu'elles soient prises en compte.
 
 ## 4. Créer le webhook Stripe
 
@@ -47,8 +58,8 @@ client a payé, pour enregistrer la réservation et envoyer la confirmation sans
 ait à intervenir.
 
 1. Dans Stripe : Développeurs > Webhooks > Ajouter un endpoint
-2. URL du endpoint : `https://<ton-site>.netlify.app/.netlify/functions/stripe-webhook`
-   (remplacer par le vrai domaine une fois le site sur Netlify)
+2. URL du endpoint : `https://<ton-site>.pages.dev/api/stripe-webhook` (remplacer par le
+   vrai domaine une fois le site sur Cloudflare Pages)
 3. Événement à écouter : `checkout.session.completed`
 4. Stripe donne alors une "signature secrète du endpoint" (`whsec_...`) : c'est la valeur
    à mettre dans `STRIPE_WEBHOOK_SECRET` (étape 3).

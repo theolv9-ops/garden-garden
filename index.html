@@ -1147,7 +1147,7 @@ function crSubmit(e){
   btn.disabled = true;
   btn.textContent = 'Redirection…';
 
-  fetch('/.netlify/functions/create-checkout-session', {
+  fetch('/api/create-checkout-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
