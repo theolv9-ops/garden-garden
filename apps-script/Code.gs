@@ -23,10 +23,70 @@ function jsonResponse_(data) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/**
+ * Clé d'accès aux données de réservation.
+ *
+ * Elle n'est PAS écrite dans ce fichier : elle se règle une fois pour toutes dans
+ * l'éditeur Apps Script, via Paramètres du projet > Propriétés du script, en créant
+ * une propriété nommée ADMIN_KEY avec une valeur longue et aléatoire.
+ *
+ * Tant que cette propriété n'existe pas, la lecture des réservations est refusée :
+ * c'est volontaire, pour qu'un oubli de configuration n'ouvre pas la liste des clients.
+ */
+function adminKeyOk_(fournie) {
+  var attendue = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
+  if (!attendue) return false;
+  if (!fournie || String(fournie).length !== attendue.length) return false;
+  // Comparaison à durée constante, pour ne pas laisser deviner la clé caractère par caractère.
+  var ecart = 0;
+  for (var i = 0; i < attendue.length; i++) {
+    ecart |= attendue.charCodeAt(i) ^ String(fournie).charCodeAt(i);
+  }
+  return ecart === 0;
+}
+
+// Liste des réservations, au format attendu par la page d'administration.
+function listeReservations_() {
+  var sheet = getSheet_();
+  var values = sheet.getDataRange().getValues();
+  var tz = Session.getScriptTimeZone();
+
+  // On utilise HEADERS (et non la ligne 1 réelle de la feuille) pour nommer les clés :
+  // si quelqu'un modifie/tape mal un intitulé de colonne dans la Sheet, le JSON reste correct.
+  return values.slice(1)
+    .filter(function (row) { return row.join('') !== ''; })
+    .map(function (row) {
+      var obj = {};
+      HEADERS.forEach(function (h, i) {
+        var val = row[i];
+        if (val instanceof Date) {
+          val = Utilities.formatDate(val, tz, 'dd/MM/yyyy HH:mm');
+        }
+        obj[h] = val;
+      });
+      return obj;
+    })
+    .reverse(); // les plus récentes en premier
+}
+
 // Reçoit une réservation (POST en JSON) et l'ajoute à la feuille
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+
+    // Actions réservées à l'établissement : elles exposent ou effacent des données
+    // personnelles de clients, elles exigent donc la clé d'accès.
+    if (data.action === 'getReservations' || data.action === 'cleanupTestData') {
+      if (!adminKeyOk_(data.key)) {
+        return jsonResponse_({ success: false, error: 'Clé d\'accès invalide ou non configurée.' });
+      }
+      if (data.action === 'cleanupTestData') {
+        return jsonResponse_(cleanupTestData_());
+      }
+      return jsonResponse_({ success: true, reservations: listeReservations_() });
+    }
+
+    // Sans action : c'est le formulaire public, qui crée une réservation.
     var sheet = getSheet_();
 
     // Le formulaire a un champ "Commentaires" mais la feuille n'a que 10 colonnes fixes :
@@ -83,43 +143,17 @@ function cleanupTestData_() {
   return { success: true, deleted: deleted };
 }
 
-// Retourne les réservations en JSON : ?action=getReservations
-// Nettoie les lignes de test : ?action=cleanupTestData
-function doGet(e) {
-  try {
-    var action = e && e.parameter ? e.parameter.action : null;
-
-    if (action === 'cleanupTestData') {
-      return jsonResponse_(cleanupTestData_());
-    }
-
-    if (action !== 'getReservations') {
-      return jsonResponse_({ success: false, error: 'Action inconnue' });
-    }
-
-    var sheet = getSheet_();
-    var values = sheet.getDataRange().getValues();
-    var tz = Session.getScriptTimeZone();
-
-    // On utilise HEADERS (et non la ligne 1 réelle de la feuille) pour nommer les clés :
-    // si quelqu'un modifie/tape mal un intitulé de colonne dans la Sheet, le JSON reste correct.
-    var reservations = values.slice(1)
-      .filter(function (row) { return row.join('') !== ''; })
-      .map(function (row) {
-        var obj = {};
-        HEADERS.forEach(function (h, i) {
-          var val = row[i];
-          if (val instanceof Date) {
-            val = Utilities.formatDate(val, tz, 'dd/MM/yyyy HH:mm');
-          }
-          obj[h] = val;
-        });
-        return obj;
-      })
-      .reverse(); // les plus récentes en premier
-
-    return jsonResponse_({ success: true, reservations: reservations });
-  } catch (err) {
-    return jsonResponse_({ success: false, error: err.message });
-  }
+/**
+ * Point d'entrée GET.
+ *
+ * Il ne renvoie plus aucune donnée de réservation : jusqu'au 19 septembre 2026, un simple
+ * appel à ?action=getReservations suffisait, sans authentification, pour récupérer les
+ * noms, téléphones et emails de tous les clients. La lecture passe désormais par doPost,
+ * avec la clé d'accès (voir adminKeyOk_).
+ */
+function doGet() {
+  return jsonResponse_({
+    success: false,
+    error: 'Action inconnue. La lecture des réservations se fait en POST, avec la clé d\'accès.'
+  });
 }

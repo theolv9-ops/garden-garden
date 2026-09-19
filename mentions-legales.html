@@ -29,7 +29,13 @@ h2 { font-family:'Fraunces',serif; font-weight:500; font-size:22px; margin:36px 
 p, li { font-size:15.5px; color:#3a3c30; }
 ul { padding-left:20px; margin:10px 0; }
 li { margin:4px 0; }
+table { width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:600; }
 .todo { background:rgba(185,95,58,.08); border:1px dashed var(--terra); border-radius:8px; padding:14px 18px; margin:16px 0; font-size:14px; color:var(--terra); }
+.fill { background:rgba(200,162,102,.3); border-bottom:1px dashed var(--gold); padding:0 4px; border-radius:3px; font-weight:600; color:#7a5c22; }
+.important { background:rgba(185,95,58,.07); border-left:3px solid var(--terra); border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; }
+.important p { color:#3a3c30; }
 a { color:var(--terra); }
 hr { border:none; border-top:1px solid var(--line); margin:40px 0; }
 footer { color:var(--muted); font-size:13px; }
@@ -39,21 +45,41 @@ footer { color:var(--muted); font-size:13px; }
 <div class="wrap">
   <a class="back" href="index.html">← Retour au site</a>
   <h1>Mentions <em>légales</em></h1>
-  <p class="updated">Dernière mise à jour : juillet 2026</p>
+  <p class="updated">Dernière mise à jour : 19 septembre 2026</p>
+
+  <div class="todo"><strong>À compléter avant la mise en ligne.</strong> Les zones surlignées attendent les informations d'entreprise de Garden Garden (extrait Kbis, licence de débit de boissons, attestation d'assurance, adhésion au médiateur). Ce bandeau est à supprimer une fois tout rempli.</div>
 
   <h2>Éditeur du site</h2>
   <p>
-    Garden Garden<br>
-    SASU au capital de 1 000 €<br>
-    RCS Vienne : 107 060 824<br>
-    SIRET : 00014<br>
-    Siège social : 14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz<br>
-    Téléphone : <a href="tel:0486802750">04 86 80 27 50</a><br>
+    <span class="fill">[Dénomination sociale exacte, telle qu'elle figure sur le Kbis]</span><br>
+    <span class="fill">[Forme juridique]</span> au capital de <span class="fill">[montant]</span> €<br>
+    Siège social : 14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz, France<br>
+    Immatriculée au RCS de <span class="fill">[ville]</span> sous le numéro <span class="fill">[SIREN — 9 chiffres]</span><br>
+    SIRET : <span class="fill">[14 chiffres]</span><br>
+    Numéro de TVA intracommunautaire : <span class="fill">[FR + 11 caractères]</span><br>
+    Téléphone : 04 86 80 27 50<br>
     Email : <a href="mailto:contact.gardengarden38@gmail.com">contact.gardengarden38@gmail.com</a><br>
-    Directeur de la publication : Patrick Zekri
+    Directeur de la publication : <span class="fill">[prénom et nom du représentant légal]</span>
   </p>
 
-  <h2>Hébergement</h2>
+  <h2>Activité réglementée</h2>
+  <p>
+    <strong>Débit de boissons.</strong> L'établissement exploite une licence de
+    <span class="fill">[catégorie — par exemple « licence restaurant » ou « licence IV »]</span>,
+    déclarée en mairie de Chavanoz sous le numéro <span class="fill">[numéro de récépissé]</span>.
+  </p>
+  <p>
+    <strong>Hébergement.</strong> <span class="fill">[Si le classement Atout France est obtenu : « Établissement classé [X] étoiles par arrêté du [date], sous le numéro de classement [numéro], pour une durée de cinq ans. » — s'il n'est pas obtenu, supprimer ce paragraphe et retirer les étoiles du reste du site.]</span>
+  </p>
+
+  <h2>Assurance professionnelle</h2>
+  <p>
+    Responsabilité civile professionnelle souscrite auprès de <span class="fill">[nom de l'assureur]</span>,
+    <span class="fill">[adresse de l'assureur]</span>.<br>
+    Couverture géographique : <span class="fill">[France métropolitaine / Union européenne]</span>.
+  </p>
+
+  <h2>Hébergement du site</h2>
   <p>
     Ce site est hébergé par :<br>
     Netlify, Inc.<br>
@@ -61,17 +87,35 @@ footer { color:var(--muted); font-size:13px; }
     <a href="https://www.netlify.com" target="_blank" rel="noopener">netlify.com</a>
   </p>
 
+  <h2>Médiation de la consommation</h2>
+  <p>
+    Conformément à l'article L612-1 du code de la consommation, tout consommateur a le droit de
+    recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable d'un
+    litige qui l'oppose à un professionnel. Notre médiateur est :
+  </p>
+  <p>
+    <span class="fill">[nom du médiateur]</span><br>
+    <span class="fill">[adresse postale]</span><br>
+    <span class="fill">[site internet]</span>
+  </p>
+  <p>
+    Le recours à la médiation n'est possible qu'après avoir adressé une réclamation écrite
+    directement à l'établissement et à défaut de réponse satisfaisante dans un délai de deux mois.
+  </p>
+
   <h2>Propriété intellectuelle</h2>
   <p>L'ensemble des textes, photographies et éléments graphiques présents sur ce site est la propriété de Garden Garden, sauf mention contraire. Toute reproduction, représentation ou utilisation, totale ou partielle, sans autorisation préalable est interdite.</p>
 
   <h2>Responsabilité</h2>
-  <p>Garden Garden s'efforce d'assurer l'exactitude des informations diffusées sur ce site (horaires, tarifs, disponibilités) mais ne peut garantir qu'elles soient exemptes d'erreurs. Il est recommandé de confirmer par téléphone les informations sensibles avant tout déplacement.</p>
+  <p>Garden Garden s'efforce d'assurer l'exactitude des informations diffusées sur ce site (horaires, tarifs, disponibilités) mais ne peut garantir qu'elles soient exemptes d'erreurs. Les photographies sont non contractuelles. Il est recommandé de confirmer par téléphone les informations sensibles avant tout déplacement.</p>
 
   <h2>Données personnelles</h2>
-  <p>Le traitement des données collectées via le formulaire de réservation est détaillé dans notre <a href="confidentialite.html">politique de confidentialité</a>.</p>
+  <p>Le traitement des données collectées sur ce site est détaillé dans notre <a href="confidentialite.html">politique de confidentialité</a>.</p>
 
+  <h2>Conditions de vente</h2>
+  <p>Les réservations de chambre payées en ligne sont régies par nos <a href="cgv.html">conditions générales de vente</a>.</p>
   <hr>
-  <footer>© 2026 Garden Garden · <a href="index.html">Retour à l'accueil</a></footer>
+  <footer>© 2026 Garden Garden · <a href="index.html">Retour à l'accueil</a> · <a href="mentions-legales.html">Mentions légales</a> · <a href="cgv.html">CGV</a> · <a href="confidentialite.html">Confidentialité</a></footer>
 </div>
 </body>
 </html>

@@ -32,6 +32,10 @@ li { margin:4px 0; }
 table { width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px; }
 th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
 th { color:var(--muted); font-weight:600; }
+.todo { background:rgba(185,95,58,.08); border:1px dashed var(--terra); border-radius:8px; padding:14px 18px; margin:16px 0; font-size:14px; color:var(--terra); }
+.fill { background:rgba(200,162,102,.3); border-bottom:1px dashed var(--gold); padding:0 4px; border-radius:3px; font-weight:600; color:#7a5c22; }
+.important { background:rgba(185,95,58,.07); border-left:3px solid var(--terra); border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; }
+.important p { color:#3a3c30; }
 a { color:var(--terra); }
 hr { border:none; border-top:1px solid var(--line); margin:40px 0; }
 footer { color:var(--muted); font-size:13px; }
@@ -41,42 +45,69 @@ footer { color:var(--muted); font-size:13px; }
 <div class="wrap">
   <a class="back" href="index.html">← Retour au site</a>
   <h1>Politique de <em>confidentialité</em></h1>
-  <p class="updated">Dernière mise à jour : juillet 2026</p>
+  <p class="updated">Dernière mise à jour : 19 septembre 2026</p>
+
+  <div class="todo"><strong>À compléter avant la mise en ligne.</strong> Les zones surlignées attendent les informations d'entreprise de Garden Garden (extrait Kbis, licence de débit de boissons, attestation d'assurance, adhésion au médiateur). Ce bandeau est à supprimer une fois tout rempli.</div>
 
   <h2>Qui traite vos données ?</h2>
-  <p>Garden Garden, situé 14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz, est responsable du traitement des données collectées sur ce site.</p>
+  <p>
+    <span class="fill">[Dénomination sociale]</span>, <span class="fill">[forme juridique]</span>, dont le siège est
+    14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz, immatriculée sous le numéro SIREN
+    <span class="fill">[9 chiffres]</span>, est responsable du traitement des données collectées sur ce site.<br>
+    Contact : <a href="mailto:contact.gardengarden38@gmail.com">contact.gardengarden38@gmail.com</a> — 04 86 80 27 50.
+  </p>
 
   <h2>Quelles données collectons-nous ?</h2>
-  <p>Le seul formulaire du site est celui de demande de réservation. Il collecte :</p>
   <table>
     <tr><th>Donnée</th><th>Finalité</th></tr>
     <tr><td>Prénom, nom</td><td>Identifier votre demande</td></tr>
-    <tr><td>Date, heure, nombre de convives</td><td>Organiser votre table</td></tr>
+    <tr><td>Date, heure, nombre de convives, table souhaitée</td><td>Organiser votre venue</td></tr>
     <tr><td>Téléphone</td><td>Vous rappeler pour confirmer la réservation</td></tr>
-    <tr><td>Message (occasion particulière)</td><td>Adapter l'accueil (anniversaire, allergie…)</td></tr>
+    <tr><td>Adresse email</td><td>Vous envoyer la confirmation de votre réservation</td></tr>
+    <tr><td>Message libre (occasion, allergie, demande particulière)</td><td>Adapter l'accueil</td></tr>
+    <tr><td>Nom, email et données de paiement, lors d'une réservation de chambre</td><td>Encaisser et confirmer votre séjour</td></tr>
+    <tr><td>Données de navigation (pages vues, appareil), si vous y consentez</td><td>Mesurer la fréquentation du site</td></tr>
   </table>
+  <p>Les données de carte bancaire ne transitent jamais par nos serveurs et ne sont pas conservées par l'établissement : elles sont traitées directement par notre prestataire de paiement.</p>
 
   <h2>Pourquoi et sur quelle base ?</h2>
-  <p>Ces données sont utilisées uniquement pour traiter votre demande de réservation, sur la base de l'exécution de mesures précontractuelles prises à votre demande (article 6.1.b du RGPD).</p>
-
-  <h2>Qui reçoit ces données ?</h2>
-  <p>Les demandes sont transmises directement à Garden Garden par email. Le formulaire est techniquement géré par <strong>Netlify, Inc.</strong> (hébergeur du site, agissant comme sous-traitant technique), qui stocke temporairement les soumissions. Aucune donnée n'est vendue ni transmise à d'autres tiers.</p>
-
-  <h2>Combien de temps sont-elles conservées ?</h2>
-  <p>Les demandes de réservation sont conservées 12 mois maximum, sauf demande de suppression anticipée de votre part.</p>
-
-  <h2>Vos droits</h2>
-  <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour l'exercer, contactez-nous à <a href="mailto:contact.gardengarden38@gmail.com">contact.gardengarden38@gmail.com</a>.</p>
-
-  <h2>Cookies et ressources externes</h2>
-  <p>Ce site ne dépose pas de cookie de suivi ou publicitaire. Il charge cependant certaines ressources externes nécessaires à son affichage :</p>
   <ul>
-    <li><strong>Google Fonts</strong> (polices de caractères) et <strong>Tabler Icons</strong> (icônes), qui peuvent transmettre votre adresse IP aux serveurs qui les hébergent lors du chargement de la page.</li>
-    <li><strong>Netlify</strong>, notre hébergeur, qui traite techniquement les visites du site.</li>
+    <li><strong>Réservation de table</strong> : exécution de mesures précontractuelles prises à votre demande (article 6.1.b du RGPD).</li>
+    <li><strong>Réservation et paiement d'une chambre</strong> : exécution du contrat (article 6.1.b).</li>
+    <li><strong>Conservation des pièces comptables liées au paiement</strong> : obligation légale (article 6.1.c).</li>
+    <li><strong>Mesure d'audience du site</strong> : votre consentement (article 6.1.a), recueilli via le bandeau affiché lors de votre première visite et révocable à tout moment.</li>
   </ul>
 
+  <h2>Qui reçoit ces données ?</h2>
+  <p>Vos données sont accessibles au personnel de l'établissement chargé des réservations. Elles sont également traitées, pour notre compte et sur nos instructions, par les sous-traitants techniques suivants :</p>
+  <ul>
+    <li><strong>Google Ireland Ltd. / Google LLC</strong> — le formulaire de réservation transmet les demandes à un script Google Apps Script, qui les enregistre dans une feuille Google Sheets. Google fournit également la mesure d'audience du site, lorsque vous y avez consenti, ainsi que les polices de caractères (Google Fonts).</li>
+    <li><strong>FormSubmit</strong> — service de transmission par email, utilisé en secours lorsque le premier envoi échoue.</li>
+    <li><strong>Stripe Payments Europe, Ltd.</strong> — traitement des paiements en ligne.</li>
+    <li><strong>Netlify, Inc.</strong> — hébergement du site et journalisation technique des visites.</li>
+    <li><strong>Tabler Icons</strong> — icônes affichées sur le site.</li>
+  </ul>
+  <p>Certains de ces prestataires sont établis aux États-Unis ou y disposent de serveurs. Les transferts correspondants sont encadrés par les clauses contractuelles types de la Commission européenne et, le cas échéant, par la certification du prestataire au <em>EU-U.S. Data Privacy Framework</em>. Aucune donnée n'est vendue ni cédée à des fins publicitaires.</p>
+
+  <h2>Combien de temps sont-elles conservées ?</h2>
+  <ul>
+    <li>Demandes de réservation non suivies d'une venue : 12 mois.</li>
+    <li>Données liées à un séjour payé : 3 ans à compter de la fin de la relation commerciale.</li>
+    <li>Pièces comptables (factures, justificatifs de paiement) : 10 ans, conformément à l'article L123-22 du code de commerce.</li>
+    <li>Données de mesure d'audience : 14 mois au maximum.</li>
+  </ul>
+
+  <h2>Vos droits</h2>
+  <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation du traitement, d'opposition et de portabilité de vos données, ainsi que du droit de définir des directives relatives à leur sort après votre décès.</p>
+  <p>Pour les exercer, écrivez à <a href="mailto:contact.gardengarden38@gmail.com">contact.gardengarden38@gmail.com</a> ; une preuve d'identité pourra vous être demandée. Vous recevrez une réponse dans un délai d'un mois.</p>
+  <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez introduire une réclamation auprès de la CNIL : 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, ou sur <a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>.</p>
+
+  <h2>Cookies et ressources externes</h2>
+  <p>Ce site n'utilise aucun cookie publicitaire.</p>
+  <p>Il utilise Google Analytics pour mesurer sa fréquentation. Ces cookies ne sont déposés <strong>qu'après votre consentement</strong>, recueilli via le bandeau affiché lors de votre première visite. Refuser est aussi simple qu'accepter, et vous pouvez revenir sur votre choix à tout moment en effaçant les données de site de votre navigateur pour gardengarden-chavanoz.com. En l'absence de consentement, aucun script de mesure d'audience n'est chargé.</p>
+  <p>Le site charge par ailleurs des ressources externes nécessaires à son affichage — Google Fonts (polices de caractères) et Tabler Icons (icônes) — qui reçoivent votre adresse IP lors du chargement de la page.</p>
   <hr>
-  <footer>© 2026 Garden Garden · <a href="index.html">Retour à l'accueil</a> · <a href="mentions-legales.html">Mentions légales</a></footer>
+  <footer>© 2026 Garden Garden · <a href="index.html">Retour à l'accueil</a> · <a href="mentions-legales.html">Mentions légales</a> · <a href="cgv.html">CGV</a> · <a href="confidentialite.html">Confidentialité</a></footer>
 </div>
 </body>
 </html>
