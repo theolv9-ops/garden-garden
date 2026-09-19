@@ -389,14 +389,47 @@ html { scroll-behavior:smooth; }
 @media (hover:hover){
   .flip-hint { display:none; }
 }
+
+/* --- Bandeau de consentement a la mesure d'audience --- */
+.cookiebar { position:fixed; left:0; right:0; bottom:0; z-index:300; background:var(--ink); color:var(--cream); padding:18px 24px; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:18px; box-shadow:0 -14px 40px -18px rgba(0,0,0,.6); }
+.cookiebar[hidden] { display:none; }
+.cookiebar p { font-size:14px; line-height:1.6; margin:0; max-width:620px; color:var(--cream); }
+.cookiebar a { color:var(--gold); }
+.cookiebar-actions { display:flex; gap:12px; flex-shrink:0; }
+.cookiebtn { font-family:'Inter',sans-serif; font-size:14px; font-weight:600; padding:11px 26px; border-radius:40px; cursor:pointer; border:1px solid var(--cream); background:transparent; color:var(--cream); transition:background .2s, color .2s; }
+.cookiebtn:hover { background:var(--cream); color:var(--ink); }
+
+/* --- Mentions obligatoires du parcours de paiement --- */
+.pay-legal { margin-top:18px; font-size:13.5px; color:var(--muted); line-height:1.6; }
+.pay-legal p { margin-top:8px; }
+.pay-consent { display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--ink); cursor:pointer; }
+.pay-consent input { margin-top:4px; flex-shrink:0; width:17px; height:17px; accent-color:var(--terra); }
+.price-note { font-size:13.5px; color:var(--muted); margin-top:8px; line-height:1.6; }
+.btn-outline.is-disabled { opacity:.45; pointer-events:none; }
+
+/* --- Informations restant a completer par l'etablissement --- */
+.fill { background:rgba(200,162,102,.3); border-bottom:1px dashed var(--gold); padding:0 4px; border-radius:3px; font-weight:600; color:#7a5c22; }
 </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-D81CPJL0BG"></script>
+<!-- Mesure d'audience Google Analytics.
+     Le script n'est charge qu'apres consentement explicite (bandeau en bas de page).
+     Sans consentement, aucun cookie de mesure d'audience n'est depose. -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-D81CPJL0BG');
+  var GG_GA_ID = 'G-D81CPJL0BG';
+  function ggLoadAnalytics(){
+    if (window.ggAnalyticsLoaded) return;
+    window.ggAnalyticsLoaded = true;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GG_GA_ID;
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', GG_GA_ID, { anonymize_ip: true });
+  }
+  try {
+    if (window.localStorage && localStorage.getItem('gg-consent') === 'accepte') ggLoadAnalytics();
+  } catch (e) {}
 </script>
 </head>
 <body>
@@ -726,6 +759,7 @@ html { scroll-behavior:smooth; }
       <h2 class="stitle">Prolongez la soirée <em>à l'étage</em></h2>
       <p style="color:var(--muted); font-size:15px; margin-top:16px;">Sept chambres classiques trois étoiles aux matériaux naturels — lin, chêne, terracotta — ouvertes sur le jardin, climatisées pour un confort en toute saison.</p>
       <div class="hotel-price"><span class="amount">110€</span><span class="per">/ nuit — chambre classique, 2 personnes</span></div>
+      <p class="price-note">Prix TTC. Taxe de séjour de <span class="fill">[montant]</span> € par personne et par nuit en supplément, réglée sur place. Petit-déjeuner continental 15 € par personne.</p>
       <div class="hotel-feats">
         <div class="hfeat"><i class="ti ti-bed"></i> 7 chambres</div>
         <div class="hfeat"><i class="ti ti-snowflake"></i> Climatisation</div>
@@ -733,10 +767,15 @@ html { scroll-behavior:smooth; }
         <div class="hfeat"><i class="ti ti-coffee"></i> Petit-déjeuner continental — 15€</div>
         <div class="hfeat"><i class="ti ti-car"></i> Parking privé gratuit</div>
       </div>
-      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:4px;">
+      <div class="pay-legal">
+        <label class="pay-consent"><input type="checkbox" id="ggCgvOk"><span>J'ai lu et j'accepte les <a href="cgv.html">conditions générales de vente</a>.</span></label>
+        <p>Cette réservation porte sur une prestation d'hébergement à date déterminée : conformément à l'article L221-28, 12° du code de la consommation, elle n'ouvre pas droit à rétractation. Les conditions d'annulation figurent à l'article 7 des CGV.</p>
+      </div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:16px;">
         <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une chambre</button>
-        <!-- Lien de paiement Stripe : à remplacer par le vrai lien une fois le compte Stripe créé (voir instructions) -->
-        <a class="btn-outline" href="https://buy.stripe.com/REMPLACE_PAR_TON_LIEN" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; text-decoration:none;">Payer ma chambre en ligne</a>
+        <!-- Lien de paiement Stripe : encore un lien de test, a remplacer par le vrai lien de paiement.
+             La page Stripe doit afficher le recapitulatif (dates, prestation, montant total) avant validation. -->
+        <a class="btn-outline is-disabled" id="ggPayBtn" aria-disabled="true" href="https://buy.stripe.com/REMPLACE_PAR_TON_LIEN" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; text-decoration:none;">Commander avec obligation de paiement</a>
       </div>
     </div>
   </div>
@@ -919,7 +958,7 @@ html { scroll-behavior:smooth; }
 
 <div class="foot">
   <div class="brand" style="color:var(--cream); font-family:'Fraunces',serif;">Garden<em style="color:var(--gold);">Garden</em></div>
-  <small>Bar · Restaurant · Chambres ★★★ — 14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz · 04 86 80 27 50<br>© 2026 Garden Garden · <a href="mentions-legales.html" style="color:inherit; text-decoration:underline;">Mentions légales</a> · <a href="confidentialite.html" style="color:inherit; text-decoration:underline;">Confidentialité</a></small>
+  <small>Bar · Restaurant · Chambres ★★★ — 14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz · 04 86 80 27 50<br>© 2026 Garden Garden · <a href="mentions-legales.html" style="color:inherit; text-decoration:underline;">Mentions légales</a> · <a href="cgv.html" style="color:inherit; text-decoration:underline;">CGV</a> · <a href="confidentialite.html" style="color:inherit; text-decoration:underline;">Confidentialité</a></small>
 </div>
 
 <div class="stickybar">
@@ -1247,6 +1286,46 @@ function chooseTable(label){
       d.addEventListener('click', function(){ jardinShow(parseInt(d.getAttribute('data-i'), 10)); });
     });
   }
+})();
+</script>
+
+<!-- Bandeau de consentement a la mesure d'audience (CNIL : refuser doit etre aussi simple qu'accepter) -->
+<div class="cookiebar" id="ggCookiebar" role="dialog" aria-live="polite" aria-label="Consentement à la mesure d'audience" hidden>
+  <p>Nous aimerions mesurer la fréquentation de ce site avec Google&nbsp;Analytics. C'est facultatif : le site fonctionne à l'identique si vous refusez. <a href="confidentialite.html">En savoir plus</a></p>
+  <div class="cookiebar-actions">
+    <button type="button" class="cookiebtn" id="ggCookieRefuse">Refuser</button>
+    <button type="button" class="cookiebtn" id="ggCookieAccept">Accepter</button>
+  </div>
+</div>
+
+<script>
+/* Consentement a la mesure d'audience */
+(function(){
+  var bar = document.getElementById('ggCookiebar');
+  if (!bar) return;
+  var choix = null;
+  try { if (window.localStorage) choix = localStorage.getItem('gg-consent'); } catch (e) {}
+  if (choix === 'accepte' || choix === 'refuse') return;
+  bar.hidden = false;
+  function decider(valeur){
+    try { if (window.localStorage) localStorage.setItem('gg-consent', valeur); } catch (e) {}
+    bar.hidden = true;
+    if (valeur === 'accepte' && typeof ggLoadAnalytics === 'function') ggLoadAnalytics();
+  }
+  document.getElementById('ggCookieAccept').addEventListener('click', function(){ decider('accepte'); });
+  document.getElementById('ggCookieRefuse').addEventListener('click', function(){ decider('refuse'); });
+})();
+
+/* Le paiement de la chambre n'est accessible qu'apres acceptation des CGV (art. L221-14 code conso) */
+(function(){
+  var caseCgv = document.getElementById('ggCgvOk');
+  var bouton = document.getElementById('ggPayBtn');
+  if (!caseCgv || !bouton) return;
+  caseCgv.checked = false;
+  caseCgv.addEventListener('change', function(){
+    bouton.classList.toggle('is-disabled', !caseCgv.checked);
+    bouton.setAttribute('aria-disabled', caseCgv.checked ? 'false' : 'true');
+  });
 })();
 </script>
 
