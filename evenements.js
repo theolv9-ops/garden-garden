@@ -13,6 +13,8 @@
    lien      : facultatif ; si rempli, le bouton ouvre ce lien
                (billetterie, page Facebook...). Sinon, le bouton
                "Réserver" pré-remplit le formulaire de réservation.
+   prive     : mettre true pour un événement sur invitation ; la carte
+               affiche "Sur invitation" au lieu du bouton "Réserver".
    exemple   : à SUPPRIMER sur les vrais événements ; tant qu'il vaut
                true, un badge "Exemple" s'affiche sur la carte.
 
@@ -22,13 +24,20 @@
 
 var EVENEMENTS = [
   {
+    date: "2026-10-29",
+    titre: "Inauguration privée",
+    texte: "Garden Garden célèbre son inauguration lors d'une soirée privée, réservée aux invités.",
+    prive: true,
+    image: "images/facade-soir.jpg"
+  },
+  {
     exemple: true,
     date: "2026-10-02",
     heure: "19h00",
     titre: "Soirée d'ouverture",
     texte: "Garden Garden ouvre ses portes : apéritif au jardin, braseros allumés et premier service à la carte.",
     prix: "Entrée libre",
-    image: "images/facade-soir.jpg"
+    image: "images/hero.jpg"
   },
   {
     exemple: true,

@@ -266,6 +266,7 @@ section { padding:110px 20px; }
 .evt-body p { font-size:13.5px; color:var(--muted); margin-bottom:16px; }
 .evt-foot { margin-top:auto; display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
 .evt-prix { font-family:'Fraunces',serif; font-size:17px; color:var(--ink); }
+.evt-invite { display:inline-flex; align-items:center; border:1.5px solid var(--gold); color:var(--olive); font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:8px 16px; border-radius:40px; }
 .evt-foot .btn-outline { font-size:12px; padding:9px 18px; text-decoration:none; }
 .agenda-empty { max-width:620px; margin:0 auto; text-align:center; background:#fff; border:1px solid var(--line); border-radius:22px; padding:40px 32px; color:var(--muted); font-size:15px; }
 .agenda-empty a { color:var(--terra); font-weight:600; text-decoration:none; }
@@ -876,9 +877,11 @@ html { scroll-behavior:smooth; }
     body.appendChild(el('h3', '', e.titre));
     if(e.texte) body.appendChild(el('p', '', e.texte));
     var foot = el('div', 'evt-foot');
-    foot.appendChild(el('span', 'evt-prix', e.prix || ''));
+    if(e.prix) foot.appendChild(el('span', 'evt-prix', e.prix));
     var btn;
-    if(e.lien){
+    if(e.prive){
+      btn = el('span', 'evt-invite', 'Sur invitation');
+    } else if(e.lien){
       btn = el('a', 'btn-outline', 'En savoir plus');
       btn.href = e.lien; btn.target = '_blank'; btn.rel = 'noopener';
     } else {
