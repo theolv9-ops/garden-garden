@@ -246,6 +246,30 @@ section { padding:110px 20px; }
 .jfeat h4 { font-family:'Fraunces',serif; font-weight:500; font-size:19px; margin:12px 0 6px; }
 .jfeat p { font-size:13.5px; color:var(--muted); }
 
+/* AGENDA DES ÉVÉNEMENTS (contenu dans evenements.js) */
+.agenda { background:var(--cream2); }
+.agenda-head { text-align:center; max-width:640px; margin:0 auto 46px; }
+.agenda-head p { color:var(--muted); margin-top:14px; font-size:15px; }
+.agenda-grid { max-width:1120px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+.evt { background:#fff; border:1px solid var(--line); border-radius:18px; overflow:hidden; display:flex; flex-direction:column; transition:transform .3s ease, box-shadow .3s ease; }
+.evt:hover { transform:translateY(-6px); box-shadow:0 24px 44px -22px rgba(21,23,15,.28); }
+.evt-photo { position:relative; aspect-ratio:16/10; background:linear-gradient(150deg,#3a4028,#23271a); overflow:hidden; }
+.evt-photo img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
+.evt:hover .evt-photo img { transform:scale(1.05); }
+.evt-date { position:absolute; top:14px; left:14px; background:var(--ink); color:var(--cream); border:1px solid rgba(200,162,102,.5); border-radius:14px; padding:8px 12px 7px; text-align:center; line-height:1; min-width:58px; }
+.evt-date .d { display:block; font-family:'Fraunces',serif; font-size:26px; color:var(--gold); }
+.evt-date .m { display:block; font-size:10.5px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; margin-top:5px; }
+.evt-tag { position:absolute; top:14px; right:14px; background:var(--terra); color:var(--cream); font-size:10.5px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:6px 12px; border-radius:20px; }
+.evt-body { padding:22px 24px 24px; display:flex; flex-direction:column; flex:1; }
+.evt-when { color:var(--terra); font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.evt-body h3 { font-family:'Fraunces',serif; font-weight:500; font-size:21px; line-height:1.2; margin-bottom:8px; }
+.evt-body p { font-size:13.5px; color:var(--muted); margin-bottom:16px; }
+.evt-foot { margin-top:auto; display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
+.evt-prix { font-family:'Fraunces',serif; font-size:17px; color:var(--ink); }
+.evt-foot .btn-outline { font-size:12px; padding:9px 18px; text-decoration:none; }
+.agenda-empty { max-width:620px; margin:0 auto; text-align:center; background:#fff; border:1px solid var(--line); border-radius:22px; padding:40px 32px; color:var(--muted); font-size:15px; }
+.agenda-empty a { color:var(--terra); font-weight:600; text-decoration:none; }
+
 /* VISITE VIRTUELLE */
 .visite { background:var(--ink); color:var(--cream); }
 .visite .eyebrow { color:var(--gold); }
@@ -450,6 +474,7 @@ html { scroll-behavior:smooth; }
       <a onclick="gscroll('tables')">Les tables</a>
       <a onclick="gscroll('hotel')">Les chambres</a>
       <a onclick="gscroll('terrasse')">Jardin &amp; Terrasse</a>
+      <a onclick="gscroll('evenements')">Événements</a>
       <a onclick="gscroll('infos')">Contact</a>
     </div>
     <a class="nav-cta" onclick="gscroll('resa')">Réserver</a>
@@ -789,6 +814,100 @@ html { scroll-behavior:smooth; }
     </div>
   </div>
 </section>
+
+<section class="agenda" id="evenements">
+  <div class="agenda-head reveal">
+    <div class="eyebrow">Agenda</div>
+    <h2 class="stitle">Nos prochains <em>rendez-vous</em></h2>
+    <p>Concerts, soirées à thème, tournois au jardin : ce qui se passe bientôt chez Garden Garden.</p>
+  </div>
+  <div class="agenda-grid" id="agendaGrid"></div>
+</section>
+<!-- Les événements se modifient dans le fichier evenements.js, pas ici. -->
+<script src="evenements.js"></script>
+<script>
+(function(){
+  var grid = document.getElementById('agendaGrid');
+  var MOIS = ['janv.','févr.','mars','avril','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var now = new Date();
+  var today = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+  var list = (window.EVENEMENTS || []).filter(function(e){
+    return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && e.date >= today && e.titre;
+  }).sort(function(a, b){ return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+
+  function el(tag, cls, text){
+    var n = document.createElement(tag);
+    if(cls) n.className = cls;
+    if(text) n.textContent = text;
+    return n;
+  }
+
+  if(list.length === 0){
+    var empty = el('div', 'agenda-empty reveal', 'Pas d\'événement annoncé pour le moment. Suivez-nous sur Instagram pour être les premiers informés : ');
+    var a = el('a', '', '@gardengardenchavanoz');
+    a.href = 'https://www.instagram.com/gardengardenchavanoz'; a.target = '_blank'; a.rel = 'noopener';
+    empty.appendChild(a);
+    grid.appendChild(empty);
+    return;
+  }
+
+  list.forEach(function(e){
+    var p = e.date.split('-');
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    var card = el('article', 'evt reveal');
+
+    var photo = el('div', 'evt-photo');
+    if(e.image){
+      var img = document.createElement('img');
+      img.src = e.image; img.alt = e.titre; img.loading = 'lazy'; img.decoding = 'async';
+      img.onerror = function(){ this.style.display = 'none'; };
+      photo.appendChild(img);
+    }
+    var badge = el('div', 'evt-date');
+    badge.appendChild(el('span', 'd', String(d.getDate())));
+    badge.appendChild(el('span', 'm', MOIS[d.getMonth()]));
+    photo.appendChild(badge);
+    if(e.exemple) photo.appendChild(el('span', 'evt-tag', 'Exemple'));
+    card.appendChild(photo);
+
+    var body = el('div', 'evt-body');
+    body.appendChild(el('div', 'evt-when', JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()] + (e.heure ? ' · ' + e.heure : '')));
+    body.appendChild(el('h3', '', e.titre));
+    if(e.texte) body.appendChild(el('p', '', e.texte));
+    var foot = el('div', 'evt-foot');
+    foot.appendChild(el('span', 'evt-prix', e.prix || ''));
+    var btn;
+    if(e.lien){
+      btn = el('a', 'btn-outline', 'En savoir plus');
+      btn.href = e.lien; btn.target = '_blank'; btn.rel = 'noopener';
+    } else {
+      btn = el('button', 'btn-outline', 'Réserver');
+      btn.type = 'button';
+      btn.onclick = function(){ reserverEvenement(e); };
+    }
+    foot.appendChild(btn);
+    body.appendChild(foot);
+    card.appendChild(body);
+    grid.appendChild(card);
+  });
+})();
+// Bouton « Réserver » d'un événement : pré-remplit le formulaire de réservation
+function reserverEvenement(e){
+  var date = document.getElementById('g-date');
+  if(date && e.date >= (date.min || '')) date.value = e.date;
+  var heure = document.getElementById('g-heure');
+  if(heure && e.heure){
+    Array.prototype.forEach.call(heure.options, function(o){ if(o.value === e.heure) heure.value = o.value; });
+  }
+  var msg = document.getElementById('g-msg');
+  if(msg){
+    var ligne = 'Événement : ' + e.titre;
+    if(msg.value.indexOf(ligne) === -1) msg.value = ligne + (msg.value ? '\n' + msg.value : '');
+  }
+  gscroll('resa');
+}
+</script>
 
 <section class="gallery">
   <div class="gallery-head reveal">
