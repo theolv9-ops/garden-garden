@@ -37,32 +37,5 @@ var EVENEMENTS = [
     texte: "Garden Garden ouvre ses portes : apéritif au jardin, braseros allumés et premier service à la carte.",
     prix: "Entrée libre",
     image: "images/hero.jpg"
-  },
-  {
-    exemple: true,
-    date: "2026-10-17",
-    heure: "20h00",
-    titre: "Concert au coin du brasero",
-    texte: "Un duo acoustique sous la charpente de la terrasse, cocktails et pièces grillées à la braise.",
-    prix: "Sans supplément",
-    image: "images/bar-exterieur.jpg"
-  },
-  {
-    exemple: true,
-    date: "2026-10-25",
-    heure: "14h00",
-    titre: "Tournoi de pétanque",
-    texte: "Doublettes sur nos trois pistes du parc, lots pour les vainqueurs et goûter offert.",
-    prix: "10 € par doublette",
-    image: "images/jardin-petanque.jpg"
-  },
-  {
-    exemple: true,
-    date: "2026-11-19",
-    heure: "19h00",
-    titre: "Soirée Beaujolais nouveau",
-    texte: "Le nouveau millésime servi au verre, planches de charcuterie et fromages de la région.",
-    prix: "25 € par personne",
-    image: "images/salle.jpg"
   }
 ];
