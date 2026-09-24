@@ -31,7 +31,6 @@ var EVENEMENTS = [
     image: "images/facade-soir.jpg"
   },
   {
-    exemple: true,
     date: "2026-10-02",
     heure: "19h00",
     titre: "Soirée d'ouverture",

@@ -330,12 +330,6 @@ section { padding:110px 20px; }
 .gal-item:hover img { transform:scale(1.07); }
 
 /* TESTIMONIALS */
-.testi-head { text-align:center; max-width:620px; margin:0 auto 46px; }
-.opening-banner { max-width:720px; margin:0 auto; text-align:center; background:#fff; border:1px solid var(--line); border-radius:22px; padding:48px 40px; }
-.opening-icon { width:56px; height:56px; border-radius:50%; background:var(--ink); color:var(--gold); font-size:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 22px; }
-.opening-banner p { font-size:16px; line-height:1.7; color:var(--muted); margin-bottom:28px; }
-.opening-banner strong { color:var(--ink); }
-.opening-actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
 .testi-grid { max-width:1120px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:20px; }
 .tcard { background:#fff; border:1px solid var(--line); border-radius:18px; padding:30px; transition:transform .3s ease, box-shadow .3s ease; }
 .tcard:hover { transform:translateY(-6px); box-shadow:0 24px 44px -22px rgba(21,23,15,.28); }
@@ -461,7 +455,7 @@ html { scroll-behavior:smooth; }
 
 <div id="progress"></div>
 
-<div class="opening-ribbon" onclick="gscroll('ouverture')" style="cursor:pointer;"><i class="ti ti-confetti"></i> <b>Ouverture le 2 octobre 2026</b> — Bar · Restaurant · Chambres à Chavanoz</div>
+<div class="opening-ribbon" onclick="gscroll('evenements')" style="cursor:pointer;"><i class="ti ti-confetti"></i> <b>Ouverture le 2 octobre 2026</b> — Bar · Restaurant · Chambres à Chavanoz</div>
 
 <div class="nav-wrap">
   <div class="nav" id="mainNav">
@@ -488,14 +482,14 @@ html { scroll-behavior:smooth; }
     <img src="images/hero.jpg" alt="Garden Garden — Bar, Restaurant &amp; Chambres" onerror="this.style.display='none'" fetchpriority="high" decoding="async">
   </div>
   <canvas id="fireflies"></canvas>
-  <div class="status-float" onclick="gscroll('ouverture')" style="cursor:pointer;"><span class="status-dot"></span> Ouverture le 2 octobre 2026 · réservations ouvertes</div>
+  <div class="status-float" onclick="gscroll('evenements')" style="cursor:pointer;"><span class="status-dot"></span> Ouverture le 2 octobre 2026 · réservations ouvertes</div>
   <div class="hero-content" id="heroContent">
     <div class="tagline"><i class="ti ti-trees"></i> Bar · Restaurant · Chambres</div>
     <h1><span class="w" style="--d:.6s">L'art</span> <span class="w" style="--d:.72s">de</span> <span class="w" style="--d:.84s">recevoir,</span> <em><span class="w" style="--d:1s">le</span> <span class="w" style="--d:1.12s">goût</span> <span class="w" style="--d:1.24s">du</span> <span class="w" style="--d:1.36s">plaisir.</span></em></h1>
     <p class="sub">Cuisine française traditionnelle, viandes d'exception sélectionnées et maturées avec soin, chambres au calme d'un parc arboré — à quelques minutes de Lyon.</p>
     <div class="hero-row">
       <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une table</button>
-      <div class="rating-badge" onclick="gscroll('ouverture')" style="cursor:pointer;">
+      <div class="rating-badge" onclick="gscroll('evenements')" style="cursor:pointer;">
         <span class="stars"><i class="ti ti-calendar-event"></i></span>
         <b>Ouverture</b>
         <span>le 2 octobre 2026</span>
@@ -517,13 +511,13 @@ html { scroll-behavior:smooth; }
 
 <div class="marquee">
   <div class="track">
-    <span onclick="gscroll('ouverture')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture le 2 octobre 2026</span>
+    <span onclick="gscroll('evenements')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture le 2 octobre 2026</span>
     <span><i class="ti ti-tag"></i>Grenouilles à volonté · Ven, Sam, Dim</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
     <span><i class="ti ti-bed"></i>Chambres ★★★</span>
     <span><i class="ti ti-trees"></i>Terrasse au jardin</span>
-    <span onclick="gscroll('ouverture')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture le 2 octobre 2026</span>
+    <span onclick="gscroll('evenements')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture le 2 octobre 2026</span>
     <span><i class="ti ti-tag"></i>Grenouilles à volonté · Ven, Sam, Dim</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
@@ -922,21 +916,6 @@ function reserverEvenement(e){
     <div class="gal-item tilt img-shine reveal"><img src="images/gal2.jpg" alt="Burger du Brasero avec frites maison" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
     <div class="gal-item tilt img-shine reveal"><img src="images/gal3.jpg" alt="Entrée fraîcheur tomates et mozzarella" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
     <div class="gal-item tilt img-shine reveal"><img src="images/gal4.jpg" alt="Moelleux au chocolat, dessert maison Garden Garden" onerror="this.style.display='none'" loading="lazy" decoding="async"></div>
-  </div>
-</section>
-
-<section class="testi" id="ouverture">
-  <div class="testi-head reveal">
-    <div class="eyebrow">Bientôt</div>
-    <h2 class="stitle">L'ouverture approche <em>— 2 octobre 2026</em></h2>
-  </div>
-  <div class="opening-banner reveal">
-    <div class="opening-icon"><i class="ti ti-calendar-event"></i></div>
-    <p>Garden Garden ouvre ses portes le <strong>2 octobre 2026</strong> à Chavanoz : bar, restaurant et chambres au cœur d'un parc arboré. Réservez dès maintenant votre table pour l'ouverture !</p>
-    <div class="opening-actions">
-      <a class="btn btn-primary" href="https://www.instagram.com/gardengardenchavanoz" target="_blank" rel="noopener"><i class="ti ti-brand-instagram"></i> Suivre l'ouverture</a>
-      <a class="btn-outline" href="mailto:contact.gardengarden38@gmail.com?subject=Tenez-moi%20inform%C3%A9%20de%20l%27ouverture&body=Bonjour%2C%0A%0AJe%20souhaite%20%C3%AAtre%20inform%C3%A9%28e%29%20de%20la%20date%20d%27ouverture%20de%20Garden%20Garden.%0A%0AMon%20pr%C3%A9nom%20%3A%20%0AMon%20t%C3%A9l%C3%A9phone%20ou%20email%20%3A%20" onclick="if(typeof gtag==='function'){gtag('event','notify_me_click',{event_category:'engagement',event_label:'etre_prevenu'});}">Être prévenu</a>
-    </div>
   </div>
 </section>
 
