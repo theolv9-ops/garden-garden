@@ -185,6 +185,33 @@
     <p class="table-note" id="tableNote"></p>
   </div>
 
+  <div class="card">
+    <h2>Chambres payées en ligne</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Reçu le</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Arrivée</th>
+            <th>Départ</th>
+            <th>Nuits</th>
+            <th>Petit-déj</th>
+            <th>Montant</th>
+            <th>Téléphone</th>
+            <th>Email</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="roomTableBody">
+          <tr class="loading-row"><td colspan="11">Chargement des chambres…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note" id="roomTableNote"></p>
+  </div>
+
 </div>
 
 <script>
@@ -322,6 +349,60 @@
       });
   }
 
+  var roomTableBody = document.getElementById('roomTableBody');
+  var roomTableNote = document.getElementById('roomTableNote');
+
+  function renderRoomTable(chambres) {
+    if (!chambres || chambres.length === 0) {
+      roomTableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Aucune chambre payée pour l\'instant.</td></tr>';
+      roomTableNote.textContent = '';
+      return;
+    }
+
+    var rows = chambres.map(function (c) {
+      return '<tr>' +
+        '<td>' + escapeHtml(c['Reçu le']) + '</td>' +
+        '<td>' + escapeHtml(c['Prénom']) + '</td>' +
+        '<td>' + escapeHtml(c['Nom']) + '</td>' +
+        '<td>' + escapeHtml(c['Arrivée']) + '</td>' +
+        '<td>' + escapeHtml(c['Départ']) + '</td>' +
+        '<td>' + escapeHtml(c['Nuits']) + '</td>' +
+        '<td>' + escapeHtml(c['Petit-déj']) + '</td>' +
+        '<td>' + escapeHtml(c['Montant']) + ' €</td>' +
+        '<td>' + escapeHtml(c['Téléphone']) + '</td>' +
+        '<td>' + escapeHtml(c['Email']) + '</td>' +
+        '<td><span class="badge confirmee">' + escapeHtml(c['Statut']) + '</span></td>' +
+      '</tr>';
+    }).join('');
+
+    roomTableBody.innerHTML = rows;
+    roomTableNote.textContent = '';
+  }
+
+  function loadChambres() {
+    var cle = cleAcces();
+    if (!cle) {
+      roomTableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Clé d\'accès requise pour afficher les chambres.</td></tr>';
+      return;
+    }
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getChambres', key: cle })
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.success) {
+          renderRoomTable(data.chambres);
+        } else {
+          throw new Error(data.error || 'Erreur inconnue');
+        }
+      })
+      .catch(function (err) {
+        roomTableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Impossible de charger les chambres (' + escapeHtml(err.message) + ')</td></tr>';
+      });
+  }
+
   function showMsg(type, text) {
     formMsg.className = 'msg show ' + type;
     formMsg.textContent = text;
@@ -388,6 +469,7 @@
   });
 
   loadReservations();
+  loadChambres();
 </script>
 
 </body>

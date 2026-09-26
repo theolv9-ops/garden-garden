@@ -3,18 +3,30 @@
  * Google Sheet "Réservations Garden Garden"
  * SHEET_ID: 1qIpRoT3IccSyPYZaFJem-fsF-DwmhSrtRLUoTLCI3tI
  *
- * Colonnes attendues sur la 1ère ligne de la feuille :
+ * Onglet "Réservations" (table du restaurant), colonnes sur la 1ère ligne :
  * Reçu le | Prénom | Nom | Date | Heure | Convives | Téléphone | Email | Occasion | Statut
+ *
+ * Onglet "Chambres" (réservations de chambre payées via Stripe), colonnes :
+ * Reçu le | Prénom | Nom | Email | Téléphone | Arrivée | Départ | Nuits | Petit-déj | Montant | Statut | Session Stripe
+ *
+ * Avant d'utiliser doPost avec type="chambre", définir la propriété de script
+ * SHARED_SECRET (menu Extensions > Propriétés du script) avec une valeur secrète,
+ * et mettre la même valeur dans la variable d'environnement Cloudflare Pages
+ * GAS_SHARED_SECRET. Cela empêche quiconque d'appeler ce endpoint pour créer de
+ * fausses réservations "payées".
  */
 
 var SHEET_ID = '1qIpRoT3IccSyPYZaFJem-fsF-DwmhSrtRLUoTLCI3tI';
 var HEADERS = ['Reçu le', 'Prénom', 'Nom', 'Date', 'Heure', 'Convives', 'Téléphone', 'Email', 'Occasion', 'Statut'];
 
-// Adresse prévenue par email à chaque nouvelle réservation. Envoyé par MailApp,
-// depuis le compte Google propriétaire du script : contrairement à un service
-// tiers (FormSubmit), l'envoi ne dépend d'aucune activation externe et n'est
-// jamais bloqué en silence. Limite Google : 100 emails/jour sur un compte
-// gratuit, largement suffisant ici.
+var ROOM_SHEET_NAME = 'Chambres';
+var ROOM_HEADERS = ['Reçu le', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Arrivée', 'Départ', 'Nuits', 'Petit-déj', 'Montant', 'Statut', 'Session Stripe'];
+
+// Adresse prévenue par email à chaque nouvelle réservation (table ou chambre). Envoyé
+// par MailApp, depuis le compte Google propriétaire du script : contrairement à un
+// service tiers (FormSubmit), l'envoi ne dépend d'aucune activation externe et n'est
+// jamais bloqué en silence. Limite Google : 100 emails/jour sur un compte gratuit,
+// largement suffisante ici.
 var NOTIFY_EMAIL = 'contact.gardengarden38@gmail.com';
 
 function getSheet_() {
@@ -25,13 +37,26 @@ function getSheet_() {
   return sheet;
 }
 
+// Récupère (ou crée) l'onglet dédié aux réservations de chambre
+function getRoomSheet_() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(ROOM_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(ROOM_SHEET_NAME);
+  }
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(ROOM_HEADERS);
+  }
+  return sheet;
+}
+
 function jsonResponse_(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
- * Clé d'accès aux données de réservation.
+ * Clé d'accès aux données de réservation (tables et chambres).
  *
  * Elle n'est PAS écrite dans ce fichier : elle se règle une fois pour toutes dans
  * l'éditeur Apps Script, via Paramètres du projet > Propriétés du script, en créant
@@ -52,7 +77,7 @@ function adminKeyOk_(fournie) {
   return ecart === 0;
 }
 
-// Liste des réservations, au format attendu par la page d'administration.
+// Liste des réservations de table, au format attendu par la page d'administration.
 function listeReservations_() {
   var sheet = getSheet_();
   var values = sheet.getDataRange().getValues();
@@ -76,63 +101,148 @@ function listeReservations_() {
     .reverse(); // les plus récentes en premier
 }
 
-// Reçoit une réservation (POST en JSON) et l'ajoute à la feuille
-function doPost(e) {
+// Liste des réservations de chambre payées, même logique que listeReservations_.
+function listeChambres_() {
+  var sheet = getRoomSheet_();
+  var values = sheet.getDataRange().getValues();
+  var tz = Session.getScriptTimeZone();
+
+  return values.slice(1)
+    .filter(function (row) { return row.join('') !== ''; })
+    .map(function (row) {
+      var obj = {};
+      ROOM_HEADERS.forEach(function (h, i) {
+        var val = row[i];
+        if (val instanceof Date) {
+          val = Utilities.formatDate(val, tz, 'dd/MM/yyyy HH:mm');
+        }
+        obj[h] = val;
+      });
+      return obj;
+    })
+    .reverse();
+}
+
+// Enregistre une réservation de table (comportement historique) et prévient
+// l'établissement par email.
+function saveTableReservation_(data) {
+  var sheet = getSheet_();
+
+  // Le formulaire a un champ "Commentaires" mais la feuille n'a que 10 colonnes fixes :
+  // on ajoute le commentaire à la suite de l'occasion pour ne rien perdre.
+  var occasion = data.occasion || '';
+  if (data.commentaires) {
+    occasion = occasion ? occasion + ' — ' + data.commentaires : data.commentaires;
+  }
+
+  var rowValues = [[
+    new Date(),
+    data.prenom || '',
+    data.nom || '',
+    data.date || '',
+    data.heure || '',
+    data.convives || '',
+    data.telephone || '',
+    data.email || '',
+    occasion,
+    'Nouvelle'
+  ]];
+
+  var rowIndex = sheet.getLastRow() + 1;
+  var range = sheet.getRange(rowIndex, 1, 1, rowValues[0].length);
+  // Force Date/Heure/Téléphone/Email/Occasion/Statut en texte brut : sans ça, Sheets
+  // les convertit automatiquement en date/heure/nombre (ex: "0612345678" -> 612345678,
+  // le 0 initial disparaît). "Reçu le" reste une vraie date, "Convives" reste un nombre.
+  range.setNumberFormats([['dd/MM/yyyy HH:mm', '@', '@', '@', '@', '0', '@', '@', '@', '@']]);
+  range.setValues(rowValues);
+
+  notifierNouvelleReservation_(data, occasion);
+
+  return { success: true };
+}
+
+// Enregistre une réservation de chambre déjà payée (appelé par le webhook Stripe,
+// jamais directement par le site) et envoie la confirmation au client + une
+// notification à Théo, sans intervention manuelle.
+function saveRoomReservation_(data) {
+  var secret = PropertiesService.getScriptProperties().getProperty('SHARED_SECRET');
+  if (!secret || data.secret !== secret) {
+    return { success: false, error: 'Non autorisé' };
+  }
+
+  var sheet = getRoomSheet_();
+  var nuits = parseInt(data.nuits, 10) || 0;
+  var montant = data.montant || '';
+  var petitDej = data.petitDej === 'oui' ? 'Oui' : 'Non';
+
+  var rowValues = [[
+    new Date(),
+    data.prenom || '',
+    data.nom || '',
+    data.email || '',
+    data.telephone || '',
+    data.arrivee || '',
+    data.depart || '',
+    nuits,
+    petitDej,
+    montant,
+    'Payée',
+    data.stripeSessionId || ''
+  ]];
+
+  var rowIndex = sheet.getLastRow() + 1;
+  var range = sheet.getRange(rowIndex, 1, 1, rowValues[0].length);
+  // Comme pour les tables : on force le texte brut sur Email/Téléphone/Dates/Statut/Session
+  // pour éviter que Sheets ne les reformate (perte du 0 initial d'un numéro, etc.).
+  range.setNumberFormats([['dd/MM/yyyy HH:mm', '@', '@', '@', '@', '@', '@', '0', '@', '@', '@', '@']]);
+  range.setValues(rowValues);
+
+  sendRoomConfirmationEmails_(data, montant, nuits, petitDej);
+
+  return { success: true };
+}
+
+function sendRoomConfirmationEmails_(data, montant, nuits, petitDej) {
+  var recap = [
+    'Arrivée : ' + data.arrivee,
+    'Départ : ' + data.depart,
+    'Nuits : ' + nuits,
+    'Petit-déjeuner : ' + petitDej,
+    'Montant payé : ' + montant + ' €'
+  ].join('\n');
+
   try {
-    var data = JSON.parse(e.postData.contents);
-
-    // Actions réservées à l'établissement : elles exposent ou effacent des données
-    // personnelles de clients, elles exigent donc la clé d'accès.
-    if (data.action === 'getReservations' || data.action === 'cleanupTestData') {
-      if (!adminKeyOk_(data.key)) {
-        return jsonResponse_({ success: false, error: 'Clé d\'accès invalide ou non configurée.' });
-      }
-      if (data.action === 'cleanupTestData') {
-        return jsonResponse_(cleanupTestData_());
-      }
-      return jsonResponse_({ success: true, reservations: listeReservations_() });
+    if (data.email) {
+      MailApp.sendEmail({
+        to: data.email,
+        subject: 'Votre réservation est confirmée — Garden Garden',
+        body:
+          'Bonjour ' + (data.prenom || '') + ',\n\n' +
+          'Votre paiement a bien été reçu et votre chambre est réservée. À bientôt !\n\n' +
+          recap + '\n\n' +
+          'Garden Garden\n14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz\n04 86 80 27 50'
+      });
     }
-
-    // Sans action : c'est le formulaire public, qui crée une réservation.
-    var sheet = getSheet_();
-
-    // Le formulaire a un champ "Commentaires" mais la feuille n'a que 10 colonnes fixes :
-    // on ajoute le commentaire à la suite de l'occasion pour ne rien perdre.
-    var occasion = data.occasion || '';
-    if (data.commentaires) {
-      occasion = occasion ? occasion + ' — ' + data.commentaires : data.commentaires;
-    }
-
-    var rowValues = [[
-      new Date(),
-      data.prenom || '',
-      data.nom || '',
-      data.date || '',
-      data.heure || '',
-      data.convives || '',
-      data.telephone || '',
-      data.email || '',
-      occasion,
-      'Nouvelle'
-    ]];
-
-    var rowIndex = sheet.getLastRow() + 1;
-    var range = sheet.getRange(rowIndex, 1, 1, rowValues[0].length);
-    // Force Date/Heure/Téléphone/Email/Occasion/Statut en texte brut : sans ça, Sheets
-    // les convertit automatiquement en date/heure/nombre (ex: "0612345678" -> 612345678,
-    // le 0 initial disparaît). "Reçu le" reste une vraie date, "Convives" reste un nombre.
-    range.setNumberFormats([['dd/MM/yyyy HH:mm', '@', '@', '@', '@', '0', '@', '@', '@', '@']]);
-    range.setValues(rowValues);
-
-    notifierNouvelleReservation_(data, occasion);
-
-    return jsonResponse_({ success: true });
   } catch (err) {
-    return jsonResponse_({ success: false, error: err.message });
+    // On ne bloque pas l'enregistrement si l'envoi au client échoue (adresse invalide, etc.)
+  }
+
+  try {
+    MailApp.sendEmail({
+      to: NOTIFY_EMAIL,
+      subject: 'Nouvelle chambre payée — ' + (data.prenom || '') + ' ' + (data.nom || ''),
+      body: 'Nouvelle réservation de chambre payée en ligne :\n\n' +
+        'Client : ' + (data.prenom || '') + ' ' + (data.nom || '') + '\n' +
+        'Email : ' + (data.email || '') + '\n' +
+        'Téléphone : ' + (data.telephone || '') + '\n' +
+        recap
+    });
+  } catch (err) {
+    // idem : ne pas bloquer l'enregistrement de la réservation pour un souci d'envoi
   }
 }
 
-// Prévient l'établissement par email qu'une réservation vient d'arriver.
+// Prévient l'établissement par email qu'une réservation de table vient d'arriver.
 // La réservation est déjà enregistrée dans la Sheet à ce stade : un échec
 // d'envoi ici (quota Gmail dépassé, etc.) ne doit jamais faire perdre la
 // réservation ni faire échouer la réponse au site, d'où le try/catch.
@@ -177,13 +287,50 @@ function cleanupTestData_() {
   return { success: true, deleted: deleted };
 }
 
+// Reçoit une réservation ou une action d'administration (POST en JSON).
+// - data.action === 'getReservations' | 'getChambres' | 'cleanupTestData' -> lecture/
+//   maintenance réservée à l'établissement, protégée par ADMIN_KEY (voir adminKeyOk_).
+// - data.type === 'chambre' -> réservation de chambre payée (depuis le webhook Stripe),
+//   protégée par SHARED_SECRET (voir saveRoomReservation_).
+// - sinon -> réservation de table du restaurant, créée par le formulaire public.
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+
+    // Actions réservées à l'établissement : elles exposent ou effacent des données
+    // personnelles de clients, elles exigent donc la clé d'accès.
+    if (data.action === 'getReservations' || data.action === 'getChambres' || data.action === 'cleanupTestData') {
+      if (!adminKeyOk_(data.key)) {
+        return jsonResponse_({ success: false, error: 'Clé d\'accès invalide ou non configurée.' });
+      }
+      if (data.action === 'cleanupTestData') {
+        return jsonResponse_(cleanupTestData_());
+      }
+      if (data.action === 'getChambres') {
+        return jsonResponse_({ success: true, chambres: listeChambres_() });
+      }
+      return jsonResponse_({ success: true, reservations: listeReservations_() });
+    }
+
+    if (data.type === 'chambre') {
+      return jsonResponse_(saveRoomReservation_(data));
+    }
+
+    // Sans action ni type : c'est le formulaire public, qui crée une réservation de table.
+    return jsonResponse_(saveTableReservation_(data));
+  } catch (err) {
+    return jsonResponse_({ success: false, error: err.message });
+  }
+}
+
 /**
  * Point d'entrée GET.
  *
- * Il ne renvoie plus aucune donnée de réservation : jusqu'au 19 septembre 2026, un simple
- * appel à ?action=getReservations suffisait, sans authentification, pour récupérer les
- * noms, téléphones et emails de tous les clients. La lecture passe désormais par doPost,
- * avec la clé d'accès (voir adminKeyOk_).
+ * Il ne renvoie plus aucune donnée de réservation (tables ou chambres) : jusqu'au
+ * 19 septembre 2026, un simple appel à ?action=getReservations suffisait, sans
+ * authentification, pour récupérer les noms, téléphones et emails de tous les
+ * clients. La lecture passe désormais par doPost, avec la clé d'accès (voir
+ * adminKeyOk_).
  */
 function doGet() {
   return jsonResponse_({
