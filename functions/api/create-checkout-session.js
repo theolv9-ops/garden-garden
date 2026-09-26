@@ -12,7 +12,7 @@
 // - STRIPE_SECRET_KEY : la clé secrète du compte Stripe de Garden Garden
 
 const OPENING_DATE = '2026-10-02';
-const NIGHT_PRICE_EUR = 110;
+const NIGHT_PRICE_EUR = 95;
 const BREAKFAST_PRICE_EUR = 15; // par personne et par jour
 const ROOM_GUESTS = 2; // chambre classique, 2 personnes
 const MAX_NIGHTS = 30;
