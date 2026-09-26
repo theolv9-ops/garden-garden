@@ -10,6 +10,13 @@
 var SHEET_ID = '1qIpRoT3IccSyPYZaFJem-fsF-DwmhSrtRLUoTLCI3tI';
 var HEADERS = ['Reçu le', 'Prénom', 'Nom', 'Date', 'Heure', 'Convives', 'Téléphone', 'Email', 'Occasion', 'Statut'];
 
+// Adresse prévenue par email à chaque nouvelle réservation. Envoyé par MailApp,
+// depuis le compte Google propriétaire du script : contrairement à un service
+// tiers (FormSubmit), l'envoi ne dépend d'aucune activation externe et n'est
+// jamais bloqué en silence. Limite Google : 100 emails/jour sur un compte
+// gratuit, largement suffisant ici.
+var NOTIFY_EMAIL = 'contact.gardengarden38@gmail.com';
+
 function getSheet_() {
   var sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
   if (sheet.getLastRow() === 0) {
@@ -117,9 +124,36 @@ function doPost(e) {
     range.setNumberFormats([['dd/MM/yyyy HH:mm', '@', '@', '@', '@', '0', '@', '@', '@', '@']]);
     range.setValues(rowValues);
 
+    notifierNouvelleReservation_(data, occasion);
+
     return jsonResponse_({ success: true });
   } catch (err) {
     return jsonResponse_({ success: false, error: err.message });
+  }
+}
+
+// Prévient l'établissement par email qu'une réservation vient d'arriver.
+// La réservation est déjà enregistrée dans la Sheet à ce stade : un échec
+// d'envoi ici (quota Gmail dépassé, etc.) ne doit jamais faire perdre la
+// réservation ni faire échouer la réponse au site, d'où le try/catch.
+function notifierNouvelleReservation_(data, occasion) {
+  try {
+    var sujet = 'Nouvelle réservation — ' + (data.prenom || '') + ' ' + (data.nom || '');
+    var corps = [
+      'Prénom : ' + (data.prenom || ''),
+      'Nom : ' + (data.nom || ''),
+      'Date : ' + (data.date || ''),
+      'Heure : ' + (data.heure || ''),
+      'Convives : ' + (data.convives || ''),
+      'Téléphone : ' + (data.telephone || ''),
+      'Email : ' + (data.email || ''),
+      'Occasion / commentaire : ' + (occasion || '—')
+    ].join('\n');
+    MailApp.sendEmail(NOTIFY_EMAIL, sujet, corps);
+  } catch (err) {
+    // On logge dans Exécutions plutôt que de propager l'erreur : la
+    // réservation est déjà sauvegardée, seul l'email a échoué.
+    console.error('Échec de l\'email de notification : ' + err.message);
   }
 }
 
