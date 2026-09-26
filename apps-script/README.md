@@ -34,4 +34,14 @@ c'est le parcours normal d'un client.
 Jusqu'à cette date, un simple appel à `…/exec?action=getReservations` suffisait, sans
 aucune authentification, pour récupérer les noms, téléphones et emails de tous les
 clients ayant réservé. L'action `cleanupTestData`, qui supprime des lignes, était elle
-aussi ouverte à tous. Les deux passent désormais par `doPost` avec la clé.
+aussi ouverte à tous. Les deux passent désormais par `doPost` avec la clé, tout comme
+la nouvelle action `getChambres` (réservations de chambre payées).
+
+## Autre propriété nécessaire : le paiement des chambres
+
+Le paiement en ligne des chambres (Stripe) a besoin d'une deuxième propriété de script,
+`SHARED_SECRET`, décrite dans `PAIEMENT-CHAMBRES.md` à la racine du dépôt. Elle sert à
+vérifier que seul le webhook Stripe (via la fonction Cloudflare Pages) peut créer une
+réservation de chambre marquée « Payée » — sans elle, `doPost` avec `type: "chambre"`
+répond systématiquement « Non autorisé ». Elle est indépendante de `ADMIN_KEY` : les deux
+doivent être créées, avec des valeurs différentes.
