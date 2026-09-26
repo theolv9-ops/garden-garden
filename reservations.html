@@ -217,6 +217,24 @@
 <script>
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNJ-ZJkZebg-IJ-vKzTs966eLpEIyXPZTYWio1gYjCiguMARc7VrlTfMpxHcsT-KCGGA/exec';
 
+  // Cette page affiche les noms, téléphones et emails des clients : elle exige la clé
+  // d'accès configurée côté Apps Script (propriété de script ADMIN_KEY). La clé n'est
+  // gardée que le temps de l'onglet, jamais dans le dépôt.
+  function cleAcces() {
+    var cle = null;
+    try { if (window.sessionStorage) cle = sessionStorage.getItem('gg-admin-key'); } catch (e) {}
+    if (!cle) {
+      cle = window.prompt('Clé d\'accès aux réservations :');
+      if (!cle) return null;
+      try { if (window.sessionStorage) sessionStorage.setItem('gg-admin-key', cle); } catch (e) {}
+    }
+    return cle;
+  }
+
+  function oublierCle() {
+    try { if (window.sessionStorage) sessionStorage.removeItem('gg-admin-key'); } catch (e) {}
+  }
+
   var form = document.getElementById('reservationForm');
   var submitBtn = document.getElementById('submitBtn');
   var formMsg = document.getElementById('formMsg');
@@ -307,17 +325,27 @@
   }
 
   function loadReservations() {
-    fetch(SCRIPT_URL + '?action=getReservations')
+    var cle = cleAcces();
+    if (!cle) {
+      tableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Clé d\'accès requise pour afficher les réservations. <a href="#" onclick="location.reload(); return false;">Réessayer</a></td></tr>';
+      return;
+    }
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getReservations', key: cle })
+    })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data.success) {
           renderTable(data.reservations);
         } else {
+          oublierCle();
           throw new Error(data.error || 'Erreur inconnue');
         }
       })
       .catch(function (err) {
-        tableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Impossible de charger les réservations (' + escapeHtml(err.message) + ')</td></tr>';
+        tableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Impossible de charger les réservations (' + escapeHtml(err.message) + ') <a href="#" onclick="location.reload(); return false;">Réessayer</a></td></tr>';
       });
   }
 
@@ -352,7 +380,16 @@
   }
 
   function loadChambres() {
-    fetch(SCRIPT_URL + '?action=getChambres')
+    var cle = cleAcces();
+    if (!cle) {
+      roomTableBody.innerHTML = '<tr class="loading-row"><td colspan="11">Clé d\'accès requise pour afficher les chambres.</td></tr>';
+      return;
+    }
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'getChambres', key: cle })
+    })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data.success) {
