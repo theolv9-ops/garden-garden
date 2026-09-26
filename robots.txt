@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /reservations.html
 
 Sitemap: https://gardengarden-chavanoz.com/sitemap.xml
