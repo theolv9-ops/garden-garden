@@ -237,7 +237,9 @@ function sendRoomConfirmationEmails_(data, montant, nuits, petitDej) {
       });
     }
   } catch (err) {
-    // On ne bloque pas l'enregistrement si l'envoi au client échoue (adresse invalide, etc.)
+    // On ne bloque pas l'enregistrement si l'envoi au client échoue (adresse invalide, etc.),
+    // mais on logge la vraie cause dans Exécutions pour pouvoir la diagnostiquer.
+    console.error('Échec de l\'email de confirmation client (chambre) : ' + err.message);
   }
 
   try {
@@ -252,6 +254,7 @@ function sendRoomConfirmationEmails_(data, montant, nuits, petitDej) {
     });
   } catch (err) {
     // idem : ne pas bloquer l'enregistrement de la réservation pour un souci d'envoi
+    console.error('Échec de l\'email de notification (chambre) : ' + err.message);
   }
 }
 
