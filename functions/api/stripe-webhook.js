@@ -55,7 +55,7 @@ async function verifyStripeSignature(payload, header, secret) {
 }
 
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const { request, env, waitUntil } = context;
 
   if (!env.STRIPE_WEBHOOK_SECRET) {
     return new Response('Webhook non configuré', { status: 500 });
@@ -81,30 +81,39 @@ export async function onRequestPost(context) {
     const m = session.metadata || {};
 
     if (env.GAS_WEBHOOK_URL) {
-      try {
-        await fetch(env.GAS_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            type: 'chambre',
-            secret: env.GAS_SHARED_SECRET,
-            prenom: m.prenom,
-            nom: m.nom,
-            email: m.email,
-            telephone: m.telephone,
-            arrivee: m.arrivee,
-            depart: m.depart,
-            nuits: m.nuits,
-            petitDej: m.petitDej,
-            montant: ((session.amount_total || 0) / 100).toFixed(2),
-            stripeSessionId: session.id,
-          }),
-        });
-      } catch (err) {
+      // On ne bloque pas la réponse à Stripe sur l'appel à Apps Script (qui peut
+      // parfois être lent, cold start compris) : si Stripe n'a pas de 200 assez
+      // vite, il considère l'appel raté et renvoie le même paiement en double,
+      // d'où le doublon vu en test. waitUntil laisse cet appel se terminer en
+      // arrière-plan même après la réponse envoyée à Stripe ci-dessous.
+      const notifyGas = fetch(env.GAS_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          type: 'chambre',
+          secret: env.GAS_SHARED_SECRET,
+          prenom: m.prenom,
+          nom: m.nom,
+          email: m.email,
+          telephone: m.telephone,
+          arrivee: m.arrivee,
+          depart: m.depart,
+          nuits: m.nuits,
+          petitDej: m.petitDej,
+          montant: ((session.amount_total || 0) / 100).toFixed(2),
+          stripeSessionId: session.id,
+        }),
+      }).catch(function (err) {
         // Le paiement Stripe a déjà réussi : on ne fait pas échouer le webhook pour un
         // souci d'écriture côté Google Sheet, sinon Stripe le renverra en boucle.
         // À surveiller manuellement si ça arrive souvent (voir la boîte mail Garden Garden).
         console.error('Erreur en écrivant la réservation chambre dans le Google Sheet :', err);
+      });
+
+      if (waitUntil) {
+        waitUntil(notifyGas);
+      } else {
+        await notifyGas;
       }
     }
   }

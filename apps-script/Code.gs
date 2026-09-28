@@ -171,6 +171,19 @@ function saveRoomReservation_(data) {
   }
 
   var sheet = getRoomSheet_();
+
+  // Stripe peut renvoyer le même paiement plusieurs fois (retry si la réponse
+  // n'arrive pas assez vite à son goût) : on ignore un paiement déjà enregistré,
+  // reconnu par son identifiant de session Stripe (dernière colonne).
+  if (data.stripeSessionId) {
+    var existant = sheet.getDataRange().getValues();
+    for (var i = 1; i < existant.length; i++) {
+      if (existant[i][existant[i].length - 1] === data.stripeSessionId) {
+        return { success: true, doublon: true };
+      }
+    }
+  }
+
   var nuits = parseInt(data.nuits, 10) || 0;
   var montant = data.montant || '';
   var petitDej = data.petitDej === 'oui' ? 'Oui' : 'Non';
