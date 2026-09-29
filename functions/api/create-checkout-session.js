@@ -17,11 +17,31 @@ const BREAKFAST_PRICE_EUR = 15; // par personne et par jour
 const ROOM_GUESTS = 2; // chambre classique, 2 personnes
 const MAX_NIGHTS = 30;
 
-function json(data, status) {
+const DEFAULT_ORIGIN = 'https://gardengarden-chavanoz.com';
+const ALLOWED_ORIGIN_RE = /^https:\/\/((www\.)?gardengarden-chavanoz\.com|([a-z0-9-]+\.)?garden-garden\.pages\.dev)$/;
+
+// Le site public (GitHub Pages) appelle cette fonction depuis un autre domaine :
+// on autorise uniquement les origines de Garden Garden.
+function corsHeaders(request) {
+  const origin = request.headers.get('origin') || '';
+  if (!ALLOWED_ORIGIN_RE.test(origin)) return {};
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    Vary: 'Origin',
+  };
+}
+
+function json(data, status, request) {
   return new Response(JSON.stringify(data), {
     status: status || 200,
-    headers: { 'Content-Type': 'application/json' },
+    headers: Object.assign({ 'Content-Type': 'application/json' }, request ? corsHeaders(request) : {}),
   });
+}
+
+export async function onRequestOptions(context) {
+  return new Response(null, { status: 204, headers: corsHeaders(context.request) });
 }
 
 // Transforme un objet (éventuellement imbriqué) en paires clé/valeur au format
@@ -53,14 +73,14 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   if (!env.STRIPE_SECRET_KEY) {
-    return json({ error: "Le paiement n'est pas encore configuré (clé Stripe manquante)." }, 500);
+    return json({ error: "Le paiement n'est pas encore configuré (clé Stripe manquante)." }, 500, request);
   }
 
   let data;
   try {
     data = await request.json();
   } catch (err) {
-    return json({ error: 'Requête invalide' }, 400);
+    return json({ error: 'Requête invalide' }, 400, request);
   }
 
   const prenom = String(data.prenom || '').trim();
@@ -72,7 +92,7 @@ export async function onRequestPost(context) {
   const petitDej = !!data.petitDej;
 
   if (!prenom || !nom || !email || !telephone || !arrivee || !depart) {
-    return json({ error: 'Merci de remplir tous les champs.' }, 400);
+    return json({ error: 'Merci de remplir tous les champs.' }, 400, request);
   }
 
   const dArrivee = new Date(arrivee + 'T00:00:00');
@@ -80,10 +100,10 @@ export async function onRequestPost(context) {
   const nights = Math.round((dDepart - dArrivee) / 86400000);
 
   if (arrivee < OPENING_DATE) {
-    return json({ error: 'Garden Garden ouvre ses portes le 2 octobre 2026.' }, 400);
+    return json({ error: 'Garden Garden ouvre ses portes le 2 octobre 2026.' }, 400, request);
   }
   if (!nights || nights < 1 || nights > MAX_NIGHTS) {
-    return json({ error: 'Dates de séjour invalides.' }, 400);
+    return json({ error: 'Dates de séjour invalides.' }, 400, request);
   }
 
   const nightsAmountCents = nights * NIGHT_PRICE_EUR * 100;
@@ -115,8 +135,8 @@ export async function onRequestPost(context) {
     });
   }
 
-  const origin = request.headers.get('origin') || request.headers.get('referer') || 'https://gardengarden-chavanoz.com';
-  const baseUrl = origin.replace(/\/$/, '');
+  const requestOrigin = request.headers.get('origin') || '';
+  const baseUrl = ALLOWED_ORIGIN_RE.test(requestOrigin) ? requestOrigin : DEFAULT_ORIGIN;
 
   const form = toStripeForm({
     mode: 'payment',
@@ -141,10 +161,10 @@ export async function onRequestPost(context) {
     });
     const session = await res.json();
     if (!res.ok) {
-      return json({ error: (session.error && session.error.message) || 'Erreur Stripe' }, 500);
+      return json({ error: (session.error && session.error.message) || 'Erreur Stripe' }, 500, request);
     }
-    return json({ url: session.url });
+    return json({ url: session.url }, 200, request);
   } catch (err) {
-    return json({ error: err.message }, 500);
+    return json({ error: err.message }, 500, request);
   }
 }

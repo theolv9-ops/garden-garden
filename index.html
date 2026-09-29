@@ -1138,7 +1138,7 @@ function crSubmit(e){
   btn.disabled = true;
   btn.textContent = 'Redirection…';
 
-  fetch('/api/create-checkout-session', {
+  fetch('https://garden-garden.pages.dev/api/create-checkout-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
