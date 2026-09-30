@@ -15,6 +15,11 @@
                "Réserver" pré-remplit le formulaire de réservation.
    prive     : mettre true pour un événement sur invitation ; la carte
                affiche "Sur invitation" au lieu du bouton "Réserver".
+   video     : facultatif, un lien vers une vidéo (reel/post Instagram
+               ou vidéo YouTube). Affiche un bouton "lecture" sur la
+               photo qui ouvre la vidéo dans une fenêtre par-dessus la
+               page. Les autres liens (TikTok...) s'ouvrent dans un
+               nouvel onglet.
    exemple   : à SUPPRIMER sur les vrais événements ; tant qu'il vaut
                true, un badge "Exemple" s'affiche sur la carte.
 
@@ -26,9 +31,10 @@ var EVENEMENTS = [
   {
     date: "2026-10-29",
     titre: "Inauguration privée",
-    texte: "Garden Garden célèbre son inauguration lors d'une soirée privée, réservée aux invités.",
+    texte: "Garden Garden célèbre son inauguration lors d'une soirée privée, réservée aux invités, avec une performance live de la chanteuse Priscillia.",
     prive: true,
-    image: "images/facade-soir.jpg"
+    image: "images/facade-soir.jpg",
+    video: "https://www.instagram.com/reel/Ddvx2Dqu0y4/"
   },
   {
     date: "2026-10-02",
