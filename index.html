@@ -270,6 +270,20 @@ section { padding:110px 20px; }
 .evt-foot .btn-outline { font-size:12px; padding:9px 18px; text-decoration:none; }
 .agenda-empty { max-width:620px; margin:0 auto; text-align:center; background:#fff; border:1px solid var(--line); border-radius:22px; padding:40px 32px; color:var(--muted); font-size:15px; }
 .agenda-empty a { color:var(--terra); font-weight:600; text-decoration:none; }
+.evt-photo.has-video { cursor:pointer; }
+.evt-play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(21,23,15,.18); transition:background .25s; }
+.evt-photo.has-video:hover .evt-play { background:rgba(21,23,15,.34); }
+.evt-play i { width:58px; height:58px; border-radius:50%; background:rgba(246,241,229,.95); color:var(--ink); display:flex; align-items:center; justify-content:center; font-size:22px; padding-left:3px; box-shadow:0 10px 24px -10px rgba(0,0,0,.5); transition:transform .25s; }
+.evt-photo.has-video:hover .evt-play i { transform:scale(1.08); }
+.evt-lightbox { position:fixed; inset:0; z-index:600; display:none; align-items:center; justify-content:center; background:rgba(15,17,11,.88); padding:24px; }
+.evt-lightbox.open { display:flex; }
+.evt-lightbox-wrap { position:relative; width:100%; max-width:420px; }
+.evt-lightbox-wrap.wide { max-width:860px; }
+.evt-lightbox-box { position:relative; width:100%; aspect-ratio:9/16; background:#000; border-radius:16px; overflow:hidden; }
+.evt-lightbox-wrap.wide .evt-lightbox-box { aspect-ratio:16/9; }
+.evt-lightbox-box iframe { width:100%; height:100%; border:0; display:block; }
+.evt-lightbox-close { position:absolute; top:-44px; right:0; width:36px; height:36px; border-radius:50%; border:1.5px solid rgba(246,241,229,.5); background:rgba(246,241,229,.1); color:var(--cream); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.evt-lightbox-close:hover { background:rgba(246,241,229,.2); }
 
 /* VISITE VIRTUELLE */
 .visite { background:var(--ink); color:var(--cream); }
@@ -838,6 +852,12 @@ html { scroll-behavior:smooth; }
   </div>
   <div class="agenda-grid" id="agendaGrid"></div>
 </section>
+<div class="evt-lightbox" id="evtLightbox" onclick="if(event.target===this) fermerVideoEvenement()">
+  <div class="evt-lightbox-wrap" id="evtLightboxWrap">
+    <button class="evt-lightbox-close" type="button" aria-label="Fermer la vidéo" onclick="fermerVideoEvenement()"><i class="ti ti-x"></i></button>
+    <div class="evt-lightbox-box" id="evtLightboxBox"></div>
+  </div>
+</div>
 <!-- Les événements se modifient dans le fichier evenements.js, pas ici. -->
 <script src="evenements.js"></script>
 <script>
@@ -884,6 +904,15 @@ html { scroll-behavior:smooth; }
     badge.appendChild(el('span', 'm', MOIS[d.getMonth()]));
     photo.appendChild(badge);
     if(e.exemple) photo.appendChild(el('span', 'evt-tag', 'Exemple'));
+    if(e.video){
+      photo.classList.add('has-video');
+      var play = el('div', 'evt-play');
+      play.innerHTML = '<i class="ti ti-player-play-filled"></i>';
+      photo.appendChild(play);
+      photo.setAttribute('role', 'button');
+      photo.setAttribute('aria-label', 'Voir la vidéo — ' + e.titre);
+      photo.onclick = function(){ ouvrirVideoEvenement(e.video); };
+    }
     card.appendChild(photo);
 
     var body = el('div', 'evt-body');
@@ -924,6 +953,38 @@ function reserverEvenement(e){
   }
   gscroll('resa');
 }
+// Vidéo d'un événement (champ "video" dans evenements.js) : ouvre un lecteur en incrustation.
+// Comprend les liens Instagram (reel/p/tv) et YouTube ; tout autre lien s'ouvre dans un nouvel onglet.
+function evtVideoEmbed(url){
+  var m = url.match(/instagram\.com\/(reel|p|tv)\/([^/?#]+)/i);
+  if(m) return { src: 'https://www.instagram.com/' + m[1] + '/' + m[2] + '/embed', wide: false };
+  m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/i);
+  if(m) return { src: 'https://www.youtube.com/embed/' + m[1] + '?autoplay=1', wide: true };
+  return null;
+}
+function ouvrirVideoEvenement(url){
+  var embed = evtVideoEmbed(url);
+  if(!embed){ window.open(url, '_blank', 'noopener'); return; }
+  var box = document.getElementById('evtLightboxBox');
+  var wrap = document.getElementById('evtLightboxWrap');
+  var iframe = document.createElement('iframe');
+  iframe.src = embed.src;
+  iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+  iframe.allowFullscreen = true;
+  box.innerHTML = '';
+  box.appendChild(iframe);
+  wrap.classList.toggle('wide', embed.wide);
+  document.getElementById('evtLightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function fermerVideoEvenement(){
+  document.getElementById('evtLightbox').classList.remove('open');
+  document.getElementById('evtLightboxBox').innerHTML = '';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(ev){
+  if(ev.key === 'Escape') fermerVideoEvenement();
+});
 </script>
 
 <section class="gallery">
