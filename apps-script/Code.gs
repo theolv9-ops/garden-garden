@@ -275,7 +275,19 @@ function notifierNouvelleReservation_(data, occasion) {
       'Email : ' + (data.email || ''),
       'Occasion / commentaire : ' + (occasion || '—')
     ].join('\n');
-    MailApp.sendEmail(NOTIFY_EMAIL, sujet, corps);
+    var options = {
+      to: NOTIFY_EMAIL,
+      subject: sujet,
+      body: corps,
+      // Le client apparaît comme expéditeur affiché ; « Répondre » lui écrit directement.
+      // L'adresse d'envoi reste celle du compte Google qui a déployé le script : Google
+      // n'autorise pas d'envoyer au nom de l'adresse d'un client.
+      name: ((data.prenom || '') + ' ' + (data.nom || '')).trim() + ' (via le site)'
+    };
+    if (data.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      options.replyTo = data.email;
+    }
+    MailApp.sendEmail(options);
   } catch (err) {
     // On logge dans Exécutions plutôt que de propager l'erreur : la
     // réservation est déjà sauvegardée, seul l'email a échoué.
