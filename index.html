@@ -1118,12 +1118,19 @@ var OPENING_DATE = '2026-10-02';
   if(dateInput){ dateInput.min = todayStr > OPENING_DATE ? todayStr : OPENING_DATE; }
 })();
 function gscroll(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+// Envoie la réservation à Apps Script, qui l'écrit dans le Google Sheet ET envoie
+// l'email « Nouvelle réservation » à Garden Garden. Rejette si l'envoi a échoué.
 function gsendToSheet(payload){
-  fetch('https://script.google.com/macros/s/AKfycbwNJ-ZJkZebg-IJ-vKzTs966eLpEIyXPZTYWio1gYjCiguMARc7VrlTfMpxHcsT-KCGGA/exec', {
+  return fetch('https://script.google.com/macros/s/AKfycbwNJ-ZJkZebg-IJ-vKzTs966eLpEIyXPZTYWio1gYjCiguMARc7VrlTfMpxHcsT-KCGGA/exec', {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload)
-  }).catch(function(){});
+  }).then(function(res){
+    if(!res.ok) throw new Error('bad status');
+    return res.json();
+  }).then(function(data){
+    if(!data || data.success !== true) throw new Error('script refused');
+  });
 }
 function gsubmit(e){
   e.preventDefault();
@@ -1137,6 +1144,12 @@ function gsubmit(e){
   var tableLabel = tables.join(' ou ');
   // La feuille Google n'a pas de colonne dédiée : on place la table en tête de l'occasion.
   var occasionSheet = 'Table : ' + tableLabel + (v('g-msg') ? ' — ' + v('g-msg') : '');
+  var btn = e.target.querySelector('button[type="submit"]');
+  var errEl = document.getElementById('g-err');
+  var okEl = document.getElementById('g-ok');
+  errEl.style.display='none';
+  okEl.style.display='none';
+  if(btn){ btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
   gsendToSheet({
     prenom: v('g-prenom'),
     nom: v('g-nom'),
@@ -1146,59 +1159,15 @@ function gsubmit(e){
     heure: v('g-heure').replace('h', ':'),
     convives: v('g-pers'),
     occasion: occasionSheet
-  });
-  var subject = 'Réservation — ' + v('g-prenom') + ' ' + v('g-nom') + ' — ' + v('g-date') + ' ' + v('g-heure');
-  var body = [
-    'Prénom : ' + v('g-prenom'),
-    'Nom : ' + v('g-nom'),
-    'Date : ' + v('g-date'),
-    'Heure : ' + v('g-heure'),
-    'Convives : ' + v('g-pers'),
-    'Table souhaitée : ' + tableLabel,
-    'Téléphone : ' + v('g-tel'),
-    'Email : ' + v('g-email'),
-    'Occasion particulière : ' + (v('g-msg') || '—')
-  ].join('\n');
-  var mailto = 'mailto:contact.gardengarden38@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  var btn = e.target.querySelector('button[type="submit"]');
-  var errEl = document.getElementById('g-err');
-  var okEl = document.getElementById('g-ok');
-  errEl.style.display='none';
-  okEl.style.display='none';
-  if(btn){ btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
-  var fd = new FormData();
-  fd.append('Prénom', v('g-prenom'));
-  fd.append('Nom', v('g-nom'));
-  fd.append('Date', v('g-date'));
-  fd.append('Heure', v('g-heure'));
-  fd.append('Convives', v('g-pers'));
-  fd.append('Table souhaitée', tableLabel);
-  fd.append('Téléphone', v('g-tel'));
-  fd.append('Email', v('g-email'));
-  fd.append('Occasion particulière', v('g-msg') || '—');
-  fd.append('_subject', subject);
-  fd.append('_template', 'table');
-  fd.append('_captcha', 'false');
-  fetch('https://formsubmit.co/ajax/contact.gardengarden38@gmail.com', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json' },
-    body: fd
-  }).then(function(res){
-    if(!res.ok) throw new Error('bad status');
-    return res.json();
-  }).then(function(data){
-    if(!data || data.success === false || data.success === 'false'){ throw new Error('formsubmit not active'); }
+  }).then(function(){
     if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation_auto'}); }
     okEl.textContent = '✓ Merci ! Votre demande a été envoyée. Nous vous rappelons très vite pour confirmer.';
     okEl.style.display='block';
     okEl.scrollIntoView({behavior:'smooth',block:'center'});
     document.getElementById('reservationForm').reset();
   }).catch(function(){
-    if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation_fallback_mailto'}); }
-    window.location.href = mailto;
-    okEl.textContent = '✓ Votre messagerie va s\'ouvrir avec la demande pré-remplie — il ne reste qu\'à cliquer sur « Envoyer ». Vous pouvez aussi appeler directement le 04 86 80 27 50.';
-    okEl.style.display='block';
-    okEl.scrollIntoView({behavior:'smooth',block:'center'});
+    errEl.style.display='block';
+    errEl.scrollIntoView({behavior:'smooth',block:'center'});
   }).finally(function(){
     if(btn){ btn.disabled = false; btn.textContent = 'Confirmer la réservation'; }
   });
