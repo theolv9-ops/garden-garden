@@ -35,7 +35,7 @@
   "hasMenu": "https://gardengarden-chavanoz.com/#carte",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "14 hameau de Grange Rouge, 2 route de Loyettes",
+    "streetAddress": "14 hameau de Grange Rouge",
     "addressLocality": "Chavanoz",
     "postalCode": "38230",
     "addressCountry": "FR"
@@ -469,7 +469,7 @@ html { scroll-behavior:smooth; }
 
 <div id="progress"></div>
 
-<div class="opening-ribbon" onclick="gscroll('evenements')" style="cursor:pointer;"><i class="ti ti-confetti"></i> <b>Ouverture le 2 octobre 2026</b> — Bar · Restaurant · Chambres à Chavanoz</div>
+<div class="opening-ribbon" onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i> <b>Ouvert 7 jours sur 7</b> — Bar · Restaurant · Chambres à Chavanoz</div>
 
 <div class="nav-wrap">
   <div class="nav" id="mainNav">
@@ -496,17 +496,17 @@ html { scroll-behavior:smooth; }
     <img src="images/hero.jpg" alt="Garden Garden — Bar, Restaurant &amp; Chambres" onerror="this.style.display='none'" fetchpriority="high" decoding="async">
   </div>
   <canvas id="fireflies"></canvas>
-  <div class="status-float" onclick="gscroll('evenements')" style="cursor:pointer;"><span class="status-dot"></span> Ouverture le 2 octobre 2026 · réservations ouvertes</div>
+  <div class="status-float" onclick="gscroll('infos')" style="cursor:pointer;"><span class="status-dot"></span> Ouvert 7 jours sur 7 · réservations ouvertes</div>
   <div class="hero-content" id="heroContent">
     <div class="tagline"><i class="ti ti-trees"></i> Bar · Restaurant · Chambres</div>
     <h1><span class="w" style="--d:.6s">L'art</span> <span class="w" style="--d:.72s">de</span> <span class="w" style="--d:.84s">recevoir,</span> <em><span class="w" style="--d:1s">le</span> <span class="w" style="--d:1.12s">goût</span> <span class="w" style="--d:1.24s">du</span> <span class="w" style="--d:1.36s">plaisir.</span></em></h1>
     <p class="sub">Cuisine française traditionnelle, viandes d'exception sélectionnées et maturées avec soin, chambres au calme d'un parc arboré — à quelques minutes de Lyon.</p>
     <div class="hero-row">
       <button class="btn btn-primary" onclick="gscroll('resa')">Réserver une table</button>
-      <div class="rating-badge" onclick="gscroll('evenements')" style="cursor:pointer;">
-        <span class="stars"><i class="ti ti-calendar-event"></i></span>
-        <b>Ouverture</b>
-        <span>le 2 octobre 2026</span>
+      <div class="rating-badge" onclick="gscroll('infos')" style="cursor:pointer;">
+        <span class="stars"><i class="ti ti-calendar-check"></i></span>
+        <b>Ouvert</b>
+        <span>7 jours sur 7</span>
       </div>
     </div>
   </div>
@@ -525,13 +525,13 @@ html { scroll-behavior:smooth; }
 
 <div class="marquee">
   <div class="track">
-    <span onclick="gscroll('evenements')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture le 2 octobre 2026</span>
+    <span onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i>Ouvert 7 jours sur 7</span>
     <span><i class="ti ti-tag"></i>Menu Grenouilles · tous les week-ends</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
     <span><i class="ti ti-bed"></i>Chambres ★★★</span>
     <span><i class="ti ti-trees"></i>Terrasse au jardin</span>
-    <span onclick="gscroll('evenements')" style="cursor:pointer;"><i class="ti ti-confetti"></i>Ouverture le 2 octobre 2026</span>
+    <span onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i>Ouvert 7 jours sur 7</span>
     <span><i class="ti ti-tag"></i>Menu Grenouilles · tous les week-ends</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
@@ -1079,10 +1079,11 @@ document.addEventListener('keydown', function(ev){
   <div class="infos-wrap">
     <div class="info reveal">
       <h4>Où nous trouver</h4>
-      <p>14 hameau de Grange Rouge<br>2 route de Loyettes<br>38230 Chavanoz<br><a href="https://www.google.com/maps/search/?api=1&query=14+hameau+de+Grange+Rouge%2C+2+route+de+Loyettes%2C+38230+Chavanoz" target="_blank" rel="noopener">→ Ouvrir dans Google Maps</a></p>
+      <p>14 hameau de Grange Rouge<br>38230 Chavanoz<br><a href="https://www.google.com/maps/search/?api=1&query=14+hameau+de+Grange+Rouge%2C+38230+Chavanoz" target="_blank" rel="noopener">→ Ouvrir dans Google Maps</a></p>
     </div>
     <div class="info reveal">
       <h4>Horaires</h4>
+      <p><strong>Ouvert 7 jours sur 7</strong></p>
       <div class="hr-row"><span class="hr-day">Lundi — Samedi (midi)</span><span class="hr-time">12h–15h</span></div>
       <div class="hr-row"><span class="hr-day">Jeu — Sam (soir)</span><span class="hr-time">17h–1h</span></div>
       <div class="hr-row"><span class="hr-day">Dimanche</span><span class="hr-time">12h–18h</span></div>
@@ -1100,7 +1101,7 @@ document.addEventListener('keydown', function(ev){
 
 <div class="foot">
   <div class="brand" style="color:var(--cream); font-family:'Fraunces',serif;">Garden<em style="color:var(--gold);">Garden</em></div>
-  <small>Bar · Restaurant · Chambres ★★★ — 14 hameau de Grange Rouge, 2 route de Loyettes, 38230 Chavanoz · 04 86 80 27 50<br>© 2026 Garden Garden · <a href="mentions-legales.html" style="color:inherit; text-decoration:underline;">Mentions légales</a> · <a href="confidentialite.html" style="color:inherit; text-decoration:underline;">Confidentialité</a></small>
+  <small>Bar · Restaurant · Chambres ★★★ — 14 hameau de Grange Rouge, 38230 Chavanoz · 04 86 80 27 50<br>© 2026 Garden Garden · <a href="mentions-legales.html" style="color:inherit; text-decoration:underline;">Mentions légales</a> · <a href="confidentialite.html" style="color:inherit; text-decoration:underline;">Confidentialité</a></small>
 </div>
 
 <div class="stickybar">
