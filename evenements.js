@@ -35,13 +35,5 @@ var EVENEMENTS = [
     prive: true,
     image: "images/facade-soir.jpg",
     video: "https://www.instagram.com/reel/Ddvx2Dqu0y4/"
-  },
-  {
-    date: "2026-10-02",
-    heure: "19h00",
-    titre: "Soirée d'ouverture",
-    texte: "Garden Garden ouvre ses portes : apéritif au jardin, braseros allumés et premier service à la carte.",
-    prix: "Entrée libre",
-    image: "images/hero.jpg"
   }
 ];
