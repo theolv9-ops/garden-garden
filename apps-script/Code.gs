@@ -126,6 +126,17 @@ function listeChambres_() {
 // Enregistre une réservation de table (comportement historique) et prévient
 // l'établissement par email.
 function saveTableReservation_(data) {
+  // Verrou : deux demandes simultanées ne doivent pas se voir « de la place » en même temps.
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    return saveTableReservationLocked_(data);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function saveTableReservationLocked_(data) {
   var sheet = getSheet_();
 
   // Le formulaire a un champ "Commentaires" mais la feuille n'a que 10 colonnes fixes :
@@ -156,7 +167,12 @@ function saveTableReservation_(data) {
   range.setNumberFormats([['dd/MM/yyyy HH:mm', '@', '@', '@', '@', '0', '@', '@', '@', '@']]);
   range.setValues(rowValues);
 
-  notifierNouvelleReservation_(data, occasion);
+  var decision = decisionAutomatique_(data, rowIndex);
+  if (decision.statut !== STATUT_NOUVELLE) {
+    sheet.getRange(rowIndex, STATUT_COL).setValue(decision.statut);
+  }
+  notifierNouvelleReservation_(data, occasion, decision);
+  repondreAuClient_(data, occasion, decision, sheet.getRange(rowIndex, STATUT_COL));
 
   return { success: true };
 }
@@ -262,9 +278,10 @@ function sendRoomConfirmationEmails_(data, montant, nuits, petitDej) {
 // La réservation est déjà enregistrée dans la Sheet à ce stade : un échec
 // d'envoi ici (quota Gmail dépassé, etc.) ne doit jamais faire perdre la
 // réservation ni faire échouer la réponse au site, d'où le try/catch.
-function notifierNouvelleReservation_(data, occasion) {
+function notifierNouvelleReservation_(data, occasion, decision) {
   try {
-    var sujet = 'Nouvelle réservation — ' + (data.prenom || '') + ' ' + (data.nom || '');
+    var sujet = 'Nouvelle réservation — ' + (data.prenom || '') + ' ' + (data.nom || '') +
+      (decision ? ' [' + decision.libelle + ']' : '');
     var corps = [
       'Prénom : ' + (data.prenom || ''),
       'Nom : ' + (data.nom || ''),
@@ -273,14 +290,252 @@ function notifierNouvelleReservation_(data, occasion) {
       'Convives : ' + (data.convives || ''),
       'Téléphone : ' + (data.telephone || ''),
       'Email : ' + (data.email || ''),
-      'Occasion / commentaire : ' + (occasion || '—')
+      'Occasion / commentaire : ' + (occasion || '—'),
+      decision ? '\nDécision automatique : ' + decision.libelle + ' — ' + decision.raison : ''
     ].join('\n');
-    MailApp.sendEmail(NOTIFY_EMAIL, sujet, corps);
+    var options = {
+      to: NOTIFY_EMAIL,
+      subject: sujet,
+      body: corps,
+      // Le client apparaît comme expéditeur affiché ; « Répondre » lui écrit directement.
+      // L'adresse d'envoi reste celle du compte Google qui a déployé le script : Google
+      // n'autorise pas d'envoyer au nom de l'adresse d'un client.
+      name: ((data.prenom || '') + ' ' + (data.nom || '')).trim() + ' (via le site)'
+    };
+    if (data.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      options.replyTo = data.email;
+    }
+    MailApp.sendEmail(options);
   } catch (err) {
     // On logge dans Exécutions plutôt que de propager l'erreur : la
     // réservation est déjà sauvegardée, seul l'email a échoué.
     console.error('Échec de l\'email de notification : ' + err.message);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Suivi des réservations de table : accusé de réception, confirmation, rappel
+//
+// 1. Chaque demande est traitée automatiquement : confirmée si le restaurant est
+//    ouvert, le groupe petit et la place disponible (capacité réglable plus bas) ;
+//    refusée si fermé ; sinon laissée « Nouvelle » avec un accusé de réception qui ne
+//    promet pas la table. Le client reçoit l'email correspondant tout de suite.
+// 2. Quand l'établissement change le Statut à la main (« Confirmée » / « Refusée »),
+//    l'email correspondant part aussi tout seul, une seule fois par ligne.
+// 3. Chaque matin, un rappel est envoyé à l'établissement tant que des demandes
+//    sont restées sur « Nouvelle ».
+// Les déclencheurs (2 et 3) s'installent une seule fois en lançant
+// installerDeclencheurs() depuis l'éditeur Apps Script.
+// ---------------------------------------------------------------------------
+
+var STATUT_COL = 10; // colonne J de l'onglet des tables
+var STATUT_NOUVELLE = 'Nouvelle';
+var STATUT_CONFIRMEE = 'Confirmée';
+var STATUT_REFUSEE = 'Refusée';
+var SIGNATURE_RESTAURANT =
+  'Garden Garden\n14 hameau de Grange Rouge, 38230 Chavanoz\nTél : 04 86 80 27 50 / 06 61 02 44 31';
+
+function emailValide_(email) {
+  return !!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Date stockée en texte (2026-10-03) -> 03/10/2026 pour les emails
+function dateLisible_(d) {
+  if (d instanceof Date) return Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+  var m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? m[3] + '/' + m[2] + '/' + m[1] : String(d || '');
+}
+
+function recapTable_(r) {
+  return [
+    'Date : ' + dateLisible_(r.date),
+    'Heure : ' + (r.heure || ''),
+    'Convives : ' + (r.convives || ''),
+    r.occasion ? 'Précisions : ' + r.occasion : ''
+  ].filter(String).join('\n');
+}
+
+// Envoie un email au client avec le nom du restaurant en expéditeur ; les réponses
+// du client arrivent sur l'adresse de l'établissement.
+function envoyerAuClient_(r, sujet, intro) {
+  if (!emailValide_(r.email)) return false;
+  MailApp.sendEmail({
+    to: r.email,
+    subject: sujet,
+    body: 'Bonjour ' + (r.prenom || '') + ',\n\n' + intro + '\n\n' + recapTable_(r) + '\n\n' + SIGNATURE_RESTAURANT,
+    name: 'Garden Garden',
+    replyTo: NOTIFY_EMAIL
+  });
+  return true;
+}
+
+// ---- Décision automatique ------------------------------------------------
+// Règles réglables ici. Une demande est confirmée toute seule si le restaurant est
+// ouvert à ce moment-là, si le groupe est petit et s'il reste de la place. Sinon elle
+// reste « Nouvelle » (à vérifier à la main) ou est refusée si le restaurant est fermé.
+var CAPACITE_COUVERTS = { midi: 30, soir: 30 }; // couverts max par service : À AJUSTER avec Garden Garden
+var GROUPE_MAX_AUTO = 6;                        // au-delà : vérification manuelle
+// Jours d'ouverture par service (0 = dimanche … 6 = samedi), d'après le site.
+var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [4, 5, 6] };
+var MIDI_DEBUT = 12 * 60, MIDI_FIN = 15 * 60;   // service du midi (dimanche : jusqu'à 18 h)
+var SOIR_DEBUT = 17 * 60;
+
+function serviceDe_(minutes, jour) {
+  var finMidi = jour === 0 ? 18 * 60 : MIDI_FIN;
+  if (minutes >= MIDI_DEBUT && minutes < finMidi) return 'midi';
+  if (minutes >= SOIR_DEBUT) return 'soir';
+  return null;
+}
+
+function nombreCouverts_(convives) {
+  var m = String(convives || '').match(/^\s*(\d+)\s*personne/i);
+  return m ? parseInt(m[1], 10) : null; // « Grande tablée (7+) » -> null
+}
+
+function minutesDe_(heure) {
+  var m = String(heure || '').match(/^(\d{1,2})[:h](\d{2})$/);
+  return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
+}
+
+// Décide du sort d'une demande tout juste enregistrée à la ligne rowIndex.
+function decisionAutomatique_(data, rowIndex) {
+  var nouvelle = function (raison) { return { statut: STATUT_NOUVELLE, libelle: 'À VÉRIFIER', raison: raison }; };
+  try {
+    var m = String(data.date || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    var minutes = minutesDe_(data.heure);
+    var n = nombreCouverts_(data.convives);
+    if (!m || minutes === null) return nouvelle('date ou heure illisible');
+    if (n === null || n > GROUPE_MAX_AUTO) return nouvelle('grand groupe (' + data.convives + '), à voir avec le client');
+
+    var jour = new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10)).getDay();
+    var service = serviceDe_(minutes, jour);
+    if (!service) return nouvelle('heure en dehors des services');
+    if (JOURS_OUVERTS[service].indexOf(jour) === -1) {
+      return { statut: STATUT_REFUSEE, libelle: 'REFUSÉE (fermé)', raison: 'le restaurant n\'est pas ouvert ce jour-là à ce service' };
+    }
+
+    // Places déjà confirmées le même jour, au même service (hors la ligne tout juste ajoutée).
+    var values = getSheet_().getDataRange().getValues();
+    var pris = 0;
+    for (var i = 1; i < values.length; i++) {
+      if (i + 1 === rowIndex) continue;
+      if (String(values[i][STATUT_COL - 1]).trim() !== STATUT_CONFIRMEE) continue;
+      if (String(values[i][3]) !== String(data.date)) continue;
+      var mi = minutesDe_(values[i][4]);
+      if (mi === null || serviceDe_(mi, jour) !== service) continue;
+      pris += nombreCouverts_(values[i][5]) || 0;
+    }
+    if (pris + n > CAPACITE_COUVERTS[service]) {
+      return nouvelle('service presque complet (' + pris + '/' + CAPACITE_COUVERTS[service] + ' couverts déjà confirmés)');
+    }
+    return { statut: STATUT_CONFIRMEE, libelle: 'CONFIRMÉE AUTO', raison: (pris + n) + '/' + CAPACITE_COUVERTS[service] + ' couverts ce service' };
+  } catch (err) {
+    console.error('Échec de la décision automatique : ' + err.message);
+    return nouvelle('erreur de calcul, à vérifier');
+  }
+}
+
+// Email au client selon la décision ; la note de la cellule Statut empêche un doublon
+// si quelqu'un modifie ensuite le statut à la main.
+function repondreAuClient_(data, occasion, decision, statutRange) {
+  try {
+    var r = { prenom: data.prenom, email: data.email, date: data.date, heure: data.heure, convives: data.convives, occasion: occasion };
+    var envoye;
+    if (decision.statut === STATUT_CONFIRMEE) {
+      envoye = envoyerAuClient_(r, 'Votre réservation est confirmée — Garden Garden',
+        'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !');
+    } else if (decision.statut === STATUT_REFUSEE) {
+      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
+        'Nous sommes désolés : nous ne sommes pas ouverts à ce moment-là. ' +
+        'Consultez nos horaires sur le site ou appelez-nous au 04 86 80 27 50, nous trouverons un autre créneau.');
+    } else {
+      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
+        'Nous avons bien reçu votre demande de réservation. Ce n\'est pas encore une confirmation : ' +
+        'nous vérifions la disponibilité et nous revenons vers vous très vite, par email ou par téléphone.');
+    }
+    if (decision.statut !== STATUT_NOUVELLE) {
+      statutRange.setNote(envoye
+        ? 'Email « ' + decision.statut + ' » envoyé automatiquement au client.'
+        : 'Aucun email envoyé : adresse du client absente ou invalide. Prévenir le client par téléphone.');
+    }
+  } catch (err) {
+    console.error('Échec de l\'email au client : ' + err.message);
+  }
+}
+
+// 2. Déclencheur installable « à la modification » : réagit au changement de Statut.
+function surModificationStatut_(e) {
+  try {
+    var range = e && e.range;
+    if (!range || range.getColumn() !== STATUT_COL || range.getRow() < 2) return;
+    var sheet = range.getSheet();
+    if (sheet.getSheetId() !== getSheet_().getSheetId()) return;
+
+    var statut = String(range.getValue() || '').trim();
+    if (statut !== STATUT_CONFIRMEE && statut !== STATUT_REFUSEE) return;
+
+    // Garde-fou : un seul email par ligne, même si le statut est modifié plusieurs fois.
+    if (range.getNote()) return;
+
+    var row = sheet.getRange(range.getRow(), 1, 1, STATUT_COL).getValues()[0];
+    var r = { prenom: row[1], nom: row[2], date: row[3], heure: row[4], convives: row[5], email: row[7], occasion: row[8] };
+
+    var envoye;
+    if (statut === STATUT_CONFIRMEE) {
+      envoye = envoyerAuClient_(r, 'Votre réservation est confirmée — Garden Garden',
+        'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !');
+    } else {
+      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
+        'Nous sommes désolés : nous ne pouvons pas honorer votre demande pour ce créneau. ' +
+        'Appelez-nous au 04 86 80 27 50 et nous trouverons une autre solution ensemble.');
+    }
+    range.setNote(envoye
+      ? 'Email « ' + statut + ' » envoyé au client le ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm')
+      : 'Aucun email envoyé : adresse du client absente ou invalide. Prévenir le client par téléphone.');
+  } catch (err) {
+    console.error('Échec de l\'email de statut : ' + err.message);
+  }
+}
+
+// 3. Rappel du matin : demandes restées sur « Nouvelle ».
+function rappelDemandesEnAttente() {
+  var values = getSheet_().getDataRange().getValues();
+  var lignes = [];
+  var aujourdhui = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  for (var i = 1; i < values.length; i++) {
+    // Seulement les demandes dont la date n'est pas passée (ignore les vieilles lignes).
+    if (String(values[i][STATUT_COL - 1]).trim() === STATUT_NOUVELLE &&
+        String(values[i][3]) >= aujourdhui) {
+      lignes.push('- ' + values[i][1] + ' ' + values[i][2] + ' · ' + dateLisible_(values[i][3]) + ' à ' + values[i][4] +
+        ' · ' + values[i][5] + ' · ' + values[i][6]);
+    }
+  }
+  if (lignes.length === 0) return;
+  MailApp.sendEmail(NOTIFY_EMAIL,
+    lignes.length + ' réservation(s) à confirmer — Garden Garden',
+    'Ces demandes de table attendent encore une réponse (Statut « Nouvelle » dans la Sheet) :\n\n' +
+    lignes.join('\n') +
+    '\n\nPassez le Statut sur « Confirmée » (ou « Refusée ») : le client reçoit alors son email automatiquement.');
+}
+
+// À lancer UNE seule fois depuis l'éditeur (menu Exécuter) : installe le déclencheur
+// de confirmation, le rappel de 9 h, et la liste déroulante du Statut. Relancer ne
+// crée pas de doublons.
+function installerDeclencheurs() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    var f = t.getHandlerFunction();
+    if (f === 'surModificationStatut_' || f === 'rappelDemandesEnAttente') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('surModificationStatut_').forSpreadsheet(ss).onEdit().create();
+  ScriptApp.newTrigger('rappelDemandesEnAttente').timeBased().everyDays(1).atHour(9).create();
+
+  var sheet = getSheet_();
+  var regle = SpreadsheetApp.newDataValidation()
+    .requireValueInList([STATUT_NOUVELLE, STATUT_CONFIRMEE, STATUT_REFUSEE], true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange(2, STATUT_COL, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(regle);
 }
 
 // Supprime les lignes de test (Prénom commençant par "TEST", Nom contenant
