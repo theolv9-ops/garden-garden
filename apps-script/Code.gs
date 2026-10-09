@@ -501,8 +501,11 @@ function surModificationStatut_(e) {
 function rappelDemandesEnAttente() {
   var values = getSheet_().getDataRange().getValues();
   var lignes = [];
+  var aujourdhui = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   for (var i = 1; i < values.length; i++) {
-    if (String(values[i][STATUT_COL - 1]).trim() === STATUT_NOUVELLE) {
+    // Seulement les demandes dont la date n'est pas passée (ignore les vieilles lignes).
+    if (String(values[i][STATUT_COL - 1]).trim() === STATUT_NOUVELLE &&
+        String(values[i][3]) >= aujourdhui) {
       lignes.push('- ' + values[i][1] + ' ' + values[i][2] + ' · ' + dateLisible_(values[i][3]) + ' à ' + values[i][4] +
         ' · ' + values[i][5] + ' · ' + values[i][6]);
     }
