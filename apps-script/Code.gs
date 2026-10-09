@@ -157,6 +157,7 @@ function saveTableReservation_(data) {
   range.setValues(rowValues);
 
   notifierNouvelleReservation_(data, occasion);
+  accuseReceptionClient_(data, occasion);
 
   return { success: true };
 }
@@ -293,6 +294,147 @@ function notifierNouvelleReservation_(data, occasion) {
     // réservation est déjà sauvegardée, seul l'email a échoué.
     console.error('Échec de l\'email de notification : ' + err.message);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Suivi des réservations de table : accusé de réception, confirmation, rappel
+//
+// Le site ne gère pas les disponibilités : rien n'est confirmé automatiquement.
+// 1. À la demande, le client reçoit un accusé de réception (« bien reçue, nous
+//    vous confirmons très vite »), qui ne promet pas la table.
+// 2. Quand l'établissement passe le Statut sur « Confirmée » (ou « Refusée ») dans
+//    la Sheet, l'email correspondant part tout seul au client.
+// 3. Chaque matin, un rappel est envoyé à l'établissement tant que des demandes
+//    sont restées sur « Nouvelle ».
+// Les déclencheurs (2 et 3) s'installent une seule fois en lançant
+// installerDeclencheurs() depuis l'éditeur Apps Script.
+// ---------------------------------------------------------------------------
+
+var STATUT_COL = 10; // colonne J de l'onglet des tables
+var STATUT_NOUVELLE = 'Nouvelle';
+var STATUT_CONFIRMEE = 'Confirmée';
+var STATUT_REFUSEE = 'Refusée';
+var SIGNATURE_RESTAURANT =
+  'Garden Garden\n14 hameau de Grange Rouge, 38230 Chavanoz\nTél : 04 86 80 27 50 / 06 61 02 44 31';
+
+function emailValide_(email) {
+  return !!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Date stockée en texte (2026-10-03) -> 03/10/2026 pour les emails
+function dateLisible_(d) {
+  if (d instanceof Date) return Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+  var m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? m[3] + '/' + m[2] + '/' + m[1] : String(d || '');
+}
+
+function recapTable_(r) {
+  return [
+    'Date : ' + dateLisible_(r.date),
+    'Heure : ' + (r.heure || ''),
+    'Convives : ' + (r.convives || ''),
+    r.occasion ? 'Précisions : ' + r.occasion : ''
+  ].filter(String).join('\n');
+}
+
+// Envoie un email au client avec le nom du restaurant en expéditeur ; les réponses
+// du client arrivent sur l'adresse de l'établissement.
+function envoyerAuClient_(r, sujet, intro) {
+  if (!emailValide_(r.email)) return false;
+  MailApp.sendEmail({
+    to: r.email,
+    subject: sujet,
+    body: 'Bonjour ' + (r.prenom || '') + ',\n\n' + intro + '\n\n' + recapTable_(r) + '\n\n' + SIGNATURE_RESTAURANT,
+    name: 'Garden Garden',
+    replyTo: NOTIFY_EMAIL
+  });
+  return true;
+}
+
+// 1. Accusé de réception, juste après l'enregistrement de la demande.
+function accuseReceptionClient_(data, occasion) {
+  try {
+    envoyerAuClient_(
+      { prenom: data.prenom, email: data.email, date: data.date, heure: data.heure, convives: data.convives, occasion: occasion },
+      'Votre demande de réservation — Garden Garden',
+      'Nous avons bien reçu votre demande de réservation. Ce n\'est pas encore une confirmation : ' +
+      'nous vérifions la disponibilité et nous revenons vers vous très vite, par email ou par téléphone.'
+    );
+  } catch (err) {
+    console.error('Échec de l\'accusé de réception client : ' + err.message);
+  }
+}
+
+// 2. Déclencheur installable « à la modification » : réagit au changement de Statut.
+function surModificationStatut_(e) {
+  try {
+    var range = e && e.range;
+    if (!range || range.getColumn() !== STATUT_COL || range.getRow() < 2) return;
+    var sheet = range.getSheet();
+    if (sheet.getSheetId() !== getSheet_().getSheetId()) return;
+
+    var statut = String(range.getValue() || '').trim();
+    if (statut !== STATUT_CONFIRMEE && statut !== STATUT_REFUSEE) return;
+
+    // Garde-fou : un seul email par ligne, même si le statut est modifié plusieurs fois.
+    if (range.getNote()) return;
+
+    var row = sheet.getRange(range.getRow(), 1, 1, STATUT_COL).getValues()[0];
+    var r = { prenom: row[1], nom: row[2], date: row[3], heure: row[4], convives: row[5], email: row[7], occasion: row[8] };
+
+    var envoye;
+    if (statut === STATUT_CONFIRMEE) {
+      envoye = envoyerAuClient_(r, 'Votre réservation est confirmée — Garden Garden',
+        'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !');
+    } else {
+      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
+        'Nous sommes désolés : nous ne pouvons pas honorer votre demande pour ce créneau. ' +
+        'Appelez-nous au 04 86 80 27 50 et nous trouverons une autre solution ensemble.');
+    }
+    range.setNote(envoye
+      ? 'Email « ' + statut + ' » envoyé au client le ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm')
+      : 'Aucun email envoyé : adresse du client absente ou invalide. Prévenir le client par téléphone.');
+  } catch (err) {
+    console.error('Échec de l\'email de statut : ' + err.message);
+  }
+}
+
+// 3. Rappel du matin : demandes restées sur « Nouvelle ».
+function rappelDemandesEnAttente() {
+  var values = getSheet_().getDataRange().getValues();
+  var lignes = [];
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][STATUT_COL - 1]).trim() === STATUT_NOUVELLE) {
+      lignes.push('- ' + values[i][1] + ' ' + values[i][2] + ' · ' + dateLisible_(values[i][3]) + ' à ' + values[i][4] +
+        ' · ' + values[i][5] + ' · ' + values[i][6]);
+    }
+  }
+  if (lignes.length === 0) return;
+  MailApp.sendEmail(NOTIFY_EMAIL,
+    lignes.length + ' réservation(s) à confirmer — Garden Garden',
+    'Ces demandes de table attendent encore une réponse (Statut « Nouvelle » dans la Sheet) :\n\n' +
+    lignes.join('\n') +
+    '\n\nPassez le Statut sur « Confirmée » (ou « Refusée ») : le client reçoit alors son email automatiquement.');
+}
+
+// À lancer UNE seule fois depuis l'éditeur (menu Exécuter) : installe le déclencheur
+// de confirmation, le rappel de 9 h, et la liste déroulante du Statut. Relancer ne
+// crée pas de doublons.
+function installerDeclencheurs() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    var f = t.getHandlerFunction();
+    if (f === 'surModificationStatut_' || f === 'rappelDemandesEnAttente') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('surModificationStatut_').forSpreadsheet(ss).onEdit().create();
+  ScriptApp.newTrigger('rappelDemandesEnAttente').timeBased().everyDays(1).atHour(9).create();
+
+  var sheet = getSheet_();
+  var regle = SpreadsheetApp.newDataValidation()
+    .requireValueInList([STATUT_NOUVELLE, STATUT_CONFIRMEE, STATUT_REFUSEE], true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange(2, STATUT_COL, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(regle);
 }
 
 // Supprime les lignes de test (Prénom commençant par "TEST", Nom contenant
