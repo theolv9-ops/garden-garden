@@ -41,7 +41,8 @@
     "addressCountry": "FR"
   },
   "openingHoursSpecification": [
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "12:00", "closes": "15:00" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday"], "opens": "11:30", "closes": "14:30" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Thursday","Friday","Saturday"], "opens": "12:00", "closes": "15:00" },
     { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Thursday","Friday","Saturday"], "opens": "17:00", "closes": "01:00" },
     { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "12:00", "closes": "18:00" }
   ],
@@ -516,7 +517,7 @@ html { scroll-behavior:smooth; }
   <div class="promo-inner">
     <span class="promo-icon"><i class="ti ti-tag"></i></span>
     <div class="promo-text">
-      <strong>Menu Grenouilles — 38,90€</strong>
+      <strong>Menu Grenouilles — 39,90€</strong>
       <span>Entrée + grenouilles + fromage blanc + dessert — tous les week-ends</span>
     </div>
     <button class="btn btn-primary" onclick="gscroll('resa')">Réserver</button>
@@ -637,7 +638,7 @@ html { scroll-behavior:smooth; }
     <div class="carte-cat reveal">
       <h4>Les menus</h4>
       <div class="plat"><div><div class="plat-name">Menu du Jour</div><div class="plat-desc">Entrée + plat + dessert — tous les midis</div></div><div class="plat-price">17,90€</div></div>
-      <div class="plat"><div><div class="plat-name">Menu complet grenouilles</div><div class="plat-desc">Entrée + grenouilles + fromage blanc + dessert — tous les week-ends</div></div><div class="plat-price">38,90€</div></div>
+      <div class="plat"><div><div class="plat-name">Menu complet grenouilles</div><div class="plat-desc">Entrée + grenouilles + fromage blanc + dessert — tous les week-ends</div></div><div class="plat-price">39,90€</div></div>
     </div>
     <div class="carte-cat reveal">
       <h4>La Spéciale Garden Garden</h4>
@@ -1084,7 +1085,9 @@ document.addEventListener('keydown', function(ev){
     <div class="info reveal">
       <h4>Horaires</h4>
       <p><strong>Ouvert 7 jours sur 7</strong></p>
-      <div class="hr-row"><span class="hr-day">Lundi — Samedi (midi)</span><span class="hr-time">12h–15h</span></div>
+      <div class="hr-row"><span class="hr-day">Lundi — Mercredi (midi)</span><span class="hr-time">11h30–14h30</span></div>
+      <div class="hr-row"><span class="hr-day">Lundi — Mercredi (soir)</span><span class="hr-time">Fermé</span></div>
+      <div class="hr-row"><span class="hr-day">Jeu — Sam (midi)</span><span class="hr-time">12h–15h</span></div>
       <div class="hr-row"><span class="hr-day">Jeu — Sam (soir)</span><span class="hr-time">17h–1h</span></div>
       <div class="hr-row"><span class="hr-day">Dimanche</span><span class="hr-time">12h–18h</span></div>
     </div>
