@@ -178,7 +178,7 @@ function saveTableReservationLocked_(data) {
   if (decision.statut !== STATUT_NOUVELLE) {
     sheet.getRange(rowIndex, STATUT_COL).setValue(decision.statut);
   }
-  notifierNouvelleReservation_(data, occasion, decision);
+  notifierNouvelleReservation_(data, occasion, decision, { row: rowIndex, ts: secondes_(rowValues[0][0]) });
   repondreAuClient_(data, occasion, decision, sheet.getRange(rowIndex, STATUT_COL));
 
   return { success: true };
@@ -285,7 +285,7 @@ function sendRoomConfirmationEmails_(data, montant, nuits, petitDej) {
 // La réservation est déjà enregistrée dans la Sheet à ce stade : un échec
 // d'envoi ici (quota Gmail dépassé, etc.) ne doit jamais faire perdre la
 // réservation ni faire échouer la réponse au site, d'où le try/catch.
-function notifierNouvelleReservation_(data, occasion, decision) {
+function notifierNouvelleReservation_(data, occasion, decision, ref) {
   try {
     var sujet = 'Nouvelle réservation — ' + (data.prenom || '') + ' ' + (data.nom || '') +
       (decision ? ' [' + decision.libelle + ']' : '');
@@ -312,6 +312,14 @@ function notifierNouvelleReservation_(data, occasion, decision) {
     if (data.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       options.replyTo = data.email;
     }
+    // Demande à vérifier : deux liens « Confirmer / Refuser » qui répondent au client en un clic.
+    if (decision && decision.statut === STATUT_NOUVELLE && ref) {
+      var oui = lienDecision_(ref.row, ref.ts, STATUT_CONFIRMEE);
+      var non = lienDecision_(ref.row, ref.ts, STATUT_REFUSEE);
+      options.body = corps + '\n\nCONFIRMER : ' + oui + '\nREFUSER : ' + non;
+      options.htmlBody = '<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5">' +
+        echapperHtml_(corps).replace(/\n/g, '<br>') + '<br><br>' + boutonsDecision_(oui, non) + '</div>';
+    }
     MailApp.sendEmail(options);
   } catch (err) {
     // On logge dans Exécutions plutôt que de propager l'erreur : la
@@ -327,7 +335,8 @@ function notifierNouvelleReservation_(data, occasion, decision) {
 //    ouvert, le groupe petit et la place disponible (capacité réglable plus bas) ;
 //    refusée si fermé ; sinon laissée « Nouvelle » avec un accusé de réception qui ne
 //    promet pas la table. Le client reçoit l'email correspondant tout de suite.
-// 2. Quand l'établissement change le Statut à la main (« Confirmée » / « Refusée »),
+// 2. Les demandes « à vérifier » arrivent par email avec deux liens, Confirmer et Refuser :
+//    un clic suffit. Sinon, quand l'établissement change le Statut à la main (« Confirmée » / « Refusée »),
 //    l'email correspondant part aussi tout seul, une seule fois par ligne.
 // 3. Chaque matin, un rappel est envoyé à l'établissement tant que des demandes
 //    sont restées sur « Nouvelle ».
@@ -360,6 +369,103 @@ function recapTable_(r) {
     'Convives : ' + (r.convives || ''),
     r.occasion ? 'Précisions : ' + r.occasion : ''
   ].filter(String).join('\n');
+}
+
+// ---- Liens « Confirmer / Refuser » -----------------------------------------
+// Dans l'email « à vérifier » (et dans le rappel de 9 h), chaque demande a deux liens.
+// Un clic change le Statut et envoie l'email au client, sans ouvrir la Sheet. Chaque
+// lien est signé (HMAC) avec une clé que le script crée seul : impossible à deviner ou
+// à modifier, et valable uniquement pour la ligne d'origine (même date de réception).
+function secondes_(date) {
+  return date instanceof Date ? Math.round(date.getTime() / 1000) : 0;
+}
+
+function echapperHtml_(texte) {
+  return String(texte == null ? '' : texte).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function cleLiens_() {
+  var props = PropertiesService.getScriptProperties();
+  var cle = props.getProperty('LIEN_SECRET');
+  if (!cle) {
+    cle = Utilities.getUuid() + Utilities.getUuid();
+    props.setProperty('LIEN_SECRET', cle);
+  }
+  return cle;
+}
+
+function signerLien_(row, ts, code) {
+  var sig = Utilities.computeHmacSha256Signature(row + '|' + ts + '|' + code, cleLiens_());
+  return Utilities.base64EncodeWebSafe(sig).replace(/=+$/, '');
+}
+
+function lienDecision_(row, ts, statut) {
+  var code = statut === STATUT_CONFIRMEE ? 'c' : 'r';
+  return ScriptApp.getService().getUrl() + '?action=decision&row=' + row + '&ts=' + ts + '&s=' + code +
+    '&sig=' + signerLien_(row, ts, code);
+}
+
+function boutonsDecision_(lienOui, lienNon) {
+  var style = 'display:inline-block;padding:12px 22px;border-radius:6px;color:#ffffff;text-decoration:none;font-weight:bold;margin-right:10px;';
+  return '<a href="' + lienOui + '" style="' + style + 'background:#2e7d32">Confirmer</a>' +
+    '<a href="' + lienNon + '" style="' + style + 'background:#c62828">Refuser</a>';
+}
+
+// Envoie au client l'email correspondant au statut décidé à la main ou par lien.
+function envoyerEmailStatut_(r, statut) {
+  if (statut === STATUT_CONFIRMEE) {
+    return envoyerAuClient_(r, 'Votre réservation est confirmée — Garden Garden',
+      'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !');
+  }
+  return envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
+    'Nous sommes désolés : nous ne pouvons pas honorer votre demande pour ce créneau. ' +
+    'Appelez-nous au 04 86 80 27 50 et nous trouverons une autre solution ensemble.');
+}
+
+// Applique le clic sur un lien Confirmer / Refuser. Renvoie { ok, message } pour la page.
+function appliquerDecisionLien_(p) {
+  var row = parseInt(p.row, 10);
+  var ts = parseInt(p.ts, 10);
+  var code = String(p.s || '');
+  if (!row || !ts || (code !== 'c' && code !== 'r') || String(p.sig || '') !== signerLien_(row, ts, code)) {
+    return { ok: false, message: 'Ce lien n\'est pas valide.' };
+  }
+  var statut = code === 'c' ? STATUT_CONFIRMEE : STATUT_REFUSEE;
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sheet = getSheet_();
+    var introuvable = { ok: false, message: 'Cette réservation est introuvable (ligne déplacée ou supprimée). Ouvrez la feuille de réservations.' };
+    if (row < 2 || row > sheet.getLastRow()) return introuvable;
+    var vals = sheet.getRange(row, 1, 1, STATUT_COL).getValues()[0];
+    if (Math.abs(secondes_(vals[0]) - ts) > 1) return introuvable;
+
+    var r = { prenom: vals[1], nom: vals[2], date: vals[3], heure: vals[4], convives: vals[5], email: vals[7], occasion: vals[8] };
+    var resume = (String(vals[1]) + ' ' + String(vals[2])).trim() + ' · ' + dateLisible_(vals[3]) + ' à ' + vals[4] + ' · ' + vals[5];
+    var actuel = String(vals[STATUT_COL - 1]).trim();
+    if (actuel === STATUT_CONFIRMEE || actuel === STATUT_REFUSEE) {
+      return { ok: true, message: 'Déjà traitée : ' + resume + ' est « ' + actuel + ' ». Rien n\'a été changé.' };
+    }
+
+    var cell = sheet.getRange(row, STATUT_COL);
+    cell.setValue(statut);
+    var envoye = envoyerEmailStatut_(r, statut);
+    cell.setNote(envoye
+      ? 'Email « ' + statut + ' » envoyé au client via le lien le ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm')
+      : 'Aucun email envoyé : adresse du client absente ou invalide. Prévenir le client par téléphone.');
+    return { ok: true, message: (statut === STATUT_CONFIRMEE ? 'Réservation confirmée : ' : 'Réservation refusée : ') + resume + '. ' +
+      (envoye ? 'Le client a reçu son email.' : 'Aucun email envoyé (adresse absente ou invalide) : prévenez le client par téléphone.') };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function pageDecision_(res) {
+  var html = '<div style="font-family:Arial,sans-serif;max-width:480px;margin:40px auto;padding:0 20px;text-align:center">' +
+    '<div style="font-size:48px">' + (res.ok ? '✅' : '⚠️') + '</div>' +
+    '<p style="font-size:18px;line-height:1.5">' + echapperHtml_(res.message) + '</p>' +
+    '<p style="color:#666">Garden Garden</p></div>';
+  return HtmlService.createHtmlOutput(html).setTitle('Garden Garden').addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
 // Envoie un email au client avec le nom du restaurant en expéditeur ; les réponses
@@ -487,15 +593,7 @@ function surModificationStatut_(e) {
     var row = sheet.getRange(range.getRow(), 1, 1, STATUT_COL).getValues()[0];
     var r = { prenom: row[1], nom: row[2], date: row[3], heure: row[4], convives: row[5], email: row[7], occasion: row[8] };
 
-    var envoye;
-    if (statut === STATUT_CONFIRMEE) {
-      envoye = envoyerAuClient_(r, 'Votre réservation est confirmée — Garden Garden',
-        'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !');
-    } else {
-      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
-        'Nous sommes désolés : nous ne pouvons pas honorer votre demande pour ce créneau. ' +
-        'Appelez-nous au 04 86 80 27 50 et nous trouverons une autre solution ensemble.');
-    }
+    var envoye = envoyerEmailStatut_(r, statut);
     range.setNote(envoye
       ? 'Email « ' + statut + ' » envoyé au client le ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm')
       : 'Aucun email envoyé : adresse du client absente ou invalide. Prévenir le client par téléphone.');
@@ -508,21 +606,30 @@ function surModificationStatut_(e) {
 function rappelDemandesEnAttente() {
   var values = getSheet_().getDataRange().getValues();
   var lignes = [];
+  var blocsHtml = [];
   var aujourdhui = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   for (var i = 1; i < values.length; i++) {
     // Seulement les demandes dont la date n'est pas passée (ignore les vieilles lignes).
     if (String(values[i][STATUT_COL - 1]).trim() === STATUT_NOUVELLE &&
         String(values[i][3]) >= aujourdhui) {
-      lignes.push('- ' + values[i][1] + ' ' + values[i][2] + ' · ' + dateLisible_(values[i][3]) + ' à ' + values[i][4] +
-        ' · ' + values[i][5] + ' · ' + values[i][6]);
+      var resume = values[i][1] + ' ' + values[i][2] + ' · ' + dateLisible_(values[i][3]) + ' à ' + values[i][4] +
+        ' · ' + values[i][5] + ' · ' + values[i][6];
+      var oui = lienDecision_(i + 1, secondes_(values[i][0]), STATUT_CONFIRMEE);
+      var non = lienDecision_(i + 1, secondes_(values[i][0]), STATUT_REFUSEE);
+      lignes.push('- ' + resume + '\n  CONFIRMER : ' + oui + '\n  REFUSER : ' + non);
+      blocsHtml.push('<p><b>' + echapperHtml_(resume) + '</b><br>' + boutonsDecision_(oui, non) + '</p>');
     }
   }
   if (lignes.length === 0) return;
-  MailApp.sendEmail(NOTIFY_EMAIL,
-    lignes.length + ' réservation(s) à confirmer — Garden Garden',
-    'Ces demandes de table attendent encore une réponse (Statut « Nouvelle » dans la Sheet) :\n\n' +
-    lignes.join('\n') +
-    '\n\nPassez le Statut sur « Confirmée » (ou « Refusée ») : le client reçoit alors son email automatiquement.');
+  MailApp.sendEmail({
+    to: NOTIFY_EMAIL,
+    subject: lignes.length + ' réservation(s) à confirmer — Garden Garden',
+    body: 'Ces demandes de table attendent encore une réponse :\n\n' + lignes.join('\n\n') +
+      '\n\nUn clic sur CONFIRMER ou REFUSER suffit : le client reçoit son email automatiquement.',
+    htmlBody: '<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5">' +
+      '<p>Ces demandes de table attendent encore une réponse :</p>' + blocsHtml.join('') +
+      '<p>Un clic suffit : le client reçoit son email automatiquement.</p></div>'
+  });
 }
 
 // À lancer UNE seule fois depuis l'éditeur (menu Exécuter) : installe le déclencheur
@@ -547,8 +654,8 @@ function installerDeclencheurs() {
 
 // ---------------------------------------------------------------------------
 // Auto-test : à lancer depuis l'éditeur (fonction « testerSysteme », bouton Exécuter).
-// Il simule 5 réservations (jeudi soir, lundi soir, lundi 11h30, grand groupe, doublon),
-// vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
+// Il simule 5 réservations (jeudi soir, lundi soir, lundi 11h30, grand groupe, doublon) et
+// les liens Confirmer / Refuser, vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
 // email au propriétaire du script. Les emails de test vont uniquement à cette
 // adresse : le restaurant n'est jamais prévenu.
 // ---------------------------------------------------------------------------
@@ -597,6 +704,23 @@ function testerSysteme() {
     lignes.push('ÉCHEC  doublon : erreur ' + err.message);
   }
 
+  // Liens Confirmer / Refuser : sur la ligne « grand groupe » (restée à vérifier).
+  try {
+    var ligne = ligneDeTest_(noms[3]);
+    var base = { row: ligne.row, ts: ligne.ts };
+    var mauvais = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: 'faux' });
+    var bon = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') });
+    var statutLien = statutDeLigne_(noms[3]);
+    var encore = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'r', sig: signerLien_(base.row, base.ts, 'r') });
+    var statutFinal = statutDeLigne_(noms[3]);
+    lignes.push((!mauvais.ok ? 'OK     ' : 'ÉCHEC  ') + 'lien falsifié refusé');
+    lignes.push((bon.ok && statutLien === STATUT_CONFIRMEE ? 'OK     ' : 'ÉCHEC  ') + 'lien « Confirmer » : statut « ' + statutLien + ' »');
+    lignes.push((encore.ok && statutFinal === STATUT_CONFIRMEE && encore.message.indexOf('Déjà traitée') === 0 ? 'OK     ' : 'ÉCHEC  ') +
+      'second clic ignoré : statut toujours « ' + statutFinal + ' »');
+  } catch (err) {
+    lignes.push('ÉCHEC  liens Confirmer / Refuser : erreur ' + err.message);
+  }
+
   var supprimees = supprimerLignesTest_(stamp);
   lignes.push('Nettoyage : ' + supprimees + ' ligne(s) de test supprimée(s).');
 
@@ -612,6 +736,14 @@ function statutDeLigne_(nomTest) {
     if (String(values[i][2]) === nomTest) return String(values[i][STATUT_COL - 1]).trim();
   }
   return '(ligne introuvable)';
+}
+
+function ligneDeTest_(nomTest) {
+  var values = getSheet_().getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][2]) === nomTest) return { row: i + 1, ts: secondes_(values[i][0]) };
+  }
+  throw new Error('ligne de test introuvable');
 }
 
 function nombreLignesTest_(stamp) {
@@ -696,13 +828,22 @@ function doPost(e) {
 /**
  * Point d'entrée GET.
  *
- * Il ne renvoie plus aucune donnée de réservation (tables ou chambres) : jusqu'au
+ * Sauf pour les liens « Confirmer / Refuser » signés des emails (action=decision), il ne
+ * renvoie plus aucune donnée de réservation (tables ou chambres) : jusqu'au
  * 19 septembre 2026, un simple appel à ?action=getReservations suffisait, sans
  * authentification, pour récupérer les noms, téléphones et emails de tous les
  * clients. La lecture passe désormais par doPost, avec la clé d'accès (voir
  * adminKeyOk_).
  */
-function doGet() {
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.action === 'decision') {
+    try {
+      return pageDecision_(appliquerDecisionLien_(p));
+    } catch (err) {
+      return pageDecision_({ ok: false, message: 'Une erreur est survenue : ' + err.message });
+    }
+  }
   return jsonResponse_({
     success: false,
     error: 'Action inconnue. La lecture des réservations se fait en POST, avec la clé d\'accès.'
