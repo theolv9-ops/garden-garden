@@ -942,7 +942,7 @@ html { scroll-behavior:smooth; }
 // Bouton « Réserver » d'un événement : pré-remplit le formulaire de réservation
 function reserverEvenement(e){
   var date = document.getElementById('g-date');
-  if(date && e.date >= (date.min || '')) date.value = e.date;
+  if(date && e.date >= (date.min || '')){ date.value = e.date; if(typeof majHeures === 'function') majHeures(); }
   var heure = document.getElementById('g-heure');
   if(heure && e.heure){
     Array.prototype.forEach.call(heure.options, function(o){ if(o.value === e.heure) heure.value = o.value; });
@@ -1119,8 +1119,32 @@ var OPENING_DATE = '2026-10-02';
 (function(){
   var todayStr = new Date().toISOString().slice(0,10);
   var dateInput = document.getElementById('g-date');
-  if(dateInput){ dateInput.min = todayStr > OPENING_DATE ? todayStr : OPENING_DATE; }
+  if(dateInput){
+    dateInput.min = todayStr > OPENING_DATE ? todayStr : OPENING_DATE;
+    dateInput.addEventListener('change', majHeures);
+  }
 })();
+// Heures proposées selon le jour choisi (voir le bloc Horaires) :
+// lundi-mercredi midi seulement, jeudi-samedi midi et soir, dimanche midi.
+var HEURES_MIDI = ['12h00','12h30','13h00'];
+var HEURES_SOIR = ['19h00','19h30','20h00','20h30','21h00'];
+function majHeures(){
+  var select = document.getElementById('g-heure');
+  var date = document.getElementById('g-date').value;
+  if(!select) return;
+  var heures;
+  if(!date){ heures = HEURES_MIDI.concat(HEURES_SOIR); }
+  else {
+    var jour = new Date(date + 'T12:00:00').getDay(); // 0 = dimanche
+    if(jour >= 1 && jour <= 3) heures = ['11h30'].concat(HEURES_MIDI);
+    else if(jour >= 4 && jour <= 6) heures = HEURES_MIDI.concat(HEURES_SOIR);
+    else heures = HEURES_MIDI;
+  }
+  var avant = select.value;
+  select.innerHTML = '<option value="">Choisir</option>';
+  heures.forEach(function(h){ var o = document.createElement('option'); o.textContent = h; select.appendChild(o); });
+  if(heures.indexOf(avant) !== -1) select.value = avant;
+}
 function gscroll(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
 // Envoie la réservation à Apps Script, qui l'écrit dans le Google Sheet ET envoie
 // l'email « Nouvelle réservation » à Garden Garden. Rejette si l'envoi a échoué.
