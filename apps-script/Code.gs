@@ -130,7 +130,14 @@ function saveTableReservation_(data) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    return saveTableReservationLocked_(data);
+    // Le site renvoie parfois la même demande (réponse illisible sur certains navigateurs
+    // mobiles) avec le même requestId : on l'ignore si on l'a déjà traitée.
+    var cache = CacheService.getScriptCache();
+    var cle = data.requestId ? 'req_' + String(data.requestId).slice(0, 100) : null;
+    if (cle && cache.get(cle)) return { success: true, doublon: true };
+    var resultat = saveTableReservationLocked_(data);
+    if (cle && resultat && resultat.success) cache.put(cle, '1', 21600);
+    return resultat;
   } finally {
     lock.releaseLock();
   }
