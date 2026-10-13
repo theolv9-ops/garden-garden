@@ -373,7 +373,9 @@ function recapTable_(r) {
 
 // ---- Liens « Confirmer / Refuser » -----------------------------------------
 // Dans l'email « à vérifier » (et dans le rappel de 9 h), chaque demande a deux liens.
-// Un clic change le Statut et envoie l'email au client, sans ouvrir la Sheet. Chaque
+// Un clic ouvre une page de confirmation (ouvrir le lien ne change rien, même par un
+// scanner de liens) ; le bouton de cette page change le Statut et envoie l'email au
+// client, sans ouvrir la Sheet. Chaque
 // lien est signé (HMAC) avec une clé que le script crée seul : impossible à deviner ou
 // à modifier, et valable uniquement pour la ligne d'origine (même date de réception).
 function secondes_(date) {
@@ -422,8 +424,11 @@ function envoyerEmailStatut_(r, statut) {
     'Appelez-nous au 04 86 80 27 50 et nous trouverons une autre solution ensemble.');
 }
 
-// Applique le clic sur un lien Confirmer / Refuser. Renvoie { ok, message } pour la page.
-function appliquerDecisionLien_(p) {
+// Traite un lien Confirmer / Refuser. Renvoie { ok, message } pour la page.
+// Un simple ouverture du lien (GET, ce que font aussi les scanners de liens des
+// messageries) n'est qu'un aperçu : le statut ne change que si appliquer est vrai,
+// c'est-à-dire après le clic sur le bouton de la page de confirmation.
+function appliquerDecisionLien_(p, appliquer) {
   var row = parseInt(p.row, 10);
   var ts = parseInt(p.ts, 10);
   var code = String(p.s || '');
@@ -447,6 +452,9 @@ function appliquerDecisionLien_(p) {
       return { ok: true, message: 'Déjà traitée : ' + resume + ' est « ' + actuel + ' ». Rien n\'a été changé.' };
     }
 
+    if (!appliquer) {
+      return { ok: true, apercu: true, question: (statut === STATUT_CONFIRMEE ? 'Confirmer' : 'Refuser') + ' cette réservation ?', message: resume, statut: statut };
+    }
     var cell = sheet.getRange(row, STATUT_COL);
     cell.setValue(statut);
     var envoye = envoyerEmailStatut_(r, statut);
@@ -460,11 +468,23 @@ function appliquerDecisionLien_(p) {
   }
 }
 
-function pageDecision_(res) {
+function pageDecision_(res, lienValider) {
+  var corps;
+  if (res.apercu) {
+    var couleur = res.statut === STATUT_CONFIRMEE ? '#2e7d32' : '#c62828';
+    corps = '<div style="font-size:48px">❓</div>' +
+      '<p style="font-size:20px;font-weight:bold">' + echapperHtml_(res.question) + '</p>' +
+      '<p style="font-size:18px;line-height:1.5">' + echapperHtml_(res.message) + '</p>' +
+      '<p><a href="' + echapperHtml_(lienValider) + '" target="_top" style="display:inline-block;padding:14px 28px;border-radius:6px;' +
+      'background:' + couleur + ';color:#ffffff;text-decoration:none;font-weight:bold;font-size:18px">' +
+      (res.statut === STATUT_CONFIRMEE ? 'Oui, confirmer' : 'Oui, refuser') + '</a></p>' +
+      '<p style="color:#666">Le client recevra un email.</p>';
+  } else {
+    corps = '<div style="font-size:48px">' + (res.ok ? '✅' : '⚠️') + '</div>' +
+      '<p style="font-size:18px;line-height:1.5">' + echapperHtml_(res.message) + '</p>';
+  }
   var html = '<div style="font-family:Arial,sans-serif;max-width:480px;margin:40px auto;padding:0 20px;text-align:center">' +
-    '<div style="font-size:48px">' + (res.ok ? '✅' : '⚠️') + '</div>' +
-    '<p style="font-size:18px;line-height:1.5">' + echapperHtml_(res.message) + '</p>' +
-    '<p style="color:#666">Garden Garden</p></div>';
+    corps + '<p style="color:#666">Garden Garden</p></div>';
   return HtmlService.createHtmlOutput(html).setTitle('Garden Garden').addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
@@ -708,12 +728,15 @@ function testerSysteme() {
   try {
     var ligne = ligneDeTest_(noms[3]);
     var base = { row: ligne.row, ts: ligne.ts };
-    var mauvais = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: 'faux' });
-    var bon = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') });
+    var mauvais = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: 'faux' }, true);
+    var apercu = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') }, false);
+    var statutApercu = statutDeLigne_(noms[3]);
+    var bon = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') }, true);
     var statutLien = statutDeLigne_(noms[3]);
-    var encore = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'r', sig: signerLien_(base.row, base.ts, 'r') });
+    var encore = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'r', sig: signerLien_(base.row, base.ts, 'r') }, true);
     var statutFinal = statutDeLigne_(noms[3]);
     lignes.push((!mauvais.ok ? 'OK     ' : 'ÉCHEC  ') + 'lien falsifié refusé');
+    lignes.push((apercu.apercu && statutApercu === STATUT_NOUVELLE ? 'OK     ' : 'ÉCHEC  ') + 'ouverture du lien seule (scanner) : statut inchangé « ' + statutApercu + ' »');
     lignes.push((bon.ok && statutLien === STATUT_CONFIRMEE ? 'OK     ' : 'ÉCHEC  ') + 'lien « Confirmer » : statut « ' + statutLien + ' »');
     lignes.push((encore.ok && statutFinal === STATUT_CONFIRMEE && encore.message.indexOf('Déjà traitée') === 0 ? 'OK     ' : 'ÉCHEC  ') +
       'second clic ignoré : statut toujours « ' + statutFinal + ' »');
@@ -839,7 +862,11 @@ function doGet(e) {
   var p = (e && e.parameter) || {};
   if (p.action === 'decision') {
     try {
-      return pageDecision_(appliquerDecisionLien_(p));
+      var valider = p.go === '1';
+      var res = appliquerDecisionLien_(p, valider);
+      var lien = ScriptApp.getService().getUrl() + '?action=decision&row=' + encodeURIComponent(p.row) + '&ts=' + encodeURIComponent(p.ts) +
+        '&s=' + encodeURIComponent(p.s) + '&sig=' + encodeURIComponent(p.sig) + '&go=1';
+      return pageDecision_(res, lien);
     } catch (err) {
       return pageDecision_({ ok: false, message: 'Une erreur est survenue : ' + err.message });
     }
