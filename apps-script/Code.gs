@@ -384,7 +384,7 @@ var CAPACITE_COUVERTS = { midi: 30, soir: 30 }; // couverts max par service : À
 var GROUPE_MAX_AUTO = 6;                        // au-delà : vérification manuelle
 // Jours d'ouverture par service (0 = dimanche … 6 = samedi), d'après le site.
 var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [4, 5, 6] };
-var MIDI_DEBUT = 12 * 60, MIDI_FIN = 15 * 60;   // service du midi (dimanche : jusqu'à 18 h)
+var MIDI_DEBUT = 11 * 60 + 30, MIDI_FIN = 15 * 60; // service du midi dès 11 h 30 (lun-mer 11 h 30-14 h 30 ; dimanche jusqu'à 18 h)
 var SOIR_DEBUT = 17 * 60;
 
 function serviceDe_(minutes, jour) {
