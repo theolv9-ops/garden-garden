@@ -1123,17 +1123,34 @@ var OPENING_DATE = '2026-10-02';
 })();
 function gscroll(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
 // Envoie la réservation à Apps Script, qui l'écrit dans le Google Sheet ET envoie
-// l'email « Nouvelle réservation » à Garden Garden. Rejette si l'envoi a échoué.
+// les emails (client + Garden Garden). Résultat :
+//  - résolu 'ok'        : le script a répondu « succès » ;
+//  - résolu 'incertain' : la réponse n'a pas pu être lue (réseau, certains navigateurs mobiles
+//                         bloquent la lecture) alors que la demande a pu partir ; on la renvoie
+//                         alors avec le même identifiant, que le script ignore s'il l'a déjà reçue ;
+//  - rejeté             : le script a explicitement refusé la demande.
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwNJ-ZJkZebg-IJ-vKzTs966eLpEIyXPZTYWio1gYjCiguMARc7VrlTfMpxHcsT-KCGGA/exec';
 function gsendToSheet(payload){
-  return fetch('https://script.google.com/macros/s/AKfycbwNJ-ZJkZebg-IJ-vKzTs966eLpEIyXPZTYWio1gYjCiguMARc7VrlTfMpxHcsT-KCGGA/exec', {
+  payload.requestId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2);
+  var body = JSON.stringify(payload);
+  return fetch(GAS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(payload)
+    body: body
   }).then(function(res){
-    if(!res.ok) throw new Error('bad status');
     return res.json();
   }).then(function(data){
-    if(!data || data.success !== true) throw new Error('script refused');
+    if(!data || data.success !== true){ var refus = new Error('script refused'); refus.refused = true; throw refus; }
+    return 'ok';
+  }).catch(function(err){
+    if(err && err.refused) throw err;
+    return fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: body
+    }).then(function(){ return 'incertain'; });
   });
 }
 function gsubmit(e){
@@ -1163,16 +1180,21 @@ function gsubmit(e){
     heure: v('g-heure').replace('h', ':'),
     convives: v('g-pers'),
     occasion: occasionSheet
-  }).then(function(){
-    if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation_auto'}); }
-    okEl.textContent = '✓ Merci ! Votre demande a été envoyée. Nous vous rappelons très vite pour confirmer.';
+  }).then(function(resultat){
+    // Un seul message à la fois : jamais l'erreur et la confirmation ensemble.
+    errEl.style.display='none';
+    try{ if(typeof gtag==='function'){ gtag('event','generate_lead',{event_category:'reservation',event_label:'formulaire_reservation_auto'}); } }catch(e2){}
+    okEl.textContent = resultat === 'ok'
+      ? '✓ Merci ! Votre demande a été envoyée. Vous recevez un email dans quelques instants.'
+      : '✓ Votre demande a été envoyée. Si vous ne recevez pas d\'email dans quelques minutes, appelez-nous au 04 86 80 27 50.';
     okEl.style.display='block';
-    okEl.scrollIntoView({behavior:'smooth',block:'center'});
     document.getElementById('reservationForm').reset();
-  }).catch(function(){
+    try{ okEl.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e3){}
+  }, function(){
+    okEl.style.display='none';
     errEl.style.display='block';
-    errEl.scrollIntoView({behavior:'smooth',block:'center'});
-  }).finally(function(){
+    try{ errEl.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e4){}
+  }).then(function(){
     if(btn){ btn.disabled = false; btn.textContent = 'Confirmer la réservation'; }
   });
   return false;
