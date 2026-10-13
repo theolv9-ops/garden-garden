@@ -301,7 +301,7 @@ function notifierNouvelleReservation_(data, occasion, decision) {
       decision ? '\nDécision automatique : ' + decision.libelle + ' — ' + decision.raison : ''
     ].join('\n');
     var options = {
-      to: NOTIFY_EMAIL,
+      to: data.test ? Session.getEffectiveUser().getEmail() : NOTIFY_EMAIL,
       subject: sujet,
       body: corps,
       // Le client apparaît comme expéditeur affiché ; « Répondre » lui écrit directement.
@@ -384,7 +384,7 @@ var CAPACITE_COUVERTS = { midi: 30, soir: 30 }; // couverts max par service : À
 var GROUPE_MAX_AUTO = 6;                        // au-delà : vérification manuelle
 // Jours d'ouverture par service (0 = dimanche … 6 = samedi), d'après le site.
 var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [4, 5, 6] };
-var MIDI_DEBUT = 12 * 60, MIDI_FIN = 15 * 60;   // service du midi (dimanche : jusqu'à 18 h)
+var MIDI_DEBUT = 11 * 60 + 30, MIDI_FIN = 15 * 60; // service du midi dès 11 h 30 (lun-mer 11 h 30-14 h 30 ; dimanche jusqu'à 18 h)
 var SOIR_DEBUT = 17 * 60;
 
 function serviceDe_(minutes, jour) {
@@ -543,6 +543,98 @@ function installerDeclencheurs() {
     .setAllowInvalid(false)
     .build();
   sheet.getRange(2, STATUT_COL, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(regle);
+}
+
+// ---------------------------------------------------------------------------
+// Auto-test : à lancer depuis l'éditeur (fonction « testerSysteme », bouton Exécuter).
+// Il simule 5 réservations (jeudi soir, lundi soir, lundi 11h30, grand groupe, doublon),
+// vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
+// email au propriétaire du script. Les emails de test vont uniquement à cette
+// adresse : le restaurant n'est jamais prévenu.
+// ---------------------------------------------------------------------------
+function prochainJour_(jourSemaine, heure) {
+  var d = new Date();
+  d.setDate(d.getDate() + 7);
+  while (d.getDay() !== jourSemaine) d.setDate(d.getDate() + 1);
+  return Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+
+function testerSysteme() {
+  var moi = Session.getEffectiveUser().getEmail();
+  var jeudi = prochainJour_(4);
+  var lundi = prochainJour_(1);
+  var stamp = String(new Date().getTime());
+  var scenarios = [
+    { nom: 'jeudi soir, 2 personnes', date: jeudi, heure: '20:00', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
+    { nom: 'lundi soir (fermé)', date: lundi, heure: '20:00', convives: '2 personnes', attendu: STATUT_REFUSEE },
+    { nom: 'lundi 11h30', date: lundi, heure: '11:30', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
+    { nom: 'grand groupe', date: jeudi, heure: '20:00', convives: 'Grande tablée (7+)', attendu: STATUT_NOUVELLE }
+  ];
+  var lignes = [];
+  var noms = [];
+  scenarios.forEach(function (sc, i) {
+    var nomTest = 'AUTOTEST-' + stamp + '-' + i;
+    noms.push(nomTest);
+    var data = { prenom: 'TEST-AUTO', nom: nomTest, email: moi, telephone: '0000000000', date: sc.date, heure: sc.heure,
+      convives: sc.convives, occasion: 'test automatique', requestId: 'selftest-' + stamp + '-' + i, test: true };
+    try {
+      saveTableReservation_(data);
+      var obtenu = statutDeLigne_(nomTest);
+      lignes.push((obtenu === sc.attendu ? 'OK     ' : 'ÉCHEC  ') + sc.nom + ' : attendu « ' + sc.attendu + ' », obtenu « ' + obtenu + ' »');
+    } catch (err) {
+      lignes.push('ÉCHEC  ' + sc.nom + ' : erreur ' + err.message);
+    }
+  });
+
+  // Doublon : même requestId renvoyé une 2e fois -> ignoré, pas de nouvelle ligne.
+  try {
+    var avant = nombreLignesTest_(stamp);
+    var rep = saveTableReservation_({ prenom: 'TEST-AUTO', nom: noms[0], email: moi, telephone: '0000000000', date: jeudi,
+      heure: '20:00', convives: '2 personnes', requestId: 'selftest-' + stamp + '-0', test: true });
+    var apres = nombreLignesTest_(stamp);
+    lignes.push((rep && rep.doublon && avant === apres ? 'OK     ' : 'ÉCHEC  ') + 'doublon ignoré (' + avant + ' ligne(s) avant, ' + apres + ' après)');
+  } catch (err) {
+    lignes.push('ÉCHEC  doublon : erreur ' + err.message);
+  }
+
+  var supprimees = supprimerLignesTest_(stamp);
+  lignes.push('Nettoyage : ' + supprimees + ' ligne(s) de test supprimée(s).');
+
+  var ok = lignes.every(function (l) { return l.indexOf('ÉCHEC') !== 0; });
+  MailApp.sendEmail(moi, (ok ? '✅' : '❌') + ' Test du système de réservation — Garden Garden',
+    lignes.join('\n') + '\n\nLes emails de test (confirmation, refus, notification) ont été envoyés à cette adresse uniquement.');
+  return lignes;
+}
+
+function statutDeLigne_(nomTest) {
+  var values = getSheet_().getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][2]) === nomTest) return String(values[i][STATUT_COL - 1]).trim();
+  }
+  return '(ligne introuvable)';
+}
+
+function nombreLignesTest_(stamp) {
+  var values = getSheet_().getDataRange().getValues();
+  var n = 0;
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][2]).indexOf('AUTOTEST-' + stamp) === 0) n++;
+  }
+  return n;
+}
+
+// Ne supprime que les lignes créées par ce test (nom AUTOTEST-<horodatage>-n, prénom TEST-AUTO).
+function supprimerLignesTest_(stamp) {
+  var sheet = getSheet_();
+  var values = sheet.getDataRange().getValues();
+  var n = 0;
+  for (var i = values.length - 1; i >= 1; i--) {
+    if (String(values[i][1]) === 'TEST-AUTO' && String(values[i][2]).indexOf('AUTOTEST-' + stamp) === 0) {
+      sheet.deleteRow(i + 1);
+      n++;
+    }
+  }
+  return n;
 }
 
 // Supprime les lignes de test (Prénom commençant par "TEST", Nom contenant
