@@ -367,6 +367,11 @@ section { padding:110px 20px; }
 .field input, .field select, .field textarea { border:1.5px solid var(--line); background:#fff; color:var(--ink); padding:12px 14px; border-radius:10px; font-family:'Inter',sans-serif; font-size:14px; outline:none; transition:border-color .2s, box-shadow .2s; resize:vertical; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--terra); box-shadow:0 0 0 3px rgba(185,95,58,.14); }
 /* Choix de la table : cases à cocher (le client peut en cocher plusieurs) */
+.field.optin { gap:8px; margin-bottom:6px; }
+.field.optin label { display:flex; align-items:flex-start; gap:10px; font-size:13.5px; line-height:1.5; letter-spacing:normal; text-transform:none; color:var(--ink); font-weight:500; cursor:pointer; }
+.field.optin input { width:18px; height:18px; flex:none; padding:0; margin:2px 0 0; accent-color:var(--terra); cursor:pointer; }
+.field.optin small { font-size:12px; line-height:1.5; color:var(--olive); }
+.field.optin small a { color:var(--terra); }
 .table-choice { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
 .table-choice .opt { display:flex; align-items:center; gap:10px; border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:12px 14px; cursor:pointer; transition:border-color .2s, box-shadow .2s, background .2s; font-size:14px; font-weight:500; letter-spacing:normal; text-transform:none; color:var(--ink); }
 .table-choice .opt:hover { border-color:var(--terra); }
@@ -1119,6 +1124,10 @@ document.addEventListener('keydown', function(ev){
           </div>
         </div>
         <div class="field full"><label>Une occasion particulière ?</label><textarea id="g-msg" name="message" rows="2" placeholder="Anniversaire, demande spéciale, allergies…"></textarea></div>
+        <div class="field full optin">
+          <label for="g-optin"><input type="checkbox" id="g-optin" name="optin"><span id="g-optin-texte">J’accepte de recevoir par e-mail les menus, événements et offres promotionnelles du Garden Garden. Je peux retirer mon accord à tout moment.</span></label>
+          <small>Facultatif : cette case n’a aucun effet sur votre réservation. Si vous la cochez, Garden Garden conserve votre adresse e-mail et la date de votre accord pour ces envois, jusqu’à votre désinscription (lien dans chaque e-mail). <a href="confidentialite.html#communications" target="_blank" rel="noopener">Données personnelles et droits</a></small>
+        </div>
       </div>
       <button class="btn btn-primary submit-full" type="submit">Confirmer la réservation</button>
       <div class="err" id="g-err" style="display:none; color:#b95f3a; margin-top:10px; font-size:14px;">Le formulaire n'a pas pu être envoyé — merci d'appeler directement le <a href="tel:0486802750">04 86 80 27 50</a>.</div>
@@ -1255,7 +1264,10 @@ function gsubmit(e){
     date: v('g-date'),
     heure: v('g-heure').replace('h', ':'),
     convives: v('g-pers'),
-    occasion: occasionSheet
+    occasion: occasionSheet,
+    // Case facultative, décochée par défaut : on envoie aussi le texte exact affiché, pour la preuve de l'accord.
+    optin: document.getElementById('g-optin').checked === true,
+    optinTexte: document.getElementById('g-optin-texte').textContent.trim()
   }).then(function(resultat){
     // Un seul message à la fois : jamais l'erreur et la confirmation ensemble.
     errEl.style.display='none';
