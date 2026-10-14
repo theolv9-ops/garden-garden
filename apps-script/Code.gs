@@ -9,6 +9,10 @@
  * Onglet "Chambres" (réservations de chambre payées via Stripe), colonnes :
  * Reçu le | Prénom | Nom | Email | Téléphone | Arrivée | Départ | Nuits | Petit-déj | Montant | Statut | Session Stripe
  *
+ * Onglet "Communications" (créé tout seul) : clients qui ont coché la case facultative
+ * d'inscription aux emails promotionnels du formulaire. Une ligne par adresse :
+ * Email | Prénom | Accord le | Texte accepté | Statut (Inscrit / STOP) | Retrait le | Lien de désinscription
+ *
  * Avant d'utiliser doPost avec type="chambre", définir la propriété de script
  * SHARED_SECRET (menu Extensions > Propriétés du script) avec une valeur secrète,
  * et mettre la même valeur dans la variable d'environnement Cloudflare Pages
@@ -29,6 +33,12 @@ var ROOM_HEADERS = ['Reçu le', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Arriv
 // largement suffisante ici.
 var NOTIFY_EMAIL = 'contact.gardengarden38@gmail.com';
 
+var COMM_SHEET_NAME = 'Communications';
+var COMM_HEADERS = ['Email', 'Prénom', 'Accord le', 'Texte accepté', 'Statut', 'Retrait le', 'Lien de désinscription'];
+var COMM_INSCRIT = 'Inscrit';
+var COMM_STOP = 'STOP';
+var COMM_TEXTE_PAR_DEFAUT = 'J’accepte de recevoir par e-mail les menus, événements et offres promotionnelles du Garden Garden. Je peux retirer mon accord à tout moment.';
+
 function getSheet_() {
   var sheet = SpreadsheetApp.openById(SHEET_ID).getSheets()[0];
   if (sheet.getLastRow() === 0) {
@@ -46,6 +56,20 @@ function getRoomSheet_() {
   }
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(ROOM_HEADERS);
+  }
+  return sheet;
+}
+
+// Récupère (ou crée) l'onglet des accords de communication commerciale
+function getCommSheet_() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(COMM_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(COMM_SHEET_NAME);
+  }
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(COMM_HEADERS);
+    sheet.setFrozenRows(1);
   }
   return sheet;
 }
@@ -174,6 +198,9 @@ function saveTableReservationLocked_(data) {
   range.setNumberFormats([['dd/MM/yyyy HH:mm', '@', '@', '@', '@', '0', '@', '@', '@', '@']]);
   range.setValues(rowValues);
 
+  // Case facultative « emails promotionnels » : sans effet sur la réservation, jamais bloquante.
+  data.optinResultat = enregistrerAccordCommunications_(data);
+
   var decision = decisionAutomatique_(data, rowIndex);
   if (decision.statut !== STATUT_NOUVELLE) {
     sheet.getRange(rowIndex, STATUT_COL).setValue(decision.statut);
@@ -298,6 +325,7 @@ function notifierNouvelleReservation_(data, occasion, decision, ref) {
       'Téléphone : ' + (data.telephone || ''),
       'Email : ' + (data.email || ''),
       'Occasion / commentaire : ' + (occasion || '—'),
+      'Emails promotionnels : ' + libelleAccord_(data.optinResultat),
       decision ? '\nDécision automatique : ' + decision.libelle + ' — ' + decision.raison : ''
     ].join('\n');
     var options = {
@@ -369,6 +397,117 @@ function recapTable_(r) {
     'Convives : ' + (r.convives || ''),
     r.occasion ? 'Précisions : ' + r.occasion : ''
   ].filter(String).join('\n');
+}
+
+// ---------------------------------------------------------------------------
+// Communications commerciales (case facultative du formulaire)
+//
+// - La case est décochée par défaut et ne conditionne jamais la réservation.
+// - Quand elle est cochée, l'accord est enregistré dans l'onglet « Communications » :
+//   email, prénom, date et heure, texte exact accepté, statut, lien de désinscription.
+// - Les anciennes réservations ne sont jamais ajoutées à cette liste.
+// - Une personne désinscrite (STOP) n'est jamais réinscrite, même si elle recoche la case.
+// - Chaque ligne a son lien de désinscription personnel (colonne G) : à insérer dans
+//   chaque email promotionnel (publipostage). Ouvrir le lien affiche une page de
+//   confirmation ; le bouton de la page enregistre la désinscription.
+// ---------------------------------------------------------------------------
+function emailNormalise_(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function libelleAccord_(resultat) {
+  if (resultat === 'inscrit') return 'oui (ajouté à l\'onglet Communications)';
+  if (resultat === 'deja') return 'oui (déjà inscrit)';
+  if (resultat === 'stop') return 'non (s\'était désinscrit : pas réinscrit)';
+  return 'non';
+}
+
+function signerStop_(email) {
+  var sig = Utilities.computeHmacSha256Signature('stop|' + email, cleLiens_());
+  return Utilities.base64EncodeWebSafe(sig).replace(/=+$/, '');
+}
+
+function lienDesinscription_(email) {
+  var e = emailNormalise_(email);
+  return ScriptApp.getService().getUrl() + '?action=stop&e=' + encodeURIComponent(e) + '&sig=' + signerStop_(e);
+}
+
+// Renvoie l'indice (base 0 dans values) de la ligne de cette adresse, ou -1.
+function ligneCommunication_(values, email) {
+  for (var i = 1; i < values.length; i++) {
+    if (emailNormalise_(values[i][0]) === email) return i;
+  }
+  return -1;
+}
+
+// Appelé pendant l'enregistrement d'une réservation de table (déjà sous verrou).
+// Renvoie 'inscrit', 'deja', 'stop' ou 'non' (case non cochée / adresse invalide).
+function enregistrerAccordCommunications_(data) {
+  try {
+    if (data.optin !== true) return 'non';
+    var email = emailNormalise_(data.email);
+    if (!emailValide_(email)) return 'non';
+    var sheet = getCommSheet_();
+    var values = sheet.getDataRange().getValues();
+    var i = ligneCommunication_(values, email);
+    if (i !== -1) {
+      return String(values[i][4]).trim() === COMM_STOP ? 'stop' : 'deja';
+    }
+    var rowIndex = sheet.getLastRow() + 1;
+    var range = sheet.getRange(rowIndex, 1, 1, COMM_HEADERS.length);
+    range.setNumberFormats([['@', '@', 'dd/MM/yyyy HH:mm:ss', '@', '@', '@', '@']]);
+    range.setValues([[
+      email,
+      data.prenom || '',
+      new Date(),
+      String(data.optinTexte || COMM_TEXTE_PAR_DEFAUT).slice(0, 500),
+      COMM_INSCRIT,
+      '',
+      lienDesinscription_(email)
+    ]]);
+    return 'inscrit';
+  } catch (err) {
+    console.error('Échec de l\'enregistrement de l\'accord : ' + err.message);
+    return 'non';
+  }
+}
+
+// Traite un lien de désinscription. appliquer = faux : simple aperçu (ce que fait aussi
+// un scanner de liens), rien n'est modifié. Renvoie { ok, message, ... } pour la page.
+function desinscrire_(p, appliquer) {
+  var email = emailNormalise_(p.e);
+  if (!emailValide_(email) || String(p.sig || '') !== signerStop_(email)) {
+    return { ok: false, message: 'Ce lien n\'est pas valide.' };
+  }
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sheet = getCommSheet_();
+    var values = sheet.getDataRange().getValues();
+    var i = ligneCommunication_(values, email);
+    if (i !== -1 && String(values[i][4]).trim() === COMM_STOP) {
+      return { ok: true, message: 'Vous êtes déjà désinscrit(e) : vous ne recevrez plus d\'emails promotionnels de Garden Garden.' };
+    }
+    if (!appliquer) {
+      return { ok: true, apercu: true, question: 'Ne plus recevoir les emails de Garden Garden ?', message: email,
+        bouton: 'Oui, me désinscrire', couleur: '#555555', note: 'Cela n\'a aucun effet sur vos réservations.' };
+    }
+    if (i === -1) {
+      // Ligne supprimée entre-temps : on garde une trace du refus pour ne jamais réinscrire.
+      var rowIndex = sheet.getLastRow() + 1;
+      var r = sheet.getRange(rowIndex, 1, 1, COMM_HEADERS.length);
+      r.setNumberFormats([['@', '@', 'dd/MM/yyyy HH:mm:ss', '@', '@', 'dd/MM/yyyy HH:mm:ss', '@']]);
+      r.setValues([[email, '', '', '', COMM_STOP, new Date(), lienDesinscription_(email)]]);
+    } else {
+      sheet.getRange(i + 1, 5).setValue(COMM_STOP);
+      var retrait = sheet.getRange(i + 1, 6);
+      retrait.setNumberFormat('dd/MM/yyyy HH:mm:ss');
+      retrait.setValue(new Date());
+    }
+    return { ok: true, message: 'C\'est fait : vous ne recevrez plus d\'emails promotionnels de Garden Garden. Vos réservations ne sont pas concernées.' };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // ---- Liens « Confirmer / Refuser » -----------------------------------------
@@ -471,14 +610,14 @@ function appliquerDecisionLien_(p, appliquer) {
 function pageDecision_(res, lienValider) {
   var corps;
   if (res.apercu) {
-    var couleur = res.statut === STATUT_CONFIRMEE ? '#2e7d32' : '#c62828';
+    var couleur = res.couleur || (res.statut === STATUT_CONFIRMEE ? '#2e7d32' : '#c62828');
     corps = '<div style="font-size:48px">❓</div>' +
       '<p style="font-size:20px;font-weight:bold">' + echapperHtml_(res.question) + '</p>' +
       '<p style="font-size:18px;line-height:1.5">' + echapperHtml_(res.message) + '</p>' +
       '<p><a href="' + echapperHtml_(lienValider) + '" target="_top" style="display:inline-block;padding:14px 28px;border-radius:6px;' +
       'background:' + couleur + ';color:#ffffff;text-decoration:none;font-weight:bold;font-size:18px">' +
-      (res.statut === STATUT_CONFIRMEE ? 'Oui, confirmer' : 'Oui, refuser') + '</a></p>' +
-      '<p style="color:#666">Le client recevra un email.</p>';
+      echapperHtml_(res.bouton || (res.statut === STATUT_CONFIRMEE ? 'Oui, confirmer' : 'Oui, refuser')) + '</a></p>' +
+      '<p style="color:#666">' + echapperHtml_(res.note || 'Le client recevra un email.') + '</p>';
   } else {
     corps = '<div style="font-size:48px">' + (res.ok ? '✅' : '⚠️') + '</div>' +
       '<p style="font-size:18px;line-height:1.5">' + echapperHtml_(res.message) + '</p>';
@@ -675,7 +814,7 @@ function installerDeclencheurs() {
 // ---------------------------------------------------------------------------
 // Auto-test : à lancer depuis l'éditeur (fonction « testerSysteme », bouton Exécuter).
 // Il simule 5 réservations (jeudi soir, lundi soir, lundi 11h30, grand groupe, doublon) et
-// les liens Confirmer / Refuser, vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
+// les liens Confirmer / Refuser, la case « emails promotionnels » (accord, doublon, STOP), vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
 // email au propriétaire du script. Les emails de test vont uniquement à cette
 // adresse : le restaurant n'est jamais prévenu.
 // ---------------------------------------------------------------------------
@@ -744,8 +883,46 @@ function testerSysteme() {
     lignes.push('ÉCHEC  liens Confirmer / Refuser : erreur ' + err.message);
   }
 
+  // Case « emails promotionnels » : accord enregistré, pas de doublon, STOP respecté.
+  var adresseComm = moi.replace('@', '+autotest' + stamp + '@');
+  try {
+    var dataComm = function (n, optin, adresse) {
+      return { prenom: 'TEST-AUTO', nom: 'AUTOTEST-' + stamp + '-c' + n, email: adresse, telephone: '0000000000', date: jeudi, heure: '20:00',
+        convives: '2 personnes', occasion: 'test automatique', requestId: 'selftest-' + stamp + '-c' + n, test: true, optin: optin };
+    };
+    var nbComm = function (adresse) {
+      var v = getCommSheet_().getDataRange().getValues(), n = 0;
+      for (var k = 1; k < v.length; k++) { if (emailNormalise_(v[k][0]) === emailNormalise_(adresse)) n++; }
+      return n;
+    };
+    var statutComm = function (adresse) {
+      var v = getCommSheet_().getDataRange().getValues();
+      var k = ligneCommunication_(v, emailNormalise_(adresse));
+      return k === -1 ? '(absent)' : String(v[k][4]).trim();
+    };
+    saveTableReservation_(dataComm(1, false, adresseComm));
+    lignes.push((nbComm(adresseComm) === 0 ? 'OK     ' : 'ÉCHEC  ') + 'case non cochée : aucune inscription');
+    saveTableReservation_(dataComm(2, true, adresseComm));
+    lignes.push((statutComm(adresseComm) === COMM_INSCRIT ? 'OK     ' : 'ÉCHEC  ') + 'case cochée : accord enregistré (« ' + statutComm(adresseComm) + ' »)');
+    saveTableReservation_(dataComm(3, true, adresseComm));
+    lignes.push((nbComm(adresseComm) === 1 ? 'OK     ' : 'ÉCHEC  ') + 'même adresse recochée : pas de doublon (' + nbComm(adresseComm) + ' ligne)');
+    var pStop = { e: adresseComm, sig: signerStop_(emailNormalise_(adresseComm)) };
+    var stopFaux = desinscrire_({ e: adresseComm, sig: 'faux' }, true);
+    var stopApercu = desinscrire_(pStop, false);
+    var apresApercu = statutComm(adresseComm);
+    var stopBon = desinscrire_(pStop, true);
+    lignes.push((!stopFaux.ok ? 'OK     ' : 'ÉCHEC  ') + 'lien de désinscription falsifié refusé');
+    lignes.push((stopApercu.apercu && apresApercu === COMM_INSCRIT ? 'OK     ' : 'ÉCHEC  ') + 'ouverture du lien de désinscription seule : inchangé « ' + apresApercu + ' »');
+    lignes.push((stopBon.ok && statutComm(adresseComm) === COMM_STOP ? 'OK     ' : 'ÉCHEC  ') + 'désinscription : statut « ' + statutComm(adresseComm) + ' »');
+    saveTableReservation_(dataComm(4, true, adresseComm));
+    lignes.push((statutComm(adresseComm) === COMM_STOP && nbComm(adresseComm) === 1 ? 'OK     ' : 'ÉCHEC  ') + 'recocher la case après STOP : jamais réinscrit');
+  } catch (err) {
+    lignes.push('ÉCHEC  communications : erreur ' + err.message);
+  }
+
   var supprimees = supprimerLignesTest_(stamp);
-  lignes.push('Nettoyage : ' + supprimees + ' ligne(s) de test supprimée(s).');
+  var supprimeesComm = supprimerLignesCommTest_(stamp);
+  lignes.push('Nettoyage : ' + supprimees + ' ligne(s) de test supprimée(s) + ' + supprimeesComm + ' dans Communications.');
 
   var ok = lignes.every(function (l) { return l.indexOf('ÉCHEC') !== 0; });
   MailApp.sendEmail(moi, (ok ? '✅' : '❌') + ' Test du système de réservation — Garden Garden',
@@ -785,6 +962,20 @@ function supprimerLignesTest_(stamp) {
   var n = 0;
   for (var i = values.length - 1; i >= 1; i--) {
     if (String(values[i][1]) === 'TEST-AUTO' && String(values[i][2]).indexOf('AUTOTEST-' + stamp) === 0) {
+      sheet.deleteRow(i + 1);
+      n++;
+    }
+  }
+  return n;
+}
+
+// Supprime de l'onglet Communications les adresses créées par ce test (+autotest<horodatage>).
+function supprimerLignesCommTest_(stamp) {
+  var sheet = getCommSheet_();
+  var values = sheet.getDataRange().getValues();
+  var n = 0;
+  for (var i = values.length - 1; i >= 1; i--) {
+    if (String(values[i][0]).toLowerCase().indexOf('+autotest' + stamp + '@') !== -1) {
       sheet.deleteRow(i + 1);
       n++;
     }
@@ -867,6 +1058,15 @@ function doGet(e) {
       var lien = ScriptApp.getService().getUrl() + '?action=decision&row=' + encodeURIComponent(p.row) + '&ts=' + encodeURIComponent(p.ts) +
         '&s=' + encodeURIComponent(p.s) + '&sig=' + encodeURIComponent(p.sig) + '&go=1';
       return pageDecision_(res, lien);
+    } catch (err) {
+      return pageDecision_({ ok: false, message: 'Une erreur est survenue : ' + err.message });
+    }
+  }
+  if (p.action === 'stop') {
+    try {
+      var resStop = desinscrire_(p, p.go === '1');
+      var lienStop = ScriptApp.getService().getUrl() + '?action=stop&e=' + encodeURIComponent(p.e) + '&sig=' + encodeURIComponent(p.sig) + '&go=1';
+      return pageDecision_(resStop, lienStop);
     } catch (err) {
       return pageDecision_({ ok: false, message: 'Une erreur est survenue : ' + err.message });
     }
