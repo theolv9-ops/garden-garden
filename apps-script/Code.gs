@@ -645,7 +645,7 @@ function envoyerAuClient_(r, sujet, intro) {
 // Règles réglables ici. Une demande est confirmée toute seule si le restaurant est
 // ouvert à ce moment-là, si le groupe est petit et s'il reste de la place. Sinon elle
 // reste « Nouvelle » (à vérifier à la main) ou est refusée si le restaurant est fermé.
-var CAPACITE_COUVERTS = { midi: 30, soir: 30 }; // couverts max par service : À AJUSTER avec Garden Garden
+var CAPACITE_COUVERTS = { midi: 100, soir: 100 }; // couverts max par service (validé par Garden Garden le 13/10/2026)
 var GROUPE_MAX_AUTO = 6;                        // au-delà : vérification manuelle
 // Jours d'ouverture par service (0 = dimanche … 6 = samedi), d'après le site.
 var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [4, 5, 6] };
