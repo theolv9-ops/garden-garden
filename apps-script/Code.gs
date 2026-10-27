@@ -642,11 +642,11 @@ function envoyerAuClient_(r, sujet, intro) {
 }
 
 // ---- Décision automatique ------------------------------------------------
-// Règles réglables ici. Une demande est confirmée toute seule si le restaurant est
-// ouvert à ce moment-là, si le groupe est petit et s'il reste de la place. Sinon elle
-// reste « Nouvelle » (à vérifier à la main) ou est refusée si le restaurant est fermé.
+// Règles réglables ici. Une demande est confirmée toute seule, quelle que soit la taille
+// du groupe (demande de Garden Garden du 27/10/2026), si le restaurant est ouvert à ce
+// moment-là et s'il reste de la place. Elle est refusée si le restaurant est fermé ou si
+// le service est complet. Elle ne reste « Nouvelle » (à vérifier) que si elle est illisible.
 var CAPACITE_COUVERTS = { midi: 100, soir: 100 }; // couverts max par service (validé par Garden Garden le 13/10/2026)
-var GROUPE_MAX_AUTO = 6;                        // au-delà : vérification manuelle
 // Jours d'ouverture par service (0 = dimanche … 6 = samedi), d'après le site.
 var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [4, 5, 6] };
 var MIDI_DEBUT = 11 * 60 + 30, MIDI_FIN = 15 * 60; // service du midi dès 11 h 30 (lun-mer 11 h 30-14 h 30 ; dimanche jusqu'à 18 h)
@@ -659,9 +659,12 @@ function serviceDe_(minutes, jour) {
   return null;
 }
 
+// « 12 personnes », « 12 » ou l'ancien choix « Grande tablée (7+) » (compté 7).
 function nombreCouverts_(convives) {
-  var m = String(convives || '').match(/^\s*(\d+)\s*personne/i);
-  return m ? parseInt(m[1], 10) : null; // « Grande tablée (7+) » -> null
+  var s = String(convives || '');
+  var m = s.match(/^\s*(\d+)\s*(personnes?)?\s*$/i) || s.match(/\((\d+)\+\)/);
+  var n = m ? parseInt(m[1], 10) : NaN;
+  return n > 0 ? n : null;
 }
 
 function minutesDe_(heure) {
@@ -677,7 +680,7 @@ function decisionAutomatique_(data, rowIndex) {
     var minutes = minutesDe_(data.heure);
     var n = nombreCouverts_(data.convives);
     if (!m || minutes === null) return nouvelle('date ou heure illisible');
-    if (n === null || n > GROUPE_MAX_AUTO) return nouvelle('grand groupe (' + data.convives + '), à voir avec le client');
+    if (n === null) return nouvelle('nombre de convives illisible (' + data.convives + ')');
 
     var jour = new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10)).getDay();
     var service = serviceDe_(minutes, jour);
@@ -698,7 +701,8 @@ function decisionAutomatique_(data, rowIndex) {
       pris += nombreCouverts_(values[i][5]) || 0;
     }
     if (pris + n > CAPACITE_COUVERTS[service]) {
-      return nouvelle('service presque complet (' + pris + '/' + CAPACITE_COUVERTS[service] + ' couverts déjà confirmés)');
+      return { statut: STATUT_REFUSEE, libelle: 'REFUSÉE (complet)', complet: true,
+        raison: 'service complet (' + pris + '/' + CAPACITE_COUVERTS[service] + ' couverts déjà confirmés, ' + n + ' demandés)' };
     }
     return { statut: STATUT_CONFIRMEE, libelle: 'CONFIRMÉE AUTO', raison: (pris + n) + '/' + CAPACITE_COUVERTS[service] + ' couverts ce service' };
   } catch (err) {
@@ -717,8 +721,10 @@ function repondreAuClient_(data, occasion, decision, statutRange) {
       envoye = envoyerAuClient_(r, 'Votre réservation est confirmée — Garden Garden',
         'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !');
     } else if (decision.statut === STATUT_REFUSEE) {
-      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
-        'Nous sommes désolés : nous ne sommes pas ouverts à ce moment-là. ' +
+      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden', decision.complet
+        ? 'Nous sommes désolés : nous sommes complets pour ce service. ' +
+          'Appelez-nous au 04 86 80 27 50, nous trouverons un autre créneau.'
+        : 'Nous sommes désolés : nous ne sommes pas ouverts à ce moment-là. ' +
         'Consultez nos horaires sur le site ou appelez-nous au 04 86 80 27 50, nous trouverons un autre créneau.');
     } else {
       envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
@@ -813,7 +819,7 @@ function installerDeclencheurs() {
 
 // ---------------------------------------------------------------------------
 // Auto-test : à lancer depuis l'éditeur (fonction « testerSysteme », bouton Exécuter).
-// Il simule 5 réservations (jeudi soir, lundi soir, lundi 11h30, grand groupe, doublon) et
+// Il simule des réservations (jeudi soir, lundi soir, lundi 11h30, grande table, hors service, complet, doublon) et
 // les liens Confirmer / Refuser, la case « emails promotionnels » (accord, doublon, STOP), vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
 // email au propriétaire du script. Les emails de test vont uniquement à cette
 // adresse : le restaurant n'est jamais prévenu.
@@ -834,7 +840,9 @@ function testerSysteme() {
     { nom: 'jeudi soir, 2 personnes', date: jeudi, heure: '20:00', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
     { nom: 'lundi soir (fermé)', date: lundi, heure: '20:00', convives: '2 personnes', attendu: STATUT_REFUSEE },
     { nom: 'lundi 11h30', date: lundi, heure: '11:30', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
-    { nom: 'grand groupe', date: jeudi, heure: '20:00', convives: 'Grande tablée (7+)', attendu: STATUT_NOUVELLE }
+    { nom: 'grande table, 12 personnes', date: jeudi, heure: '20:00', convives: '12 personnes', attendu: STATUT_CONFIRMEE },
+    { nom: 'heure hors service (16h)', date: jeudi, heure: '16:00', convives: '2 personnes', attendu: STATUT_NOUVELLE },
+    { nom: 'service complet (101 personnes)', date: jeudi, heure: '20:00', convives: '101 personnes', attendu: STATUT_REFUSEE }
   ];
   var lignes = [];
   var noms = [];
@@ -863,17 +871,17 @@ function testerSysteme() {
     lignes.push('ÉCHEC  doublon : erreur ' + err.message);
   }
 
-  // Liens Confirmer / Refuser : sur la ligne « grand groupe » (restée à vérifier).
+  // Liens Confirmer / Refuser : sur la ligne « heure hors service » (restée à vérifier).
   try {
-    var ligne = ligneDeTest_(noms[3]);
+    var ligne = ligneDeTest_(noms[4]);
     var base = { row: ligne.row, ts: ligne.ts };
     var mauvais = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: 'faux' }, true);
     var apercu = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') }, false);
-    var statutApercu = statutDeLigne_(noms[3]);
+    var statutApercu = statutDeLigne_(noms[4]);
     var bon = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') }, true);
-    var statutLien = statutDeLigne_(noms[3]);
+    var statutLien = statutDeLigne_(noms[4]);
     var encore = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'r', sig: signerLien_(base.row, base.ts, 'r') }, true);
-    var statutFinal = statutDeLigne_(noms[3]);
+    var statutFinal = statutDeLigne_(noms[4]);
     lignes.push((!mauvais.ok ? 'OK     ' : 'ÉCHEC  ') + 'lien falsifié refusé');
     lignes.push((apercu.apercu && statutApercu === STATUT_NOUVELLE ? 'OK     ' : 'ÉCHEC  ') + 'ouverture du lien seule (scanner) : statut inchangé « ' + statutApercu + ' »');
     lignes.push((bon.ok && statutLien === STATUT_CONFIRMEE ? 'OK     ' : 'ÉCHEC  ') + 'lien « Confirmer » : statut « ' + statutLien + ' »');
