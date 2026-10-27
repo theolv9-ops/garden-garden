@@ -482,3 +482,25 @@ a.brand { text-decoration:none; }
 @media (prefers-reduced-motion: reduce){
   .hero-slide.on img { animation:none; }
 }
+
+/* Page d'accueil plein écran : photos qui défilent, logo et deux boutons */
+.accueil { position:relative; min-height:100vh; min-height:100svh; display:flex; flex-direction:column; background:var(--ink); color:var(--cream); overflow:hidden; }
+.accueil-bg { position:absolute; inset:0; }
+.accueil-bg::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,rgba(21,23,15,.45) 0%,rgba(21,23,15,.8) 75%), linear-gradient(0deg,rgba(21,23,15,.85),transparent 40%); }
+.accueil #fireflies { position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; }
+.accueil-in { position:relative; z-index:2; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px 20px; }
+.accueil-logo { width:96px; height:96px; color:var(--gold); opacity:0; animation:fadeup 1.1s ease .2s forwards; }
+.accueil h1 { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(46px,9vw,104px); line-height:1; margin-top:14px; opacity:0; animation:fadeup 1.1s ease .45s forwards; }
+.accueil h1 em { font-style:italic; color:var(--gold); }
+.accueil-sub { color:rgba(246,241,229,.75); font-size:12px; letter-spacing:3.5px; text-transform:uppercase; margin-top:14px; opacity:0; animation:fadeup 1.1s ease .7s forwards; }
+.accueil-choix { display:flex; gap:16px; margin-top:44px; flex-wrap:wrap; justify-content:center; opacity:0; animation:fadeup 1.1s ease .95s forwards; }
+.accueil-btn { display:flex; align-items:center; gap:14px; min-width:250px; padding:16px 26px; border-radius:60px; border:1.5px solid rgba(200,162,102,.7); background:rgba(21,23,15,.55); backdrop-filter:blur(8px); color:var(--cream); text-decoration:none; text-align:left; transition:background .3s, transform .3s, border-color .3s; }
+.accueil-btn:hover { background:var(--terra); border-color:var(--terra); transform:translateY(-3px); }
+.accueil-btn i { font-size:26px; color:var(--gold); }
+.accueil-btn:hover i { color:var(--cream); }
+.accueil-btn b { display:block; font-family:'Fraunces',serif; font-weight:500; font-size:21px; }
+.accueil-btn small { display:block; font-size:12.5px; color:rgba(246,241,229,.7); }
+.accueil-foot { position:relative; z-index:2; display:flex; flex-wrap:wrap; justify-content:center; gap:8px 24px; padding:16px 20px 22px; font-size:13px; color:rgba(246,241,229,.6); }
+.accueil-foot a { color:var(--gold); text-decoration:none; }
+.accueil-foot i { color:var(--gold); margin-right:6px; }
+@media(max-width:600px){ .accueil-btn { width:100%; min-width:0; } .accueil-choix { width:100%; max-width:340px; } }

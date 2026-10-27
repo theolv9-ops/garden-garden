@@ -111,38 +111,30 @@
   else if(resto.indexOf(h) !== -1) location.replace('restaurant.html#' + h);
 })();
 </script>
-<div class="choix-page">
-  <header class="choix-top">
-    <svg class="brand-logo" viewBox="0 0 200 200" aria-hidden="true" style="color:var(--gold);"><use href="#gg-logomark"></use></svg>
+<div class="accueil">
+  <div class="accueil-bg" id="heroBg">
+    <div class="hero-slide on"><img src="images/hero.jpg" alt="Garden Garden à Chavanoz" fetchpriority="high" decoding="async"></div>
+    <div class="hero-slide"><img data-src="images/salle.jpg" alt="La grande salle du restaurant" decoding="async"></div>
+    <div class="hero-slide"><img data-src="images/chambre1.jpg" alt="Une chambre de l'hôtel" decoding="async"></div>
+    <div class="hero-slide"><img data-src="images/terrasse.jpg" alt="La terrasse" decoding="async"></div>
+    <div class="hero-slide"><img data-src="images/chambre2.jpg" alt="Le coin bureau d'une chambre" decoding="async"></div>
+  </div>
+  <canvas id="fireflies"></canvas>
+  <div class="accueil-in">
+    <svg class="accueil-logo" viewBox="0 0 200 200" aria-hidden="true"><use href="#gg-logomark"></use></svg>
     <h1>Garden<em>Garden</em></h1>
-    <p>Hôtel ★★★ · Restaurant · Bar lounge — Chavanoz</p>
-  </header>
-  <main class="choix">
-    <a class="choix-card" href="restaurant.html">
-      <img src="images/salle.jpg" alt="La grande salle du restaurant Garden Garden" fetchpriority="high" decoding="async">
-      <div class="choix-in">
-        <div class="eyebrow">Ouvert 7 jours sur 7</div>
-        <h2>Le <em>Restaurant</em></h2>
-        <p>Cuisine française, viandes d'exception, carte des vins, terrasse et jardin. Menu Grenouilles tous les week-ends.</p>
-        <span class="choix-go">Carte et réservation <i class="ti ti-arrow-right"></i></span>
-      </div>
-    </a>
-    <a class="choix-card" href="hotel.html">
-      <img src="images/chambre1.jpg" alt="Une chambre de l'hôtel Garden Garden" decoding="async">
-      <div class="choix-in">
-        <div class="eyebrow">★★★ · 7 chambres</div>
-        <h2>L'<em>Hôtel</em></h2>
-        <p>Des chambres climatisées ouvertes sur le jardin, à 95 € la nuit. Réservation et paiement en ligne.</p>
-        <span class="choix-go">Chambres et réservation <i class="ti ti-arrow-right"></i></span>
-      </div>
-    </a>
-  </main>
-  <footer class="choix-foot">
-    <span><i class="ti ti-map-pin"></i><a href="https://www.google.com/maps/search/?api=1&query=14+hameau+de+Grange+Rouge%2C+38230+Chavanoz" target="_blank" rel="noopener">14 hameau de Grange Rouge, 38230 Chavanoz</a></span>
+    <p class="accueil-sub">Hôtel ★★★ · Restaurant · Bar lounge — Chavanoz</p>
+    <div class="accueil-choix">
+      <a class="accueil-btn" href="restaurant.html"><i class="ti ti-tools-kitchen-2"></i><span><b>Le Restaurant</b><small>Carte et réservation</small></span></a>
+      <a class="accueil-btn" href="hotel.html"><i class="ti ti-bed"></i><span><b>L'Hôtel</b><small>Chambres et réservation</small></span></a>
+    </div>
+  </div>
+  <footer class="accueil-foot">
+    <span><i class="ti ti-map-pin"></i><a href="https://www.google.com/maps/search/?api=1&query=14+hameau+de+Grange+Rouge%2C+38230+Chavanoz" target="_blank" rel="noopener">14 hameau de Grange Rouge, Chavanoz</a></span>
     <span><i class="ti ti-phone"></i><a href="tel:0486802750">04 86 80 27 50</a></span>
-    <span><i class="ti ti-brand-instagram"></i><a href="https://www.instagram.com/gardengardenchavanoz" target="_blank" rel="noopener">@gardengardenchavanoz</a></span>
     <span><a href="mentions-legales.html">Mentions légales</a> · <a href="confidentialite.html">Confidentialité</a></span>
   </footer>
 </div>
+<script src="assets/site.js"></script>
 </body>
 </html>
