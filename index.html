@@ -1111,7 +1111,7 @@ document.addEventListener('keydown', function(ev){
           <select id="g-heure" name="heure"><option value="">Choisir</option><option>12h00</option><option>12h30</option><option>13h00</option><option>19h00</option><option>19h30</option><option>20h00</option><option>20h30</option><option>21h00</option></select>
         </div>
         <div class="field"><label>Convives</label>
-          <select id="g-pers" name="convives"><option>2 personnes</option><option>3 personnes</option><option>4 personnes</option><option>5 personnes</option><option>6 personnes</option><option>Grande tablée (7+)</option></select>
+          <input id="g-pers" name="convives" type="number" inputmode="numeric" min="1" max="500" step="1" value="2">
         </div>
         <div class="field"><label>Téléphone</label><input id="g-tel" name="telephone" type="tel" placeholder="06 00 00 00 00"></div>
         <div class="field"><label>Email</label><input id="g-email" name="email" type="email" placeholder="camille@email.com"></div>
@@ -1245,6 +1245,8 @@ function gsubmit(e){
   if(!ok){ alert('Merci de remplir prénom, nom, date, heure, téléphone et email.'); return false; }
   var v=function(id){ return document.getElementById(id).value.trim(); };
   if(v('g-date') < OPENING_DATE){ alert('Garden Garden ouvre ses portes le 2 octobre 2026 — merci de choisir une date à partir de cette date.'); return false; }
+  var nbPers = parseInt(v('g-pers'), 10);
+  if(!(nbPers >= 1 && nbPers <= 500) || String(nbPers) !== v('g-pers')){ alert('Merci d\'indiquer le nombre de convives (un nombre entier, au moins 1).'); return false; }
   var tables = gCheckedTables();
   if(tables.length === 0){ alert('Merci de cocher la table que vous souhaitez (lounge, terrasse ou salle principale).'); gscroll('resa'); return false; }
   var tableLabel = tables.join(' ou ');
@@ -1263,7 +1265,7 @@ function gsubmit(e){
     telephone: v('g-tel'),
     date: v('g-date'),
     heure: v('g-heure').replace('h', ':'),
-    convives: v('g-pers'),
+    convives: nbPers + (nbPers > 1 ? ' personnes' : ' personne'),
     occasion: occasionSheet,
     // Case facultative, décochée par défaut : on envoie aussi le texte exact affiché, pour la preuve de l'accord.
     optin: document.getElementById('g-optin').checked === true,
