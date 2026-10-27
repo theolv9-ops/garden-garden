@@ -643,10 +643,10 @@ function envoyerAuClient_(r, sujet, intro) {
 
 // ---- Décision automatique ------------------------------------------------
 // Règles réglables ici. Une demande est confirmée toute seule, quelle que soit la taille
-// du groupe (demande de Garden Garden du 27/10/2026), si le restaurant est ouvert à ce
-// moment-là et s'il reste de la place. Elle est refusée si le restaurant est fermé ou si
-// le service est complet. Elle ne reste « Nouvelle » (à vérifier) que si elle est illisible.
-var CAPACITE_COUVERTS = { midi: 100, soir: 100 }; // couverts max par service (validé par Garden Garden le 13/10/2026)
+// du groupe et sans limite de couverts (Garden Garden gère lui-même, demande du 27/10/2026),
+// si le restaurant est ouvert à ce moment-là. Elle est refusée si le restaurant est fermé.
+// Elle ne reste « Nouvelle » (à vérifier) que si elle est illisible. Si Garden Garden n'est
+// pas d'accord, il écrit lui-même au client.
 // Jours d'ouverture par service (0 = dimanche … 6 = samedi), d'après le site.
 var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [4, 5, 6] };
 var MIDI_DEBUT = 11 * 60 + 30, MIDI_FIN = 15 * 60; // service du midi dès 11 h 30 (lun-mer 11 h 30-14 h 30 ; dimanche jusqu'à 18 h)
@@ -689,22 +689,7 @@ function decisionAutomatique_(data, rowIndex) {
       return { statut: STATUT_REFUSEE, libelle: 'REFUSÉE (fermé)', raison: 'le restaurant n\'est pas ouvert ce jour-là à ce service' };
     }
 
-    // Places déjà confirmées le même jour, au même service (hors la ligne tout juste ajoutée).
-    var values = getSheet_().getDataRange().getValues();
-    var pris = 0;
-    for (var i = 1; i < values.length; i++) {
-      if (i + 1 === rowIndex) continue;
-      if (String(values[i][STATUT_COL - 1]).trim() !== STATUT_CONFIRMEE) continue;
-      if (String(values[i][3]) !== String(data.date)) continue;
-      var mi = minutesDe_(values[i][4]);
-      if (mi === null || serviceDe_(mi, jour) !== service) continue;
-      pris += nombreCouverts_(values[i][5]) || 0;
-    }
-    if (pris + n > CAPACITE_COUVERTS[service]) {
-      return { statut: STATUT_REFUSEE, libelle: 'REFUSÉE (complet)', complet: true,
-        raison: 'service complet (' + pris + '/' + CAPACITE_COUVERTS[service] + ' couverts déjà confirmés, ' + n + ' demandés)' };
-    }
-    return { statut: STATUT_CONFIRMEE, libelle: 'CONFIRMÉE AUTO', raison: (pris + n) + '/' + CAPACITE_COUVERTS[service] + ' couverts ce service' };
+    return { statut: STATUT_CONFIRMEE, libelle: 'CONFIRMÉE AUTO', raison: n + ' couvert(s), ' + service };
   } catch (err) {
     console.error('Échec de la décision automatique : ' + err.message);
     return nouvelle('erreur de calcul, à vérifier');
@@ -721,10 +706,8 @@ function repondreAuClient_(data, occasion, decision, statutRange) {
       envoye = envoyerAuClient_(r, 'Votre réservation est confirmée — Garden Garden',
         'Bonne nouvelle : votre réservation est confirmée. Nous avons hâte de vous accueillir !');
     } else if (decision.statut === STATUT_REFUSEE) {
-      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden', decision.complet
-        ? 'Nous sommes désolés : nous sommes complets pour ce service. ' +
-          'Appelez-nous au 04 86 80 27 50, nous trouverons un autre créneau.'
-        : 'Nous sommes désolés : nous ne sommes pas ouverts à ce moment-là. ' +
+      envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
+        'Nous sommes désolés : nous ne sommes pas ouverts à ce moment-là. ' +
         'Consultez nos horaires sur le site ou appelez-nous au 04 86 80 27 50, nous trouverons un autre créneau.');
     } else {
       envoye = envoyerAuClient_(r, 'Votre demande de réservation — Garden Garden',
@@ -819,7 +802,7 @@ function installerDeclencheurs() {
 
 // ---------------------------------------------------------------------------
 // Auto-test : à lancer depuis l'éditeur (fonction « testerSysteme », bouton Exécuter).
-// Il simule des réservations (jeudi soir, lundi soir, lundi 11h30, grande table, hors service, complet, doublon) et
+// Il simule des réservations (jeudi soir, lundi soir, lundi 11h30, grande table, hors service, doublon) et
 // les liens Confirmer / Refuser, la case « emails promotionnels » (accord, doublon, STOP), vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
 // email au propriétaire du script. Les emails de test vont uniquement à cette
 // adresse : le restaurant n'est jamais prévenu.
@@ -840,9 +823,8 @@ function testerSysteme() {
     { nom: 'jeudi soir, 2 personnes', date: jeudi, heure: '20:00', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
     { nom: 'lundi soir (fermé)', date: lundi, heure: '20:00', convives: '2 personnes', attendu: STATUT_REFUSEE },
     { nom: 'lundi 11h30', date: lundi, heure: '11:30', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
-    { nom: 'grande table, 12 personnes', date: jeudi, heure: '20:00', convives: '12 personnes', attendu: STATUT_CONFIRMEE },
-    { nom: 'heure hors service (16h)', date: jeudi, heure: '16:00', convives: '2 personnes', attendu: STATUT_NOUVELLE },
-    { nom: 'service complet (101 personnes)', date: jeudi, heure: '20:00', convives: '101 personnes', attendu: STATUT_REFUSEE }
+    { nom: 'grande table, 150 personnes', date: jeudi, heure: '20:00', convives: '150 personnes', attendu: STATUT_CONFIRMEE },
+    { nom: 'heure hors service (16h)', date: jeudi, heure: '16:00', convives: '2 personnes', attendu: STATUT_NOUVELLE }
   ];
   var lignes = [];
   var noms = [];
