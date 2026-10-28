@@ -31,6 +31,7 @@ body.loaded #preloader { opacity:0; visibility:hidden; }
 .opening-ribbon { position:sticky; top:0; z-index:250; display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(90deg,var(--terra),#c8863f); color:#fff; text-align:center; font-size:13px; font-weight:600; letter-spacing:.3px; padding:10px 16px; }
 .opening-ribbon i { font-size:15px; }
 .opening-ribbon b { font-weight:800; }
+@media (max-width:820px){ .opening-ribbon .rib-suite { display:none; } }
 .nav-wrap { position:sticky; top:52px; z-index:200; display:flex; justify-content:center; padding:0 16px; }
 .nav { display:flex; align-items:center; gap:26px; background:rgba(21,23,15,.92); backdrop-filter:blur(10px); border:1px solid rgba(200,162,102,.35); border-radius:60px; padding:10px 12px 10px 24px; box-shadow:0 8px 30px -12px rgba(0,0,0,.45); transition:box-shadow .3s; }
 .nav.scrolled { box-shadow:0 14px 40px -10px rgba(0,0,0,.6); }
