@@ -648,14 +648,17 @@ function envoyerAuClient_(r, sujet, intro) {
 // Elle ne reste « Nouvelle » (à vérifier) que si elle est illisible. Si Garden Garden n'est
 // pas d'accord, il écrit lui-même au client.
 // Jours d'ouverture par service (0 = dimanche … 6 = samedi), d'après le site.
-var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [4, 5, 6] };
-var MIDI_DEBUT = 11 * 60 + 30, MIDI_FIN = 15 * 60; // service du midi dès 11 h 30 (lun-mer 11 h 30-14 h 30 ; dimanche jusqu'à 18 h)
+var JOURS_OUVERTS = { midi: [0, 1, 2, 3, 4, 5, 6], soir: [3, 4, 5, 6] };
+var MIDI_DEBUT = 11 * 60 + 30, MIDI_FIN = 15 * 60; // service du midi dès 11 h 30 (lun-mar 11 h 30-14 h 30 ; dimanche jusqu'à 18 h)
 var SOIR_DEBUT = 17 * 60;
+var MERCREDI_MIDI_DEBUT = 9 * 60, MERCREDI_SOIR_DEBUT = 19 * 60; // mercredi : 9 h-14 h 30 et 19 h-1 h (demande de Patrik, 29/10/2026)
 
 function serviceDe_(minutes, jour) {
   var finMidi = jour === 0 ? 18 * 60 : MIDI_FIN;
-  if (minutes >= MIDI_DEBUT && minutes < finMidi) return 'midi';
-  if (minutes >= SOIR_DEBUT) return 'soir';
+  var debutMidi = jour === 3 ? MERCREDI_MIDI_DEBUT : MIDI_DEBUT;
+  var debutSoir = jour === 3 ? MERCREDI_SOIR_DEBUT : SOIR_DEBUT;
+  if (minutes >= debutMidi && minutes < finMidi) return 'midi';
+  if (minutes >= debutSoir) return 'soir';
   return null;
 }
 
@@ -802,7 +805,7 @@ function installerDeclencheurs() {
 
 // ---------------------------------------------------------------------------
 // Auto-test : à lancer depuis l'éditeur (fonction « testerSysteme », bouton Exécuter).
-// Il simule des réservations (jeudi soir, lundi soir, lundi 11h30, grande table, hors service, doublon) et
+// Il simule des réservations (jeudi soir, mercredi soir, lundi soir, lundi 11h30, grande table, hors service, doublon) et
 // les liens Confirmer / Refuser, la case « emails promotionnels » (accord, doublon, STOP), vérifie le Statut décidé, supprime ses propres lignes et envoie le résultat par
 // email au propriétaire du script. Les emails de test vont uniquement à cette
 // adresse : le restaurant n'est jamais prévenu.
@@ -818,10 +821,13 @@ function testerSysteme() {
   var moi = Session.getEffectiveUser().getEmail();
   var jeudi = prochainJour_(4);
   var lundi = prochainJour_(1);
+  var mercredi = prochainJour_(3);
   var stamp = String(new Date().getTime());
   var scenarios = [
     { nom: 'jeudi soir, 2 personnes', date: jeudi, heure: '20:00', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
     { nom: 'lundi soir (fermé)', date: lundi, heure: '20:00', convives: '2 personnes', attendu: STATUT_REFUSEE },
+    { nom: 'mercredi soir 20h', date: mercredi, heure: '20:00', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
+    { nom: 'mercredi 9h30', date: mercredi, heure: '09:30', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
     { nom: 'lundi 11h30', date: lundi, heure: '11:30', convives: '2 personnes', attendu: STATUT_CONFIRMEE },
     { nom: 'grande table, 150 personnes', date: jeudi, heure: '20:00', convives: '150 personnes', attendu: STATUT_CONFIRMEE },
     { nom: 'heure hors service (16h)', date: jeudi, heure: '16:00', convives: '2 personnes', attendu: STATUT_NOUVELLE }
