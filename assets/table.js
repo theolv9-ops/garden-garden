@@ -10,7 +10,7 @@ var OPENING_DATE = '2026-10-02';
   }
 })();
 // Heures proposées selon le jour choisi (voir le bloc Horaires) :
-// lundi-mercredi midi seulement, jeudi-samedi midi et soir, dimanche midi.
+// lundi-mardi midi seulement, mercredi-samedi midi et soir, dimanche midi.
 var HEURES_MIDI = ['12h00','12h30','13h00'];
 var HEURES_SOIR = ['19h00','19h30','20h00','20h30','21h00'];
 function majHeures(){
@@ -21,7 +21,8 @@ function majHeures(){
   if(!date){ heures = HEURES_MIDI.concat(HEURES_SOIR); }
   else {
     var jour = new Date(date + 'T12:00:00').getDay(); // 0 = dimanche
-    if(jour >= 1 && jour <= 3) heures = ['11h30'].concat(HEURES_MIDI);
+    if(jour === 1 || jour === 2) heures = ['11h30'].concat(HEURES_MIDI);
+    else if(jour === 3) heures = ['11h30'].concat(HEURES_MIDI, HEURES_SOIR);
     else if(jour >= 4 && jour <= 6) heures = HEURES_MIDI.concat(HEURES_SOIR);
     else heures = HEURES_MIDI;
   }

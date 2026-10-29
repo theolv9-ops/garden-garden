@@ -40,7 +40,9 @@
     "addressCountry": "FR"
   },
   "openingHoursSpecification": [
-    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday"], "opens": "11:30", "closes": "14:30" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday"], "opens": "11:30", "closes": "14:30" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "09:00", "closes": "14:30" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "19:00", "closes": "01:00" },
     { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Thursday","Friday","Saturday"], "opens": "12:00", "closes": "15:00" },
     { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Thursday","Friday","Saturday"], "opens": "17:00", "closes": "01:00" },
     { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "12:00", "closes": "18:00" }
@@ -109,7 +111,7 @@
 </div>
 
 <div id="progress"></div>
-<div class="opening-ribbon" onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i> <span><b>Ouvert tous les midis</b> · le soir du jeudi au samedi<span class="rib-suite"> — Restaurant · Bar lounge à Chavanoz</span></span></div>
+<div class="opening-ribbon" onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i> <span><b>Ouvert tous les midis</b> · le soir du mercredi au samedi<span class="rib-suite"> — Restaurant · Bar lounge à Chavanoz</span></span></div>
 <div class="nav-wrap">
   <div class="nav" id="mainNav">
     <a class="brand" href="./" title="Accueil Garden Garden">
@@ -154,26 +156,15 @@
   </div>
 </div>
 
-<div class="promo-wrap reveal">
-  <div class="promo-inner">
-    <span class="promo-icon"><i class="ti ti-tag"></i></span>
-    <div class="promo-text">
-      <strong>Menu Grenouilles — 39€</strong>
-      <span>Entrée + grenouilles + fromage blanc + dessert — tous les week-ends</span>
-    </div>
-    <button class="btn btn-primary" onclick="gscroll('resa')">Réserver</button>
-  </div>
-</div>
-
 <div class="marquee">
   <div class="track">
-    <span onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i>Tous les midis · le soir du jeudi au samedi</span>
+    <span onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i>Tous les midis · le soir du mercredi au samedi</span>
     <span><i class="ti ti-tag"></i>Menu Grenouilles · tous les week-ends</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
     <span><i class="ti ti-glass-full"></i>Carte des vins</span>
     <span><i class="ti ti-trees"></i>Terrasse au jardin</span>
-    <span onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i>Tous les midis · le soir du jeudi au samedi</span>
+    <span onclick="gscroll('infos')" style="cursor:pointer;"><i class="ti ti-calendar-check"></i>Tous les midis · le soir du mercredi au samedi</span>
     <span><i class="ti ti-tag"></i>Menu Grenouilles · tous les week-ends</span>
     <span><i class="ti ti-meat"></i>Viandes d'exception</span>
     <span><i class="ti ti-flame"></i>Cuisine française</span>
@@ -228,6 +219,17 @@
       <span>La carte du restaurant, comme si vous l'aviez entre les mains : tournez les pages.</span>
     </div>
     <button class="btn btn-primary" type="button" onclick="ouvrirLivre('carte')"><i class="ti ti-book-2"></i> Ouvrir la carte</button>
+  </div>
+
+  <div class="promo-wrap promo-carte reveal">
+    <div class="promo-inner">
+      <span class="promo-icon"><i class="ti ti-tag"></i></span>
+      <div class="promo-text">
+        <strong>Menu Grenouilles — 39€</strong>
+        <span>Entrée + grenouilles + fromage blanc + dessert — tous les week-ends</span>
+      </div>
+      <button class="btn btn-primary" onclick="gscroll('resa')">Réserver</button>
+    </div>
   </div>
 
   <div class="carte-grid">
@@ -515,9 +517,11 @@
     </div>
     <div class="info reveal">
       <h4>Horaires</h4>
-      <p><strong>Ouvert tous les midis, le soir du jeudi au samedi</strong></p>
-      <div class="hr-row"><span class="hr-day">Lundi — Mercredi (midi)</span><span class="hr-time">11h30–14h30</span></div>
-      <div class="hr-row"><span class="hr-day">Lundi — Mercredi (soir)</span><span class="hr-time">Fermé</span></div>
+      <p><strong>Ouvert tous les midis, le soir du mercredi au samedi</strong></p>
+      <div class="hr-row"><span class="hr-day">Lundi — Mardi (midi)</span><span class="hr-time">11h30–14h30</span></div>
+      <div class="hr-row"><span class="hr-day">Lundi — Mardi (soir)</span><span class="hr-time">Fermé</span></div>
+      <div class="hr-row"><span class="hr-day">Mercredi (midi)</span><span class="hr-time">9h–14h30</span></div>
+      <div class="hr-row"><span class="hr-day">Mercredi (soir)</span><span class="hr-time">19h–1h</span></div>
       <div class="hr-row"><span class="hr-day">Jeu — Sam (midi)</span><span class="hr-time">12h–15h</span></div>
       <div class="hr-row"><span class="hr-day">Jeu — Sam (soir)</span><span class="hr-time">17h–1h</span></div>
       <div class="hr-row"><span class="hr-day">Dimanche</span><span class="hr-time">12h–18h</span></div>
