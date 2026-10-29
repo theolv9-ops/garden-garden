@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>L'Hôtel ★★★ · Garden Garden à Chavanoz</title>
 <meta name="description" content="Hôtel Garden Garden à Chavanoz, entre Lyon et Bourgoin-Jallieu : 7 chambres trois étoiles climatisées ouvertes sur le jardin, 95 € la nuit, parking privé gratuit. Réservation et paiement en ligne.">
-<meta name="theme-color" content="#15170f">
+<meta name="theme-color" content="#1c261e">
 <link rel="canonical" href="https://gardengarden-chavanoz.com/hotel.html">
 
 <meta property="og:type" content="website">
@@ -54,9 +54,10 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/v2.css">
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-D81CPJL0BG"></script>
@@ -94,15 +95,6 @@
   </defs>
 </svg>
 
-<div id="preloader">
-  <div class="pre-inner">
-    <svg class="brand-logo" viewBox="0 0 200 200" style="height:56px; width:56px; color:var(--gold); margin:0 auto 14px;"><use href="#gg-logomark"></use></svg>
-    <div class="pre-brand">Garden<em>Garden</em></div>
-    <div class="pre-sub">Hôtel ★★★</div>
-    <div class="pre-line"></div>
-  </div>
-</div>
-<div id="progress"></div>
 <div class="opening-ribbon" onclick="gscroll('resa-chambre')" style="cursor:pointer;"><i class="ti ti-bed"></i> <b>Hôtel ★★★</b> — réservez et payez en ligne</div>
 <div class="nav-wrap">
   <div class="nav" id="mainNav">
@@ -129,12 +121,10 @@
     <div class="hero-slide" data-label="Le jardin"><img data-src="images/jardin-petanque.jpg" alt="Le jardin" decoding="async"></div>
     <div class="hero-slide" data-label="La façade"><img data-src="images/facade-soir.jpg" alt="La façade au crépuscule" decoding="async"></div>
   </div>
-  <canvas id="fireflies"></canvas>
   <div class="hero-slide-label" id="heroSlideLabel">La chambre</div>
   <div class="hero-dots" aria-label="Photos de l'accueil">
     <button class="active" aria-label="Photo 1"></button><button aria-label="Photo 2"></button><button aria-label="Photo 3"></button><button aria-label="Photo 4"></button><button aria-label="Photo 5"></button>
   </div>
-  <div class="status-float" onclick="gscroll('resa-chambre')" style="cursor:pointer;"><span class="status-dot"></span> Réservation et paiement en ligne</div>
   <div class="hero-content" id="heroContent">
     <div class="tagline"><i class="ti ti-bed"></i> Hôtel ★★★ · 7 chambres</div>
     <h1><span class="w" style="--d:.6s">Prolongez</span> <span class="w" style="--d:.72s">la</span> <span class="w" style="--d:.84s">soirée,</span> <em><span class="w" style="--d:1s">dormez</span> <span class="w" style="--d:1.12s">au</span> <span class="w" style="--d:1.24s">calme.</span></em></h1>
@@ -288,6 +278,8 @@
 </div>
 
 <script src="assets/site.js"></script>
+<script src="assets/vendor/motion.js"></script>
+<script src="assets/v2.js"></script>
 <script src="assets/chambre.js"></script>
 </body>
 </html>
