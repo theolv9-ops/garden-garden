@@ -1,0 +1,327 @@
+/* ===== Version 2 (proposition du 29/10/2026) =====
+   Direction : « carnet de jardin ». Fond papier clair (le site se lit surtout sur téléphone, souvent dehors),
+   vert forêt pour le texte, terracotta pour les actions. Titres en Instrument Serif, texte en Manrope,
+   logo et nom « Garden Garden » gardés en Fraunces (identité du lieu).
+   Ce fichier se charge après site.css et ne touche qu'à l'apparence : formulaires, paiement,
+   livre 3D et carte des vins gardent leur fonctionnement. */
+
+:root {
+  --ink:#1c261e;            /* vert forêt (texte, fonds sombres) */
+  --olive:#4c5a40;
+  --olive-d:#1f2b22;
+  --cream:#f3eee3;          /* papier */
+  --cream2:#e9e2d2;         /* papier plus soutenu */
+  --terra:#9e4828;          /* terracotta, contraste 5:1 sur le papier */
+  --terra-d:#843a1f;
+  --gold:#cdae72;           /* laiton : uniquement sur fond sombre */
+  --muted:#5e604f;
+  --line:rgba(28,38,30,.14);
+  --line-dark:rgba(243,238,227,.16);
+  --radius:6px;
+  --ease:cubic-bezier(.22,.8,.24,1);
+}
+body { background:var(--cream); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+::selection { background:var(--ink); color:var(--cream); }
+:focus-visible { outline:2px solid var(--terra); outline-offset:3px; }
+.resa :focus-visible, .infos :focus-visible, .foot :focus-visible, .hero :focus-visible { outline-color:var(--gold); }
+a { color:inherit; }
+
+/* Le nom « Garden Garden » reste dans la police du logo */
+.brand, .pre-brand, .foot .brand { font-family:var(--logo)!important; }
+
+/* On retire les effets « modèle tout fait » : lucioles, reflets, inclinaison, bandeau qui défile, badge flottant */
+#fireflies, .marquee, .status-float, #progress, #preloader { display:none!important; }
+.tilt { transform:none!important; }
+.img-shine::after { display:none; }
+.rating-badge { animation:none; }
+
+/* Titres de section : plus de petit sur-titre au-dessus de chaque titre */
+.visite-head .eyebrow, .carte-head .eyebrow, .agenda-head .eyebrow, .tables-head .eyebrow,
+.resa-wrap .eyebrow, .jardin-wrap .eyebrow, .carte-sub .eyebrow, .hotel .eyebrow { display:none; }
+.stitle { font-weight:400; font-size:clamp(38px,5.4vw,64px); line-height:1; letter-spacing:-.5px; text-wrap:balance; }
+.stitle em { color:var(--terra); }
+section { padding:96px 20px; }
+
+/* Boutons : rectangles francs, pas de rebond */
+.btn { border-radius:var(--radius); font-size:15px; padding:15px 26px; letter-spacing:.1px; transition:background .2s, color .2s, transform .2s var(--ease); }
+.btn:hover { transform:translateY(-1px); box-shadow:none; }
+.btn-primary { background:var(--terra); color:#fff; }
+.btn-primary:hover { background:var(--terra-d); }
+.btn-outline { border-radius:var(--radius); font-size:14px; padding:12px 22px; }
+.btn-outline:hover { transform:none; }
+.btn i { margin-right:6px; }
+
+/* ---------- Bandeau d'horaires + navigation ---------- */
+.opening-ribbon { position:relative; background:var(--ink); color:rgba(243,238,227,.86); font-weight:500; font-size:13px; letter-spacing:.2px; padding:9px 16px; }
+.opening-ribbon b { font-weight:700; color:var(--cream); }
+.opening-ribbon i { color:var(--gold); }
+.nav-wrap { position:sticky; top:0; padding:0; z-index:300; }
+.nav { width:100%; max-width:none; border-radius:0; border:none; border-bottom:1px solid var(--line); background:var(--cream); backdrop-filter:none; box-shadow:none; padding:12px max(20px, calc((100% - 1200px)/2)); gap:28px; }
+.nav.scrolled { box-shadow:0 1px 0 var(--line), 0 10px 24px -18px rgba(28,38,30,.35); }
+.nav .brand { color:var(--ink); font-size:21px; margin-right:auto; }
+.nav .brand em { color:var(--terra); }
+.nav .brand-logo { color:var(--ink); height:34px; width:34px; }
+.nav-links { gap:26px; }
+.nav-links a { color:var(--ink); font-size:14px; font-weight:500; opacity:.78; position:relative; padding:4px 0; }
+.nav-links a::after { content:''; position:absolute; left:0; right:0; bottom:-2px; height:1px; background:var(--terra); transform:scaleX(0); transform-origin:left; transition:transform .3s var(--ease); }
+.nav-links a:hover { color:var(--ink); opacity:1; }
+.nav-links a:hover::after { transform:scaleX(1); }
+.nav-switch { color:var(--ink)!important; border:1px solid var(--line); border-radius:var(--radius); padding:9px 14px; font-size:13.5px!important; font-weight:600; }
+.nav-switch:hover { background:var(--cream2); }
+.nav-cta { border-radius:var(--radius); padding:11px 22px; font-size:14px; color:#fff!important; cursor:pointer; }
+.nav-cta:hover { transform:none; }
+
+/* ---------- Accueil de chaque site (hero) ---------- */
+.hero { margin:0; min-height:calc(100svh - 108px); max-height:900px; padding:0 20px 56px; align-items:flex-end; }
+.hero-bg { inset:0; }
+.hero-bg::after { background:linear-gradient(180deg,rgba(17,24,19,.08) 0%,rgba(17,24,19,.18) 45%,rgba(17,24,19,.86) 100%); }
+.hero-content { max-width:1200px; padding-top:120px; }
+.hero .tagline { border:none; padding:0; border-radius:0; color:var(--gold); font-size:13px; font-weight:600; letter-spacing:1.6px; margin-bottom:18px; }
+.hero h1 { font-weight:400; font-size:clamp(50px,8.4vw,124px); line-height:.94; letter-spacing:-1.5px; max-width:1000px; text-wrap:balance; }
+.hero h1 em { color:var(--gold); }
+.hero .sub { color:rgba(243,238,227,.86); font-size:clamp(16px,1.6vw,18px); margin:24px 0 30px; max-width:540px; }
+.hero-row .btn-outline { border-color:rgba(243,238,227,.7)!important; color:var(--cream)!important; padding:15px 24px; font-size:15px; }
+.hero-row .btn-outline:hover { background:var(--cream); color:var(--ink)!important; }
+.rating-badge { border-radius:var(--radius); background:transparent; border:1px solid rgba(243,238,227,.5); backdrop-filter:none; }
+.hero-dots { bottom:60px; right:max(20px, calc((100% - 1200px)/2)); }
+.hero-dots button { width:22px; height:2px; border-radius:0; background:rgba(243,238,227,.4); }
+.hero-dots button.active { width:40px; background:var(--cream); }
+.hero-slide-label { right:max(20px, calc((100% - 1200px)/2)); bottom:76px; color:rgba(243,238,227,.8); }
+
+/* ---------- Menu Grenouilles : une ardoise, pas une pilule flottante ---------- */
+.promo-wrap { margin:0; padding:0; background:var(--cream2); border-bottom:1px solid var(--line); }
+.promo-inner { width:100%; max-width:1200px; background:transparent; border:none; border-radius:0; box-shadow:none; padding:22px 20px; justify-content:flex-start; gap:12px 22px; }
+.promo-icon { display:none; }
+.promo-text { color:var(--ink); flex:1; min-width:240px; }
+.promo-text strong { font-family:var(--serif); font-size:30px; font-weight:400; line-height:1.1; }
+.promo-text span { color:var(--muted); font-size:14.5px; }
+.promo-inner .btn { padding:12px 22px; font-size:14px; }
+
+/* ---------- Chiffres clés ---------- */
+.statsband { background:var(--cream); border:none; border-bottom:1px solid var(--line); padding:44px 20px; }
+.statsgrid { max-width:1200px; gap:0; }
+.statsgrid > div { padding:6px 12px; border-left:1px solid var(--line); }
+.statsgrid > div:first-child { border-left:none; }
+.statsgrid .n { color:var(--ink); font-size:clamp(44px,6vw,76px); line-height:1; letter-spacing:-1px; }
+.statsgrid .l { color:var(--muted); font-size:12px; letter-spacing:1.6px; font-weight:600; margin-top:10px; }
+
+/* ---------- Visite virtuelle ---------- */
+.visite { background:var(--cream); color:var(--ink); }
+.visite .stitle { color:var(--ink); }
+.visite-head { max-width:1200px; margin:0 auto 36px; display:flex; justify-content:space-between; align-items:flex-end; gap:18px 40px; flex-wrap:wrap; }
+.visite-head p { color:var(--muted); max-width:340px; margin:0; }
+.visite-wrap { max-width:1200px; }
+.visite-stage { border-radius:var(--radius); aspect-ratio:16/8; }
+.visite-caption { padding:30px 32px; }
+.visite-caption h3 { font-family:var(--serif); font-weight:400; font-size:34px; color:var(--cream); }
+.visite-caption p { color:rgba(243,238,227,.85); }
+.visite-nav { justify-content:flex-start; gap:6px 26px; margin-top:20px; border-bottom:1px solid var(--line); }
+.vroom { background:none; border:none; border-radius:0; color:var(--muted); padding:12px 0; font-size:14.5px; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.vroom i { display:none; }
+.vroom:hover { color:var(--ink); border-color:var(--line); }
+.vroom.active { background:none; color:var(--ink); border-color:var(--terra); }
+
+/* ---------- La carte (mode lecture) ---------- */
+.carte { background:var(--cream); color:var(--ink); border-top:1px solid var(--line); }
+.carte .stitle { color:var(--ink); }
+.carte-head { max-width:1200px; margin-bottom:34px; }
+.carte-head p { color:var(--muted); font-size:16px; }
+.feuilleter { max-width:1200px; background:var(--cream2); border:none; border-radius:var(--radius); padding:22px 26px; margin-bottom:64px; }
+.feuilleter-txt strong { font-family:var(--serif); font-weight:400; font-size:30px; color:var(--ink); line-height:1.1; }
+.feuilleter-txt span { color:var(--muted); font-size:14.5px; }
+.feuilleter img { box-shadow:8px 10px 22px -8px rgba(28,38,30,.55); }
+.carte-grid, .vins-grid { max-width:1200px; gap:0 80px; }
+.carte-cat { margin-bottom:56px; }
+.carte-cat h4, .vins-col h4 { font-family:var(--serif); font-style:normal; font-weight:400; font-size:34px; line-height:1.1; color:var(--ink); padding-bottom:12px; margin-bottom:6px; border-bottom:1px solid var(--ink); }
+.plat { padding:15px 0; border-bottom:1px solid var(--line); gap:24px; }
+.plat-name { color:var(--ink); font-size:16px; font-weight:600; }
+.plat-desc { color:var(--muted); font-size:14px; }
+.plat-price { font-family:var(--sans); font-weight:600; font-size:16px; color:var(--terra); font-variant-numeric:tabular-nums; }
+.signature { background:var(--cream2); border:none; border-radius:var(--radius); }
+.signature .sig-label { color:var(--terra); }
+.signature h3 { color:var(--ink); font-family:var(--serif); font-weight:400; font-size:30px; }
+.signature p { color:var(--muted); }
+.signature .sig-price { color:var(--terra); }
+.carte-sub { max-width:1200px; margin:84px auto 26px; }
+.carte-sub h3 { font-family:var(--serif); font-weight:400; font-size:clamp(34px,4.6vw,54px); color:var(--ink); line-height:1; }
+.carte-sub h3 em { color:var(--terra); }
+.carte-sub p { color:var(--muted); font-size:16px; }
+.photos-strip { max-width:1200px; gap:12px; }
+.photos-strip figure { border-radius:var(--radius); aspect-ratio:4/5; }
+.photos-strip figcaption { font-family:var(--sans); font-style:normal; font-size:14px; font-weight:600; padding:40px 16px 14px; }
+.photos-attente { border-color:var(--line); color:var(--muted); }
+.vins-legende { max-width:1200px; color:var(--muted); font-size:14px; }
+.vins-col h4:not(:first-child) { margin-top:52px; }
+.vins-region { color:var(--terra); border-bottom:none; font-size:12px; font-weight:700; letter-spacing:1.8px; margin:26px 0 0; padding:0; }
+.vin-aop { color:var(--muted); font-size:13.5px; }
+.vin-label { color:#3f6b2f; border-color:rgba(63,107,47,.45); }
+.vin-prix small { color:var(--muted); }
+.carte-legal { max-width:1200px; color:var(--muted); font-size:13px; margin-top:48px; text-align:left; border-top:1px solid var(--line); padding-top:22px; }
+.carte-legal strong { color:var(--ink); }
+
+/* ---------- Terrasse, jardin, événements ---------- */
+.terrasse { background:var(--cream); padding-top:40px; }
+.duo, .duo-caption, .jardin-wrap, .tables-grid, .agenda-grid, .infos-wrap { max-width:1200px; }
+.duo-item { border-radius:var(--radius); }
+.duo-cap .eyebrow { color:var(--terra); letter-spacing:1.6px; font-size:12px; }
+.duo-cap h3 { font-family:var(--serif); font-weight:400; font-size:34px; line-height:1.05; }
+.duo-cap p { color:var(--muted); font-size:15.5px; max-width:480px; }
+.jardin-photo { border-radius:var(--radius); }
+.hphoto-caption { border-radius:var(--radius); background:rgba(28,38,30,.82); }
+.hphoto-arrow { background:var(--cream); }
+.hphoto-arrow:hover { background:var(--cream2); transform:none; }
+.hdot.active { background:var(--cream); }
+.jardin-feats { gap:0 40px; }
+.jfeat { background:none; border:none; border-top:1px solid var(--ink); border-radius:0; padding:20px 0 0; }
+.jfeat:hover { transform:none; }
+.jfeat i { color:var(--terra); font-size:24px; }
+.jfeat h4 { font-family:var(--serif); font-weight:400; font-size:28px; }
+.jfeat p { color:var(--muted); font-size:15px; }
+.agenda { background:var(--cream2); }
+.agenda-head { text-align:left; max-width:1200px; }
+.agenda-head p { color:var(--muted); max-width:520px; }
+.evt, .agenda-empty { border-radius:var(--radius); border-color:var(--line); background:var(--cream); }
+.evt:hover { transform:none; box-shadow:0 20px 40px -26px rgba(28,38,30,.45); }
+.evt-date { border-radius:var(--radius); border:none; }
+.evt-tag, .flip-tag, .tc-tag { border-radius:var(--radius); }
+.evt-body h3 { font-family:var(--serif); font-weight:400; font-size:28px; }
+.evt-body p { color:var(--muted); font-size:14.5px; }
+.evt-invite { border-radius:var(--radius); border-color:var(--ink); color:var(--ink); }
+
+/* ---------- Choix de la table ---------- */
+.tables { background:var(--cream); }
+.tables-head { text-align:left; max-width:1200px; }
+.tables-head p { max-width:520px; }
+.tables-grid { gap:12px; }
+.table-card { border-radius:var(--radius); }
+.tc-overlay h4 { font-family:var(--serif); font-weight:400; font-size:30px; }
+.tc-overlay p { color:rgba(243,238,227,.85); font-size:14px; }
+.tc-overlay .btn-outline { border-color:rgba(243,238,227,.7); }
+.tc-overlay .btn-outline:hover { background:var(--cream); border-color:var(--cream); }
+
+/* ---------- Réservation (mode utiliser : clarté avant tout) ---------- */
+.resa { background:var(--ink); }
+.resa-wrap { max-width:640px; }
+.resa .stitle { color:var(--cream); }
+.resa .stitle em { color:var(--gold); }
+.resa .lead { color:rgba(243,238,227,.75); font-size:16px; }
+.form-card { border-radius:var(--radius); padding:30px; }
+.field label { font-size:13.5px; letter-spacing:0; text-transform:none; color:var(--ink); font-weight:600; }
+.field input, .field select, .field textarea { border-radius:var(--radius); border:1px solid rgba(28,38,30,.28); font-size:16px; padding:13px 14px; background:#fff; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color:var(--ink); box-shadow:0 0 0 3px rgba(28,38,30,.12); }
+.field.optin small { color:var(--muted); }
+.table-choice .opt { border-radius:var(--radius); border:1px solid rgba(28,38,30,.28); }
+.table-choice .opt:has(input:checked) { border-color:var(--terra); background:rgba(158,72,40,.07); box-shadow:none; }
+.submit-full { padding:17px 26px; font-size:16px; }
+.ok { border-radius:var(--radius); }
+.resa-note { color:rgba(243,238,227,.72); font-size:14px; }
+.resa-note a { color:var(--gold); text-decoration:underline; text-underline-offset:3px; }
+
+/* ---------- Infos pratiques (mode lecture) ---------- */
+.infos { background:var(--cream2); color:var(--ink); }
+.info h4 { font-family:var(--serif); font-style:normal; font-weight:400; font-size:28px; color:var(--ink); margin-bottom:12px; }
+.info p { color:var(--muted); font-size:15px; line-height:1.8; }
+.info p strong { color:var(--ink); }
+.info a { color:var(--terra); text-decoration:underline; text-underline-offset:3px; font-weight:600; }
+.hr-row { border-bottom:1px solid var(--line); font-size:14.5px; }
+.hr-day { color:var(--muted); }
+.hr-time { color:var(--ink); font-variant-numeric:tabular-nums; }
+.hr-time.closed { color:var(--terra); }
+
+/* ---------- Bandeau vers l'autre maison + pied de page ---------- */
+.autre { min-height:380px; }
+.autre::after { background:linear-gradient(90deg,rgba(17,24,19,.86) 0%,rgba(17,24,19,.45) 60%,rgba(17,24,19,.2)); }
+.autre-in { max-width:1200px; }
+.autre .eyebrow { color:var(--gold); letter-spacing:1.6px; }
+.autre h2 { font-family:var(--serif); font-size:clamp(40px,5.4vw,68px); line-height:1; }
+.autre p { color:rgba(243,238,227,.86); font-size:16px; }
+.foot { background:var(--ink); padding:56px 20px 40px; }
+.foot .brand em { color:var(--gold)!important; }
+.foot small { color:rgba(243,238,227,.68); font-size:13px; line-height:2; }
+
+/* ---------- Barre « Réserver » collée en bas ---------- */
+.stickybar-inner { border-radius:var(--radius); border:none; background:var(--ink); box-shadow:0 18px 40px -16px rgba(17,24,19,.6); padding:8px 8px 8px 20px; }
+.stickybar-inner span { font-family:var(--sans); font-style:normal; font-weight:600; font-size:14px; }
+.stickybar-inner .btn { border-radius:4px; }
+
+/* ---------- Apparition au défilement : courte et discrète ---------- */
+.reveal { transform:translateY(14px); transition:opacity .6s var(--ease), transform .6s var(--ease); }
+
+/* ---------- Page d'accueil : deux portes, le restaurant et l'hôtel ---------- */
+.porte { min-height:100vh; min-height:100svh; display:flex; flex-direction:column; background:var(--ink); color:var(--cream); }
+.porte-top { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px max(20px, calc((100% - 1400px)/2)); }
+.porte-brand { display:flex; align-items:center; gap:12px; color:var(--cream); text-decoration:none; font-family:var(--logo); font-size:22px; }
+.porte-brand em { font-style:italic; color:var(--gold); }
+.porte-brand svg { width:44px; height:44px; color:var(--gold); }
+.porte-top p { color:rgba(243,238,227,.72); font-size:13px; letter-spacing:1.4px; text-transform:uppercase; font-weight:600; }
+.portes { flex:1; display:flex; gap:10px; padding:0 10px; min-height:0; }
+.porte-pan { position:relative; flex:1; display:flex; align-items:flex-end; overflow:hidden; border-radius:var(--radius); color:var(--cream); text-decoration:none; isolation:isolate; min-height:300px; transition:flex-grow .8s var(--ease); }
+.porte-pan img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; transition:transform 1.4s var(--ease); }
+.porte-pan::before { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(0deg,rgba(17,24,19,.9) 0%,rgba(17,24,19,.35) 50%,rgba(17,24,19,.12) 100%); }
+.porte-in { padding:clamp(24px,4vw,48px); width:100%; }
+.porte-k { display:block; color:var(--gold); font-size:13px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; margin-bottom:10px; }
+.porte-pan h2 { font-family:var(--serif); font-weight:400; font-size:clamp(54px,7.6vw,120px); line-height:.92; letter-spacing:-1.5px; }
+.porte-pan h2 em { color:var(--gold); }
+.porte-pan p { color:rgba(243,238,227,.86); font-size:16px; margin:14px 0 22px; max-width:400px; }
+.porte-go { display:inline-flex; align-items:center; gap:10px; background:var(--terra); color:#fff; font-weight:600; font-size:15px; padding:14px 22px; border-radius:var(--radius); transition:background .2s; }
+.porte-go i { transition:transform .4s var(--ease); }
+@media (hover:hover){
+  .portes:hover .porte-pan { flex-grow:.8; }
+  .portes .porte-pan:hover { flex-grow:1.25; }
+  .porte-pan:hover img { transform:scale(1.04); }
+  .porte-pan:hover .porte-go { background:var(--terra-d); }
+  .porte-pan:hover .porte-go i { transform:translateX(4px); }
+}
+.porte-foot { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 26px; padding:16px 20px 20px; font-size:14px; color:rgba(243,238,227,.72); }
+.porte-foot a { color:var(--cream); text-decoration:underline; text-decoration-color:rgba(243,238,227,.35); text-underline-offset:3px; }
+.porte-foot i { color:var(--gold); margin-right:6px; }
+
+/* ---------- Téléphone ---------- */
+@media(max-width:820px){
+  section { padding:72px 20px; }
+  .opening-ribbon { font-size:12.5px; }
+  .nav { padding:10px 16px; gap:10px; }
+  .nav .brand { font-size:18px; }
+  .nav .brand-logo { height:30px; width:30px; }
+  .hero { min-height:calc(100svh - 96px); padding-bottom:40px; }
+  .hero-content { padding-top:90px; }
+  .hero h1 { font-size:clamp(46px,13vw,72px); }
+  .hero-row .btn, .hero-row .btn-outline { flex:1; text-align:center; }
+  .promo-text strong { font-size:26px; }
+  .promo-inner .btn { width:100%; }
+  .statsband { padding:30px 12px; }
+  .statsgrid .l { font-size:10.5px; letter-spacing:1px; }
+  .visite-stage { aspect-ratio:4/5; }
+  .visite-caption { padding:22px; }
+  .visite-caption h3 { font-size:28px; }
+  .visite-nav { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; gap:22px; }
+  .visite-nav::-webkit-scrollbar { display:none; }
+  .vroom { white-space:nowrap; flex:none; }
+  .carte-cat h4, .vins-col h4 { font-size:30px; }
+  .feuilleter .btn { width:100%; }
+  .photos-strip { grid-template-columns:1fr 1fr; }
+  .photos-strip figure:nth-child(3):last-child { grid-column:1/-1; aspect-ratio:16/10; }
+  .form-card { padding:22px 18px; }
+  .portes { flex-direction:column; }
+  .porte-pan { min-height:38svh; }
+  .porte-pan h2 { font-size:clamp(48px,14vw,72px); }
+  .porte-pan p { font-size:15px; margin:10px 0 16px; }
+  .porte-top p { display:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal { transition:none; transform:none; opacity:1; }
+  .porte-pan, .porte-pan img { transition:none; }
+}
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.porte-etoiles { font-family:var(--sans); font-size:.24em; letter-spacing:.2em; color:var(--gold); vertical-align:.9em; }
+.porte-pan::before { background:linear-gradient(0deg,rgba(17,24,19,.94) 0%,rgba(17,24,19,.7) 38%,rgba(17,24,19,.2) 75%,rgba(17,24,19,.1) 100%); }
+button, input, select, textarea { font-family:inherit; }
+.promo-wrap { padding:0 20px; }
+.promo-inner { padding:24px 0; }
+.promo-text strong { font-size:34px; }
+.plat, .vins-col .plat { padding-left:0; padding-right:0; }
+section, [id] { scroll-margin-top:76px; }
+.foot small { display:block; }
+.hero-bg::after { background:linear-gradient(180deg,rgba(17,24,19,.1) 0%,rgba(17,24,19,.25) 40%,rgba(17,24,19,.9) 100%), linear-gradient(90deg,rgba(17,24,19,.55) 0%,rgba(17,24,19,0) 60%); }
+.porte-in > :not(.porte-go) { text-shadow:0 1px 18px rgba(17,24,19,.75); }
+@media(max-width:820px){ .porte-pan::before { background:linear-gradient(0deg,rgba(17,24,19,.95) 0%,rgba(17,24,19,.78) 50%,rgba(17,24,19,.25) 85%); } }

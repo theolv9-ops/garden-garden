@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Garden Garden · Bar, Restaurant &amp; Chambres à Chavanoz</title>
 <meta name="description" content="Garden Garden : bar, restaurant et 7 chambres 3 étoiles à Chavanoz, entre Lyon et Bourgoin-Jallieu. Cuisine française traditionnelle, viandes maturées, terrasse et jardin. Menu Grenouilles tous les week-ends.">
-<meta name="theme-color" content="#15170f">
+<meta name="theme-color" content="#1c261e">
 <link rel="canonical" href="https://gardengarden-chavanoz.com/">
 <meta name="google-site-verification" content="SeNY9eZaMAy9odKvUTeuFuu5BTlVZ4Zf1NJ7dU4lDqU" />
 
@@ -60,9 +60,10 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/v2.css">
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-D81CPJL0BG"></script>
@@ -111,30 +112,40 @@
   else if(resto.indexOf(h) !== -1) location.replace('restaurant.html#' + h);
 })();
 </script>
-<div class="accueil">
-  <div class="accueil-bg" id="heroBg">
-    <div class="hero-slide on"><img src="images/hero.jpg" alt="Garden Garden à Chavanoz" fetchpriority="high" decoding="async"></div>
-    <div class="hero-slide"><img data-src="images/salle.jpg" alt="La grande salle du restaurant" decoding="async"></div>
-    <div class="hero-slide"><img data-src="images/chambre1.jpg" alt="Une chambre de l'hôtel" decoding="async"></div>
-    <div class="hero-slide"><img data-src="images/terrasse.jpg" alt="La terrasse" decoding="async"></div>
-    <div class="hero-slide"><img data-src="images/chambre2.jpg" alt="Le coin bureau d'une chambre" decoding="async"></div>
+<main class="porte">
+  <header class="porte-top">
+    <a class="porte-brand" href="./" aria-label="Garden Garden, accueil"><svg viewBox="0 0 200 200" aria-hidden="true"><use href="#gg-logomark"></use></svg><span>Garden<em>Garden</em></span></a>
+    <p>Hôtel ★★★ · Restaurant · Bar lounge — Chavanoz</p>
+  </header>
+  <h1 class="sr-only">Garden Garden, bar, restaurant et hôtel ★★★ à Chavanoz</h1>
+  <div class="portes">
+    <a class="porte-pan" href="restaurant.html">
+      <img src="images/salle.jpg" alt="La grande salle du restaurant Garden Garden" fetchpriority="high" decoding="async">
+      <div class="porte-in">
+        <span class="porte-k">Ouvert tous les midis</span>
+        <h2>Le <em>Restaurant</em></h2>
+        <p>Cuisine française, viandes d'exception et carte des vins. Le soir du jeudi au samedi.</p>
+        <span class="porte-go">La carte et réserver une table <i class="ti ti-arrow-right"></i></span>
+      </div>
+    </a>
+    <a class="porte-pan" href="hotel.html">
+      <img src="images/chambre1.jpg" alt="Une chambre de l'hôtel Garden Garden" decoding="async">
+      <div class="porte-in">
+        <span class="porte-k">7 chambres · 95 € la nuit</span>
+        <h2>L'<em>Hôtel</em> <span class="porte-etoiles" aria-label="trois étoiles">★★★</span></h2>
+        <p>Des chambres ouvertes sur le jardin, climatisées. Réservation et paiement en ligne.</p>
+        <span class="porte-go">Voir les chambres et réserver <i class="ti ti-arrow-right"></i></span>
+      </div>
+    </a>
   </div>
-  <canvas id="fireflies"></canvas>
-  <div class="accueil-in">
-    <svg class="accueil-logo" viewBox="0 0 200 200" aria-hidden="true"><use href="#gg-logomark"></use></svg>
-    <h1>Garden<em>Garden</em></h1>
-    <p class="accueil-sub">Hôtel ★★★ · Restaurant · Bar lounge — Chavanoz</p>
-    <div class="accueil-choix">
-      <a class="accueil-btn" href="restaurant.html"><i class="ti ti-tools-kitchen-2"></i><span><b>Le Restaurant</b><small>Carte et réservation</small></span></a>
-      <a class="accueil-btn" href="hotel.html"><i class="ti ti-bed"></i><span><b>L'Hôtel</b><small>Chambres et réservation</small></span></a>
-    </div>
-  </div>
-  <footer class="accueil-foot">
+  <footer class="porte-foot">
     <span><i class="ti ti-map-pin"></i><a href="https://www.google.com/maps/search/?api=1&query=14+hameau+de+Grange+Rouge%2C+38230+Chavanoz" target="_blank" rel="noopener">14 hameau de Grange Rouge, Chavanoz</a></span>
     <span><i class="ti ti-phone"></i><a href="tel:0486802750">04 86 80 27 50</a></span>
     <span><a href="mentions-legales.html">Mentions légales</a> · <a href="confidentialite.html">Confidentialité</a></span>
   </footer>
-</div>
+</main>
 <script src="assets/site.js"></script>
+<script src="assets/vendor/motion.js"></script>
+<script src="assets/v2.js"></script>
 </body>
 </html>
