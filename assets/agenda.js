@@ -30,7 +30,7 @@
     var d = new Date(+p[0], +p[1] - 1, +p[2]);
     var card = el('article', 'evt reveal');
 
-    var photo = el('div', 'evt-photo');
+    var photo = el('div', 'evt-photo' + (e.affiche ? ' affiche' : ''));
     if(e.image){
       var img = document.createElement('img');
       img.src = e.image; img.alt = e.titre; img.loading = 'lazy'; img.decoding = 'async';
@@ -50,6 +50,10 @@
       photo.setAttribute('role', 'button');
       photo.setAttribute('aria-label', 'Voir la vidéo — ' + e.titre);
       photo.onclick = function(){ ouvrirVideoEvenement(e.video); };
+    } else if(e.affiche && e.image){
+      photo.setAttribute('role', 'button');
+      photo.setAttribute('aria-label', 'Voir l\'affiche en grand — ' + e.titre);
+      photo.onclick = function(){ ouvrirAfficheEvenement(e.image, e.titre); };
     }
     card.appendChild(photo);
 
@@ -62,6 +66,9 @@
     var btn;
     if(e.prive){
       btn = el('span', 'evt-invite', 'Sur invitation');
+    } else if(e.telephone){
+      btn = el('a', 'btn-outline', 'Réserver au ' + e.telephone);
+      btn.href = 'tel:+33' + e.telephone.replace(/\D/g, '').replace(/^0/, '');
     } else if(e.lien){
       btn = el('a', 'btn-outline', 'En savoir plus');
       btn.href = e.lien; btn.target = '_blank'; btn.rel = 'noopener';
@@ -115,7 +122,21 @@ function ouvrirVideoEvenement(url){
   document.getElementById('evtLightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+// Affiche d'un événement (champ "affiche: true") : l'ouvre en grand par-dessus la page.
+function ouvrirAfficheEvenement(src, titre){
+  var box = document.getElementById('evtLightboxBox');
+  var wrap = document.getElementById('evtLightboxWrap');
+  var img = document.createElement('img');
+  img.src = src; img.alt = 'Affiche — ' + titre;
+  box.innerHTML = '';
+  box.appendChild(img);
+  wrap.classList.remove('wide');
+  wrap.classList.add('poster');
+  document.getElementById('evtLightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 function fermerVideoEvenement(){
+  document.getElementById('evtLightboxWrap').classList.remove('poster');
   document.getElementById('evtLightbox').classList.remove('open');
   document.getElementById('evtLightboxBox').innerHTML = '';
   document.body.style.overflow = '';

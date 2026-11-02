@@ -20,6 +20,11 @@
                photo qui ouvre la vidéo dans une fenêtre par-dessus la
                page. Les autres liens (TikTok...) s'ouvrent dans un
                nouvel onglet.
+   affiche   : mettre true quand l'image est une affiche (format
+               vertical) : elle est montrée en entier, sans être
+               coupée, et s'ouvre en grand quand on clique dessus.
+   telephone : facultatif (ex. "07 60 37 06 90") ; le bouton devient
+               "Réserver au ..." et lance l'appel depuis un téléphone.
    exemple   : à SUPPRIMER sur les vrais événements ; tant qu'il vaut
                true, un badge "Exemple" s'affiche sur la carte.
 
@@ -35,5 +40,23 @@ var EVENEMENTS = [
     prive: true,
     image: "images/facade-soir.jpg",
     video: "https://www.instagram.com/reel/Ddvx2Dqu0y4/"
+  },
+  {
+    date: "2026-11-12",
+    heure: "20h00 – 2h00",
+    titre: "Red Carpet, soirée tapis rouge",
+    texte: "D'B Events et Garden Garden vous présentent une soirée bar-lounge au décor immersif, avec DJ Pioups aux platines. Dress code élégant rouge et noir. Réservation obligatoire.",
+    prix: "10 € l'entrée avec une consommation",
+    telephone: "07 60 37 06 90",
+    image: "images/affiche-red-carpet-12-11.jpg",
+    affiche: true
+  },
+  {
+    date: "2026-11-26",
+    heure: "20h00",
+    titre: "Dîner concert avec Mister Twin",
+    texte: "Mister Twin en concert, « la voix de vos plus belles soirées », pour un dîner concert à partir de 20h. Les réservations sont ouvertes.",
+    image: "images/affiche-mister-twin-26-11.jpg",
+    affiche: true
   }
 ];
