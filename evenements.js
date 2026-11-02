@@ -58,5 +58,13 @@ var EVENEMENTS = [
     texte: "Mister Twin en concert, « la voix de vos plus belles soirées », pour un dîner concert à partir de 20h. Les réservations sont ouvertes.",
     image: "images/affiche-mister-twin-26-11.jpg",
     affiche: true
+  },
+  {
+    date: "2026-12-31",
+    titre: "Destination 2027, réveillon de la Saint-Sylvestre",
+    texte: "After, dîner et dance : une soirée exceptionnelle pour changer d'année. De 2026 à 2027, embarquez avec nous ! Places très limitées, réservez dès maintenant.",
+    telephone: "04 86 80 27 50",
+    image: "images/affiche-reveillon-31-12.jpg",
+    affiche: true
   }
 ];
