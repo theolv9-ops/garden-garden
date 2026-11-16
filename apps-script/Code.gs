@@ -861,15 +861,15 @@ function testerSysteme() {
 
   // Liens Confirmer / Refuser : sur la ligne « heure hors service » (restée à vérifier).
   try {
-    var ligne = ligneDeTest_(noms[4]);
+    var ligne = ligneDeTest_(noms[6]);
     var base = { row: ligne.row, ts: ligne.ts };
     var mauvais = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: 'faux' }, true);
     var apercu = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') }, false);
-    var statutApercu = statutDeLigne_(noms[4]);
+    var statutApercu = statutDeLigne_(noms[6]);
     var bon = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'c', sig: signerLien_(base.row, base.ts, 'c') }, true);
-    var statutLien = statutDeLigne_(noms[4]);
+    var statutLien = statutDeLigne_(noms[6]);
     var encore = appliquerDecisionLien_({ row: base.row, ts: base.ts, s: 'r', sig: signerLien_(base.row, base.ts, 'r') }, true);
-    var statutFinal = statutDeLigne_(noms[4]);
+    var statutFinal = statutDeLigne_(noms[6]);
     lignes.push((!mauvais.ok ? 'OK     ' : 'ÉCHEC  ') + 'lien falsifié refusé');
     lignes.push((apercu.apercu && statutApercu === STATUT_NOUVELLE ? 'OK     ' : 'ÉCHEC  ') + 'ouverture du lien seule (scanner) : statut inchangé « ' + statutApercu + ' »');
     lignes.push((bon.ok && statutLien === STATUT_CONFIRMEE ? 'OK     ' : 'ÉCHEC  ') + 'lien « Confirmer » : statut « ' + statutLien + ' »');
