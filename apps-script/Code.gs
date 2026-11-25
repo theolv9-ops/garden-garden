@@ -237,6 +237,10 @@ function saveRoomReservation_(data) {
   var nuits = parseInt(data.nuits, 10) || 0;
   var montant = data.montant || '';
   var petitDej = data.petitDej === 'oui' ? 'Oui' : 'Non';
+  var petitDejPersonnes = parseInt(data.petitDejPersonnes, 10);
+  if (petitDej === 'Oui' && petitDejPersonnes > 0) {
+    petitDej = 'Oui (' + petitDejPersonnes + ' pers.)';
+  }
 
   var rowValues = [[
     new Date(),

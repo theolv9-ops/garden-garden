@@ -14,7 +14,7 @@
 const OPENING_DATE = '2026-10-02';
 const NIGHT_PRICE_EUR = 95;
 const BREAKFAST_PRICE_EUR = 15; // par personne et par jour
-const ROOM_GUESTS = 2; // chambre classique, 2 personnes
+const ROOM_GUESTS = 2; // chambre classique, 2 personnes maximum
 const MAX_NIGHTS = 30;
 
 const DEFAULT_ORIGIN = 'https://gardengarden-chavanoz.com';
@@ -89,7 +89,14 @@ export async function onRequestPost(context) {
   const telephone = String(data.telephone || '').trim();
   const arrivee = String(data.arrivee || '').trim();
   const depart = String(data.depart || '').trim();
-  const petitDej = !!data.petitDej;
+  // Nombre de personnes qui prennent le petit-déjeuner : 0, 1 ou 2.
+  // Avant, la case cochée comptait toujours 2 petits-déjeuners, même pour une
+  // personne seule. Une ancienne page encore en cache envoie petitDej: true :
+  // elle affichait le prix pour 2, on garde donc 2 dans ce cas.
+  let breakfastGuests = parseInt(data.petitDejPersonnes, 10);
+  if (isNaN(breakfastGuests)) breakfastGuests = data.petitDej ? ROOM_GUESTS : 0;
+  breakfastGuests = Math.min(Math.max(breakfastGuests, 0), ROOM_GUESTS);
+  const petitDej = breakfastGuests > 0;
 
   if (!prenom || !nom || !email || !telephone || !arrivee || !depart) {
     return json({ error: 'Merci de remplir tous les champs.' }, 400, request);
@@ -107,7 +114,7 @@ export async function onRequestPost(context) {
   }
 
   const nightsAmountCents = nights * NIGHT_PRICE_EUR * 100;
-  const breakfastAmountCents = petitDej ? nights * ROOM_GUESTS * BREAKFAST_PRICE_EUR * 100 : 0;
+  const breakfastAmountCents = nights * breakfastGuests * BREAKFAST_PRICE_EUR * 100;
 
   const lineItems = [
     {
@@ -127,7 +134,7 @@ export async function onRequestPost(context) {
       price_data: {
         currency: 'eur',
         product_data: {
-          name: `Petit-déjeuner continental (2 pers. × ${nights} jour${nights > 1 ? 's' : ''})`,
+          name: `Petit-déjeuner continental (${breakfastGuests} pers. × ${nights} jour${nights > 1 ? 's' : ''})`,
         },
         unit_amount: breakfastAmountCents,
       },
@@ -147,7 +154,7 @@ export async function onRequestPost(context) {
     cancel_url: `${baseUrl}/reservation-chambre-annulee.html`,
     // Le webhook Stripe relit ces informations pour écrire la réservation dans le
     // Google Sheet et envoyer la confirmation au client — jamais avant paiement confirmé.
-    metadata: { prenom, nom, email, telephone, arrivee, depart, nuits: String(nights), petitDej: petitDej ? 'oui' : 'non' },
+    metadata: { prenom, nom, email, telephone, arrivee, depart, nuits: String(nights), petitDej: petitDej ? 'oui' : 'non', petitDejPersonnes: String(breakfastGuests) },
   });
 
   try {

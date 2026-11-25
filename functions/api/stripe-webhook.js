@@ -100,6 +100,7 @@ export async function onRequestPost(context) {
           depart: m.depart,
           nuits: m.nuits,
           petitDej: m.petitDej,
+          petitDejPersonnes: m.petitDejPersonnes,
           montant: ((session.amount_total || 0) / 100).toFixed(2),
           stripeSessionId: session.id,
         }),
