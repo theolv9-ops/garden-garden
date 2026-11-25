@@ -230,9 +230,12 @@
         <div class="field"><label>Arrivée</label><input id="cr-arrivee" type="date"></div>
         <div class="field"><label>Départ</label><input id="cr-depart" type="date"></div>
         <div class="field full">
-          <label class="opt" style="display:flex; align-items:center; gap:10px; text-transform:none; letter-spacing:0; font-size:14px; color:var(--ink); font-weight:400; cursor:pointer;">
-            <input id="cr-petitdej" type="checkbox" style="width:17px; height:17px; accent-color:var(--terra);"> Petit-déjeuner continental — 15€ / personne / jour (2 personnes)
-          </label>
+          <label for="cr-petitdej">Petit-déjeuner continental — 15€ / personne / jour</label>
+          <select id="cr-petitdej">
+            <option value="0">Sans petit-déjeuner</option>
+            <option value="1">Pour 1 personne</option>
+            <option value="2">Pour 2 personnes</option>
+          </select>
         </div>
       </div>
       <p id="cr-total" style="font-family:'Fraunces',serif; font-size:22px; color:var(--ink); margin:4px 0 18px;">Choisissez vos dates pour voir le prix</p>

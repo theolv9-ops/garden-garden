@@ -2,7 +2,13 @@
 var OPENING_DATE = '2026-10-02';
 var CR_NIGHT_PRICE = 95;
 var CR_BREAKFAST_PRICE = 15; // par personne et par jour
-var CR_GUESTS = 2; // chambre classique, 2 personnes
+var CR_GUESTS = 2; // chambre classique, 2 personnes maximum
+
+// Nombre de petits-déjeuners choisis (0, 1 ou 2 personnes).
+function crBreakfastGuests(){
+  var n = parseInt(document.getElementById('cr-petitdej').value, 10) || 0;
+  return Math.min(Math.max(n, 0), CR_GUESTS);
+}
 
 (function(){
   var todayStr = new Date().toISOString().slice(0,10);
@@ -36,7 +42,7 @@ function crUpdateTotal(){
     return;
   }
   var total = nights * CR_NIGHT_PRICE;
-  if(document.getElementById('cr-petitdej').checked){ total += nights * CR_GUESTS * CR_BREAKFAST_PRICE; }
+  total += nights * crBreakfastGuests() * CR_BREAKFAST_PRICE;
   totalEl.textContent = nights + ' nuit' + (nights > 1 ? 's' : '') + ' — ' + total + ' € au total';
 }
 
@@ -85,7 +91,7 @@ function crSubmit(e){
       telephone: v('cr-tel'),
       arrivee: v('cr-arrivee'),
       depart: v('cr-depart'),
-      petitDej: document.getElementById('cr-petitdej').checked
+      petitDejPersonnes: crBreakfastGuests()
     })
   })
     .then(function(res){ return res.json().then(function(data){ return { ok: res.ok, data: data }; }); })
